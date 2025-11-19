@@ -80,20 +80,74 @@
     </div>
 </div>
 
+<!-- Edit Author Modal -->
+<div class="modal fade" id="editAuthorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa tác giả</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editAuthorForm" asp-controller="Admin" asp-action="EditAuthor" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="AuthorId" id="editAuthorId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên tác giả *</label>
+                        <input type="text" name="AuthorName" id="editAuthorName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quốc tịch</label>
+                        <input type="text" name="Nationality" id="editAuthorNationality" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tiểu sử</label>
+                        <textarea name="Biography" id="editAuthorBiography" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        function editAuthor(id) {
-            // Load author data and show edit modal
-            showToast('Thông báo', 'Chức năng đang phát triển', 'info');
+        function loadAuthorForEdit(id, name, nationality, biography) {
+            document.getElementById('editAuthorId').value = id;
+            document.getElementById('editAuthorName').value = name;
+            document.getElementById('editAuthorNationality').value = nationality;
+            document.getElementById('editAuthorBiography').value = biography;
+            openModal('editAuthorModal');
         }
 
         function deleteAuthor(id) {
             if (confirm('Bạn có chắc muốn xóa tác giả này?')) {
-                showToast('Thông báo', 'Chức năng đang phát triển', 'info');
+                showLoading();
+                fetch('@Url.Action("DeleteAuthor", "Admin")/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showToast('Thành công', data.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Lỗi', data.message, 'error');
+                    }
+                });
             }
         }
 
         submitForm('createAuthorForm');
+        submitForm('editAuthorForm');
     </script>
 }
 

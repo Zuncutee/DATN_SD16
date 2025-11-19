@@ -69,23 +69,23 @@
                     <h4 class="page-title">@ViewData["Title"]</h4>
                 </div>
                 <div class="topbar-right">
-                    <div class="user-menu">
-                        <span class="user-name">@UserHelper.GetFullName(User)</span>
-                        <div class="dropdown">
-                            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Thông tin cá nhân</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form asp-controller="AdminAuth" asp-action="Logout" method="post" class="d-inline">
-                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
+                <div class="user-menu">
+                    <span class="user-name">@(UserHelper.GetFullName(User) ?? UserHelper.GetUsername(User) ?? "Admin")</span>
+                    <div class="dropdown">
+                        <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Thông tin cá nhân</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="AdminAuth" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
+                </div>
                 </div>
             </header>
 

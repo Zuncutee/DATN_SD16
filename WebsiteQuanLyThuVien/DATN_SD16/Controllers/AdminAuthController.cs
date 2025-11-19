@@ -53,21 +53,26 @@ namespace DATN_SD16.Controllers
                     return View(request);
                 }
 
-                // Lưu token vào cookie hoặc session
-                Response.Cookies.Append("AuthToken", response.Token, new CookieOptions
+                // Lưu token vào cookie
+                var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    Secure = Request.IsHttps, // Chỉ secure trong HTTPS
+                    SameSite = SameSiteMode.Lax, // Cho phép cross-site trong một số trường hợp
                     Expires = response.ExpiresAt
-                });
+                };
 
-                Response.Cookies.Append("RefreshToken", response.RefreshToken, new CookieOptions
+                Response.Cookies.Append("AuthToken", response.Token, cookieOptions);
+
+                var refreshCookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
+                    Secure = Request.IsHttps,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(7) // Refresh token 7 ngày
+                };
+
+                Response.Cookies.Append("RefreshToken", response.RefreshToken, refreshCookieOptions);
 
                 return RedirectToAction("Dashboard", "Admin");
             }

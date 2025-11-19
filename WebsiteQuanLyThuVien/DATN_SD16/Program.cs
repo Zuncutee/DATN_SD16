@@ -7,6 +7,7 @@ using DATN_SD16.Repositories.Interfaces;
 using DATN_SD16.Services;
 using DATN_SD16.Services.Interfaces;
 using DATN_SD16.Models.Entities;
+using DATN_SD16.Middleware;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,10 +76,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Global Exception Handler - Phải đặt trước các middleware khác
+app.UseGlobalExceptionHandler();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// JWT Cookie Middleware - Đọc token từ cookie trước khi authentication
+app.UseJwtCookieAuthentication();
 
 app.UseAuthentication();
 app.UseAuthorization();

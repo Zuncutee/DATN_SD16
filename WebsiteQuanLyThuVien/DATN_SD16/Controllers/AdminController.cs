@@ -97,11 +97,50 @@ namespace DATN_SD16.Controllers
         {
             try
             {
+                // Validation
+                if (string.IsNullOrWhiteSpace(user.Username))
+                {
+                    return Json(new { success = false, message = "Tên đăng nhập không được để trống" });
+                }
+
+                if (string.IsNullOrWhiteSpace(user.Email))
+                {
+                    return Json(new { success = false, message = "Email không được để trống" });
+                }
+
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    return Json(new { success = false, message = "Mật khẩu không được để trống" });
+                }
+
+                if (password.Length < 6)
+                {
+                    return Json(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự" });
+                }
+
+                // Kiểm tra username tồn tại
+                if (await _userService.IsUsernameExistsAsync(user.Username))
+                {
+                    return Json(new { success = false, message = "Tên đăng nhập đã tồn tại" });
+                }
+
+                // Kiểm tra email tồn tại
+                if (await _userService.IsEmailExistsAsync(user.Email))
+                {
+                    return Json(new { success = false, message = "Email đã tồn tại" });
+                }
+
+                // Kiểm tra roleIds
+                if (roleIds == null || !roleIds.Any())
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn ít nhất một vai trò" });
+                }
+
                 var newUser = await _userService.CreateUserAsync(user, password);
                 
                 // Gán roles
                 var currentUserId = UserHelper.GetUserId(User) ?? 1;
-                foreach (var roleId in roleIds ?? new List<int>())
+                foreach (var roleId in roleIds)
                 {
                     await _userService.AssignRoleAsync(newUser.UserId, roleId, currentUserId);
                 }
@@ -110,7 +149,7 @@ namespace DATN_SD16.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
         }
 
@@ -202,12 +241,28 @@ namespace DATN_SD16.Controllers
         {
             try
             {
+                // Validation
+                if (string.IsNullOrWhiteSpace(category.CategoryName))
+                {
+                    return Json(new { success = false, message = "Tên thể loại không được để trống" });
+                }
+
+                // Kiểm tra trùng tên
+                var exists = await _categoryRepository.FirstOrDefaultAsync(c => c.CategoryName == category.CategoryName);
+                if (exists != null)
+                {
+                    return Json(new { success = false, message = "Tên thể loại đã tồn tại" });
+                }
+
+                category.CreatedAt = DateTime.Now;
+                category.UpdatedAt = DateTime.Now;
+
                 await _categoryRepository.AddAsync(category);
                 return Json(new { success = true, message = "Thêm thể loại thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
         }
 
@@ -218,12 +273,35 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                await _categoryRepository.UpdateAsync(category);
+                // Validation
+                if (string.IsNullOrWhiteSpace(category.CategoryName))
+                {
+                    return Json(new { success = false, message = "Tên thể loại không được để trống" });
+                }
+
+                var existing = await _categoryRepository.GetByIdAsync(category.CategoryId);
+                if (existing == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thể loại" });
+                }
+
+                // Kiểm tra trùng tên (trừ chính nó)
+                var duplicate = await _categoryRepository.FirstOrDefaultAsync(c => c.CategoryName == category.CategoryName && c.CategoryId != category.CategoryId);
+                if (duplicate != null)
+                {
+                    return Json(new { success = false, message = "Tên thể loại đã tồn tại" });
+                }
+
+                existing.CategoryName = category.CategoryName;
+                existing.Description = category.Description;
+                existing.UpdatedAt = DateTime.Now;
+
+                await _categoryRepository.UpdateAsync(existing);
                 return Json(new { success = true, message = "Cập nhật thể loại thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
         }
 
@@ -234,14 +312,24 @@ namespace DATN_SD16.Controllers
             try
             {
                 var category = await _categoryRepository.GetByIdAsync(id);
-                if (category == null) return Json(new { success = false, message = "Không tìm thấy thể loại" });
-                
+                if (category == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy thể loại" });
+                }
+
+                // Kiểm tra xem có sách nào đang sử dụng thể loại này không
+                var booksWithCategory = await _bookRepository.FindAsync(b => b.CategoryId == id);
+                if (booksWithCategory.Any())
+                {
+                    return Json(new { success = false, message = "Không thể xóa thể loại này vì đang có sách sử dụng" });
+                }
+
                 await _categoryRepository.DeleteAsync(category);
                 return Json(new { success = true, message = "Xóa thể loại thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
         }
 
@@ -252,6 +340,87 @@ namespace DATN_SD16.Controllers
             return View(authors);
         }
 
+        // POST: Admin/Authors/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAuthor(Author author)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(author.AuthorName))
+                {
+                    return Json(new { success = false, message = "Tên tác giả không được để trống" });
+                }
+
+                await _authorRepository.AddAsync(author);
+                return Json(new { success = true, message = "Thêm tác giả thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/Authors/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAuthor(Author author)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(author.AuthorName))
+                {
+                    return Json(new { success = false, message = "Tên tác giả không được để trống" });
+                }
+
+                var existing = await _authorRepository.GetByIdAsync(author.AuthorId);
+                if (existing == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tác giả" });
+                }
+
+                existing.AuthorName = author.AuthorName;
+                existing.Nationality = author.Nationality;
+                existing.Biography = author.Biography;
+                existing.UpdatedAt = DateTime.Now;
+
+                await _authorRepository.UpdateAsync(existing);
+                return Json(new { success = true, message = "Cập nhật tác giả thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/Authors/Delete/5
+        [HttpPost]
+        public async Task<IActionResult> DeleteAuthor(int id)
+        {
+            try
+            {
+                var author = await _authorRepository.GetByIdAsync(id);
+                if (author == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tác giả" });
+                }
+
+                // Kiểm tra xem có sách nào đang sử dụng tác giả này không
+                var booksWithAuthor = await _bookRepository.FindAsync(b => b.BookAuthors.Any(ba => ba.AuthorId == id));
+                if (booksWithAuthor.Any())
+                {
+                    return Json(new { success = false, message = "Không thể xóa tác giả này vì đang có sách sử dụng" });
+                }
+
+                await _authorRepository.DeleteAsync(author);
+                return Json(new { success = true, message = "Xóa tác giả thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         // GET: Admin/Publishers
         public async Task<IActionResult> Publishers()
         {
@@ -259,11 +428,201 @@ namespace DATN_SD16.Controllers
             return View(publishers);
         }
 
+        // POST: Admin/Publishers/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePublisher(Publisher publisher)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(publisher.PublisherName))
+                {
+                    return Json(new { success = false, message = "Tên nhà xuất bản không được để trống" });
+                }
+
+                var exists = await _publisherRepository.FirstOrDefaultAsync(p => p.PublisherName == publisher.PublisherName);
+                if (exists != null)
+                {
+                    return Json(new { success = false, message = "Tên nhà xuất bản đã tồn tại" });
+                }
+
+                await _publisherRepository.AddAsync(publisher);
+                return Json(new { success = true, message = "Thêm nhà xuất bản thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/Publishers/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPublisher(Publisher publisher)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(publisher.PublisherName))
+                {
+                    return Json(new { success = false, message = "Tên nhà xuất bản không được để trống" });
+                }
+
+                var existing = await _publisherRepository.GetByIdAsync(publisher.PublisherId);
+                if (existing == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy nhà xuất bản" });
+                }
+
+                // Kiểm tra tên trùng (trừ chính nó)
+                var duplicate = await _publisherRepository.FirstOrDefaultAsync(p => p.PublisherName == publisher.PublisherName && p.PublisherId != publisher.PublisherId);
+                if (duplicate != null)
+                {
+                    return Json(new { success = false, message = "Tên nhà xuất bản đã tồn tại" });
+                }
+
+                existing.PublisherName = publisher.PublisherName;
+                existing.Address = publisher.Address;
+                existing.PhoneNumber = publisher.PhoneNumber;
+                existing.Email = publisher.Email;
+                existing.UpdatedAt = DateTime.Now;
+
+                await _publisherRepository.UpdateAsync(existing);
+                return Json(new { success = true, message = "Cập nhật nhà xuất bản thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/Publishers/Delete/5
+        [HttpPost]
+        public async Task<IActionResult> DeletePublisher(int id)
+        {
+            try
+            {
+                var publisher = await _publisherRepository.GetByIdAsync(id);
+                if (publisher == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy nhà xuất bản" });
+                }
+
+                // Kiểm tra xem có sách nào đang sử dụng nhà xuất bản này không
+                var booksWithPublisher = await _bookRepository.FindAsync(b => b.PublisherId == id);
+                if (booksWithPublisher.Any())
+                {
+                    return Json(new { success = false, message = "Không thể xóa nhà xuất bản này vì đang có sách sử dụng" });
+                }
+
+                await _publisherRepository.DeleteAsync(publisher);
+                return Json(new { success = true, message = "Xóa nhà xuất bản thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         // GET: Admin/BookLocations
         public async Task<IActionResult> BookLocations()
         {
             var locations = await _bookLocationRepository.GetAllAsync();
             return View(locations);
+        }
+
+        // POST: Admin/BookLocations/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateBookLocation(BookLocation location)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(location.LocationCode))
+                {
+                    return Json(new { success = false, message = "Mã vị trí không được để trống" });
+                }
+
+                var exists = await _bookLocationRepository.FirstOrDefaultAsync(l => l.LocationCode == location.LocationCode);
+                if (exists != null)
+                {
+                    return Json(new { success = false, message = "Mã vị trí đã tồn tại" });
+                }
+
+                await _bookLocationRepository.AddAsync(location);
+                return Json(new { success = true, message = "Thêm vị trí sách thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/BookLocations/Edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditBookLocation(BookLocation location)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(location.LocationCode))
+                {
+                    return Json(new { success = false, message = "Mã vị trí không được để trống" });
+                }
+
+                var existing = await _bookLocationRepository.GetByIdAsync(location.LocationId);
+                if (existing == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy vị trí sách" });
+                }
+
+                // Kiểm tra mã vị trí trùng (trừ chính nó)
+                var duplicate = await _bookLocationRepository.FirstOrDefaultAsync(l => l.LocationCode == location.LocationCode && l.LocationId != location.LocationId);
+                if (duplicate != null)
+                {
+                    return Json(new { success = false, message = "Mã vị trí đã tồn tại" });
+                }
+
+                existing.LocationCode = location.LocationCode;
+                existing.ShelfNumber = location.ShelfNumber;
+                existing.RowNumber = location.RowNumber;
+                existing.Description = location.Description;
+                existing.UpdatedAt = DateTime.Now;
+
+                await _bookLocationRepository.UpdateAsync(existing);
+                return Json(new { success = true, message = "Cập nhật vị trí sách thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // POST: Admin/BookLocations/Delete/5
+        [HttpPost]
+        public async Task<IActionResult> DeleteBookLocation(int id)
+        {
+            try
+            {
+                var location = await _bookLocationRepository.GetByIdAsync(id);
+                if (location == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy vị trí sách" });
+                }
+
+                // Kiểm tra xem có sách nào đang sử dụng vị trí này không
+                var booksUsingLocation = await _bookRepository.FindAsync(b => b.LocationId == id);
+                if (booksUsingLocation.Any())
+                {
+                    return Json(new { success = false, message = "Không thể xóa vị trí này vì đang có sách sử dụng" });
+                }
+
+                await _bookLocationRepository.DeleteAsync(location);
+                return Json(new { success = true, message = "Xóa vị trí sách thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
         #endregion
 

@@ -34,10 +34,10 @@
                             <td>@(publisher.Email ?? "-")</td>
                             <td>@(publisher.PhoneNumber ?? "-")</td>
                             <td>
-                                <button class="btn btn-sm btn-primary">
+                                <button class="btn btn-sm btn-primary" onclick="loadPublisherForEdit(@publisher.PublisherId, '@publisher.PublisherName', '@(publisher.Address ?? "")', '@(publisher.PhoneNumber ?? "")', '@(publisher.Email ?? "")')">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger">
+                                <button class="btn btn-sm btn-danger" onclick="deletePublisher(@publisher.PublisherId)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -48,4 +48,117 @@
         </div>
     </div>
 </div>
+
+<!-- Create Publisher Modal -->
+<div class="modal fade" id="createPublisherModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Thêm nhà xuất bản mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createPublisherForm" asp-controller="Admin" asp-action="CreatePublisher" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên nhà xuất bản *</label>
+                        <input type="text" name="PublisherName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" name="Address" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" name="PhoneNumber" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="Email" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Publisher Modal -->
+<div class="modal fade" id="editPublisherModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa nhà xuất bản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editPublisherForm" asp-controller="Admin" asp-action="EditPublisher" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PublisherId" id="editPublisherId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên nhà xuất bản *</label>
+                        <input type="text" name="PublisherName" id="editPublisherName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" name="Address" id="editPublisherAddress" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" name="PhoneNumber" id="editPublisherPhone" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="Email" id="editPublisherEmail" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function loadPublisherForEdit(id, name, address, phone, email) {
+            document.getElementById('editPublisherId').value = id;
+            document.getElementById('editPublisherName').value = name;
+            document.getElementById('editPublisherAddress').value = address;
+            document.getElementById('editPublisherPhone').value = phone;
+            document.getElementById('editPublisherEmail').value = email;
+            openModal('editPublisherModal');
+        }
+
+        function deletePublisher(id) {
+            if (confirm('Bạn có chắc muốn xóa nhà xuất bản này?')) {
+                showLoading();
+                fetch('@Url.Action("DeletePublisher", "Admin")/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showToast('Thành công', data.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Lỗi', data.message, 'error');
+                    }
+                });
+            }
+        }
+
+        submitForm('createPublisherForm');
+        submitForm('editPublisherForm');
+    </script>
+}
 
