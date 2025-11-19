@@ -54,7 +54,7 @@ TestResult.xml
 nunit-*.xml
 
 # Visual Studio
-/WebsiteQuanLyThuVien/.vs/
+WebsiteQuanLyThuVien/.vs/*
 *.user
 *.userosscache
 *.sln.docstates
