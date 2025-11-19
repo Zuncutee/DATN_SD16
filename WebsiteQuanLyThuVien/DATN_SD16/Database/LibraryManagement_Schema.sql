@@ -12,7 +12,7 @@
  Target Server Version : 16001000 (16.00.1000)
  File Encoding         : 65001
 
- Date: 19/11/2025 10:20:51
+ Date: 19/11/2025 16:56:05
 */
 
 
@@ -38,16 +38,6 @@ GO
 
 
 -- ----------------------------
--- Records of Authors
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Authors] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Authors] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for BookAuthors
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[BookAuthors]') AND type IN ('U'))
@@ -63,16 +53,6 @@ CREATE TABLE [dbo].[BookAuthors] (
 GO
 
 ALTER TABLE [dbo].[BookAuthors] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of BookAuthors
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookAuthors] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookAuthors] OFF
 GO
 
 
@@ -99,16 +79,6 @@ CREATE TABLE [dbo].[BookCopies] (
 GO
 
 ALTER TABLE [dbo].[BookCopies] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of BookCopies
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookCopies] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookCopies] OFF
 GO
 
 
@@ -140,16 +110,6 @@ GO
 
 
 -- ----------------------------
--- Records of BookDamages
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookDamages] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookDamages] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for BookImports
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[BookImports]') AND type IN ('U'))
@@ -172,16 +132,6 @@ GO
 
 
 -- ----------------------------
--- Records of BookImports
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookImports] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookImports] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for BookLocations
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[BookLocations]') AND type IN ('U'))
@@ -200,16 +150,6 @@ CREATE TABLE [dbo].[BookLocations] (
 GO
 
 ALTER TABLE [dbo].[BookLocations] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of BookLocations
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookLocations] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookLocations] OFF
 GO
 
 
@@ -241,16 +181,6 @@ GO
 
 
 -- ----------------------------
--- Records of BookReservations
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookReservations] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookReservations] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for BookReviews
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[BookReviews]') AND type IN ('U'))
@@ -272,16 +202,6 @@ CREATE TABLE [dbo].[BookReviews] (
 GO
 
 ALTER TABLE [dbo].[BookReviews] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of BookReviews
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BookReviews] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BookReviews] OFF
 GO
 
 
@@ -321,16 +241,6 @@ GO
 
 
 -- ----------------------------
--- Records of Books
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Books] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Books] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for BorrowHistory
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[BorrowHistory]') AND type IN ('U'))
@@ -349,16 +259,6 @@ CREATE TABLE [dbo].[BorrowHistory] (
 GO
 
 ALTER TABLE [dbo].[BorrowHistory] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of BorrowHistory
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[BorrowHistory] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[BorrowHistory] OFF
 GO
 
 
@@ -396,16 +296,6 @@ GO
 
 
 -- ----------------------------
--- Records of Borrows
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Borrows] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Borrows] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for Categories
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[Categories]') AND type IN ('U'))
@@ -422,16 +312,6 @@ CREATE TABLE [dbo].[Categories] (
 GO
 
 ALTER TABLE [dbo].[Categories] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of Categories
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Categories] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Categories] OFF
 GO
 
 
@@ -461,16 +341,6 @@ GO
 
 
 -- ----------------------------
--- Records of EmailLogs
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[EmailLogs] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[EmailLogs] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for InventoryCheckDetails
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[InventoryCheckDetails]') AND type IN ('U'))
@@ -489,16 +359,6 @@ CREATE TABLE [dbo].[InventoryCheckDetails] (
 GO
 
 ALTER TABLE [dbo].[InventoryCheckDetails] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of InventoryCheckDetails
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[InventoryCheckDetails] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[InventoryCheckDetails] OFF
 GO
 
 
@@ -526,16 +386,6 @@ GO
 
 
 -- ----------------------------
--- Records of InventoryChecks
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[InventoryChecks] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[InventoryChecks] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for LibraryCards
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[LibraryCards]') AND type IN ('U'))
@@ -556,16 +406,6 @@ CREATE TABLE [dbo].[LibraryCards] (
 GO
 
 ALTER TABLE [dbo].[LibraryCards] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of LibraryCards
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[LibraryCards] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[LibraryCards] OFF
 GO
 
 
@@ -597,16 +437,6 @@ GO
 
 
 -- ----------------------------
--- Records of Notifications
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Notifications] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Notifications] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for PasswordResetTokens
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[PasswordResetTokens]') AND type IN ('U'))
@@ -624,16 +454,6 @@ CREATE TABLE [dbo].[PasswordResetTokens] (
 GO
 
 ALTER TABLE [dbo].[PasswordResetTokens] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of PasswordResetTokens
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[PasswordResetTokens] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[PasswordResetTokens] OFF
 GO
 
 
@@ -656,16 +476,6 @@ CREATE TABLE [dbo].[Publishers] (
 GO
 
 ALTER TABLE [dbo].[Publishers] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of Publishers
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Publishers] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Publishers] OFF
 GO
 
 
@@ -697,16 +507,6 @@ GO
 
 
 -- ----------------------------
--- Records of ReadingRoomReservations
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[ReadingRoomReservations] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[ReadingRoomReservations] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for ReadingRooms
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[ReadingRooms]') AND type IN ('U'))
@@ -726,16 +526,6 @@ CREATE TABLE [dbo].[ReadingRooms] (
 GO
 
 ALTER TABLE [dbo].[ReadingRooms] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of ReadingRooms
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[ReadingRooms] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[ReadingRooms] OFF
 GO
 
 
@@ -762,12 +552,24 @@ GO
 
 
 -- ----------------------------
--- Records of ReadingRoomSeats
+-- Table structure for RefreshTokens
 -- ----------------------------
-SET IDENTITY_INSERT [dbo].[ReadingRoomSeats] ON
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[RefreshTokens]') AND type IN ('U'))
+	DROP TABLE [dbo].[RefreshTokens]
 GO
 
-SET IDENTITY_INSERT [dbo].[ReadingRoomSeats] OFF
+CREATE TABLE [dbo].[RefreshTokens] (
+  [TokenId] int  IDENTITY(1,1) NOT NULL,
+  [UserId] int  NOT NULL,
+  [Token] nvarchar(500) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL,
+  [ExpiresAt] datetime2(7)  NOT NULL,
+  [IsRevoked] bit DEFAULT 0 NOT NULL,
+  [RevokedAt] datetime2(7)  NULL,
+  [CreatedAt] datetime2(7) DEFAULT getdate() NOT NULL
+)
+GO
+
+ALTER TABLE [dbo].[RefreshTokens] SET (LOCK_ESCALATION = TABLE)
 GO
 
 
@@ -788,25 +590,6 @@ CREATE TABLE [dbo].[Roles] (
 GO
 
 ALTER TABLE [dbo].[Roles] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of Roles
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Roles] ON
-GO
-
-INSERT INTO [dbo].[Roles] ([RoleId], [RoleName], [Description], [CreatedAt], [UpdatedAt]) VALUES (N'1', N'Admin', N'Quản trị viên hệ thống - Toàn quyền quản lý', N'2025-11-19 10:19:31.053', N'2025-11-19 10:19:31.053')
-GO
-
-INSERT INTO [dbo].[Roles] ([RoleId], [RoleName], [Description], [CreatedAt], [UpdatedAt]) VALUES (N'2', N'Librarian', N'Thủ thư - Quản lý mượn trả, kho sách', N'2025-11-19 10:19:31.053', N'2025-11-19 10:19:31.053')
-GO
-
-INSERT INTO [dbo].[Roles] ([RoleId], [RoleName], [Description], [CreatedAt], [UpdatedAt]) VALUES (N'3', N'Reader', N'Độc giả - Mượn sách, tìm kiếm', N'2025-11-19 10:19:31.053', N'2025-11-19 10:19:31.053')
-GO
-
-SET IDENTITY_INSERT [dbo].[Roles] OFF
 GO
 
 
@@ -833,37 +616,6 @@ GO
 
 
 -- ----------------------------
--- Records of SystemSettings
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[SystemSettings] ON
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'1', N'MaxBorrowDays', N'14', N'Số ngày mượn tối đa', N'Borrowing', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'2', N'MaxRenewDays', N'7', N'Số ngày gia hạn tối đa', N'Borrowing', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'3', N'MaxBorrowBooks', N'5', N'Số sách mượn tối đa cùng lúc', N'Borrowing', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'4', N'FinePerDay', N'5000', N'Phí phạt mỗi ngày quá hạn (VNĐ)', N'Fine', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'5', N'ReservationExpiryDays', N'3', N'Số ngày hết hạn đặt sách', N'Reservation', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'6', N'EmailReturnReminderDays', N'2', N'Số ngày trước khi trả để gửi email nhắc', N'Notification', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-INSERT INTO [dbo].[SystemSettings] ([SettingId], [SettingKey], [SettingValue], [Description], [Category], [UpdatedBy], [UpdatedAt]) VALUES (N'7', N'EmailOverdueAlertDays', N'1', N'Số ngày quá hạn để gửi email cảnh báo', N'Notification', NULL, N'2025-11-19 10:19:31.060')
-GO
-
-SET IDENTITY_INSERT [dbo].[SystemSettings] OFF
-GO
-
-
--- ----------------------------
 -- Table structure for UserRoles
 -- ----------------------------
 IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID(N'[dbo].[UserRoles]') AND type IN ('U'))
@@ -880,16 +632,6 @@ CREATE TABLE [dbo].[UserRoles] (
 GO
 
 ALTER TABLE [dbo].[UserRoles] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of UserRoles
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[UserRoles] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[UserRoles] OFF
 GO
 
 
@@ -921,16 +663,6 @@ CREATE TABLE [dbo].[Users] (
 GO
 
 ALTER TABLE [dbo].[Users] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of Users
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[Users] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[Users] OFF
 GO
 
 
@@ -1064,14 +796,14 @@ GO
 -- ----------------------------
 -- Auto increment value for Authors
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Authors]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Authors]', RESEED, 2)
 GO
 
 
 -- ----------------------------
 -- Primary Key structure for table Authors
 -- ----------------------------
-ALTER TABLE [dbo].[Authors] ADD CONSTRAINT [PK__Authors__70DAFC34499571A9] PRIMARY KEY CLUSTERED ([AuthorId])
+ALTER TABLE [dbo].[Authors] ADD CONSTRAINT [PK__Authors__70DAFC34BD12385B] PRIMARY KEY CLUSTERED ([AuthorId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1080,14 +812,14 @@ GO
 -- ----------------------------
 -- Auto increment value for BookAuthors
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[BookAuthors]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[BookAuthors]', RESEED, 2)
 GO
 
 
 -- ----------------------------
 -- Uniques structure for table BookAuthors
 -- ----------------------------
-ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [UQ__BookAuth__6AED6DC504D01821] UNIQUE NONCLUSTERED ([BookId] ASC, [AuthorId] ASC)
+ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [UQ__BookAuth__6AED6DC56C227DF5] UNIQUE NONCLUSTERED ([BookId] ASC, [AuthorId] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1096,7 +828,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BookAuthors
 -- ----------------------------
-ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [PK__BookAuth__21B24F59290EF61E] PRIMARY KEY CLUSTERED ([BookAuthorId])
+ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [PK__BookAuth__21B24F59889BF29D] PRIMARY KEY CLUSTERED ([BookAuthorId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1105,7 +837,7 @@ GO
 -- ----------------------------
 -- Auto increment value for BookCopies
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[BookCopies]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[BookCopies]', RESEED, 5)
 GO
 
 
@@ -1200,12 +932,12 @@ GO
 -- ----------------------------
 -- Uniques structure for table BookCopies
 -- ----------------------------
-ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [UQ__BookCopi__177800D39CC96AB7] UNIQUE NONCLUSTERED ([Barcode] ASC)
+ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [UQ__BookCopi__177800D36193E1EB] UNIQUE NONCLUSTERED ([Barcode] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [UQ__BookCopi__C02668298289461A] UNIQUE NONCLUSTERED ([BookId] ASC, [CopyNumber] ASC)
+ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [UQ__BookCopi__C026682907A5D3B1] UNIQUE NONCLUSTERED ([BookId] ASC, [CopyNumber] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1214,7 +946,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BookCopies
 -- ----------------------------
-ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [PK__BookCopi__C26CCCC53CC32940] PRIMARY KEY CLUSTERED ([CopyId])
+ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [PK__BookCopi__C26CCCC558F5FB57] PRIMARY KEY CLUSTERED ([CopyId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1230,7 +962,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BookDamages
 -- ----------------------------
-ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [PK__BookDama__8A0F2162B3A92208] PRIMARY KEY CLUSTERED ([DamageId])
+ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [PK__BookDama__8A0F21624A81DD79] PRIMARY KEY CLUSTERED ([DamageId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1246,7 +978,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BookImports
 -- ----------------------------
-ALTER TABLE [dbo].[BookImports] ADD CONSTRAINT [PK__BookImpo__869767EA55165E87] PRIMARY KEY CLUSTERED ([ImportId])
+ALTER TABLE [dbo].[BookImports] ADD CONSTRAINT [PK__BookImpo__869767EA205DCC80] PRIMARY KEY CLUSTERED ([ImportId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1255,14 +987,14 @@ GO
 -- ----------------------------
 -- Auto increment value for BookLocations
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[BookLocations]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[BookLocations]', RESEED, 2)
 GO
 
 
 -- ----------------------------
 -- Uniques structure for table BookLocations
 -- ----------------------------
-ALTER TABLE [dbo].[BookLocations] ADD CONSTRAINT [UQ__BookLoca__DDB144D560BD6F5D] UNIQUE NONCLUSTERED ([LocationCode] ASC)
+ALTER TABLE [dbo].[BookLocations] ADD CONSTRAINT [UQ__BookLoca__DDB144D5922D1C27] UNIQUE NONCLUSTERED ([LocationCode] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1271,7 +1003,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BookLocations
 -- ----------------------------
-ALTER TABLE [dbo].[BookLocations] ADD CONSTRAINT [PK__BookLoca__E7FEA497B7A40108] PRIMARY KEY CLUSTERED ([LocationId])
+ALTER TABLE [dbo].[BookLocations] ADD CONSTRAINT [PK__BookLoca__E7FEA4972492E6E0] PRIMARY KEY CLUSTERED ([LocationId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1309,7 +1041,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BookReservations
 -- ----------------------------
-ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [PK__BookRese__B7EE5F24E0650B23] PRIMARY KEY CLUSTERED ([ReservationId])
+ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [PK__BookRese__B7EE5F24BC1E5DEF] PRIMARY KEY CLUSTERED ([ReservationId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1325,7 +1057,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table BookReviews
 -- ----------------------------
-ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [UQ__BookRevi__EC984EC224A7C5B0] UNIQUE NONCLUSTERED ([BookId] ASC, [UserId] ASC)
+ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [UQ__BookRevi__EC984EC21E846287] UNIQUE NONCLUSTERED ([BookId] ASC, [UserId] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1334,14 +1066,14 @@ GO
 -- ----------------------------
 -- Checks structure for table BookReviews
 -- ----------------------------
-ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [CK__BookRevie__Ratin__47A6A41B] CHECK ([Rating]>=(1) AND [Rating]<=(5))
+ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [CK__BookRevie__Ratin__4D5F7D71] CHECK ([Rating]>=(1) AND [Rating]<=(5))
 GO
 
 
 -- ----------------------------
 -- Primary Key structure for table BookReviews
 -- ----------------------------
-ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [PK__BookRevi__74BC79CEC82B28C4] PRIMARY KEY CLUSTERED ([ReviewId])
+ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [PK__BookRevi__74BC79CE87C6A831] PRIMARY KEY CLUSTERED ([ReviewId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1350,7 +1082,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Books
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Books]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Books]', RESEED, 2)
 GO
 
 
@@ -1385,7 +1117,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table Books
 -- ----------------------------
-ALTER TABLE [dbo].[Books] ADD CONSTRAINT [UQ__Books__447D36EA4A0559A1] UNIQUE NONCLUSTERED ([ISBN] ASC)
+ALTER TABLE [dbo].[Books] ADD CONSTRAINT [UQ__Books__447D36EA94000EC0] UNIQUE NONCLUSTERED ([ISBN] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1394,7 +1126,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Books
 -- ----------------------------
-ALTER TABLE [dbo].[Books] ADD CONSTRAINT [PK__Books__3DE0C207B9616D41] PRIMARY KEY CLUSTERED ([BookId])
+ALTER TABLE [dbo].[Books] ADD CONSTRAINT [PK__Books__3DE0C2070EE5C412] PRIMARY KEY CLUSTERED ([BookId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1410,7 +1142,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table BorrowHistory
 -- ----------------------------
-ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [PK__BorrowHi__4D7B4ABDF407BE7A] PRIMARY KEY CLUSTERED ([HistoryId])
+ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [PK__BorrowHi__4D7B4ABD77ABBD97] PRIMARY KEY CLUSTERED ([HistoryId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1487,7 +1219,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table Borrows
 -- ----------------------------
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [UQ__Borrows__2E556623DC7C04E3] UNIQUE NONCLUSTERED ([BorrowNumber] ASC)
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [UQ__Borrows__2E556623EB0DF56B] UNIQUE NONCLUSTERED ([BorrowNumber] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1496,7 +1228,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Borrows
 -- ----------------------------
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [PK__Borrows__4295F83FEB05E4C1] PRIMARY KEY CLUSTERED ([BorrowId])
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [PK__Borrows__4295F83F9CFA1014] PRIMARY KEY CLUSTERED ([BorrowId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1505,14 +1237,14 @@ GO
 -- ----------------------------
 -- Auto increment value for Categories
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Categories]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Categories]', RESEED, 2)
 GO
 
 
 -- ----------------------------
 -- Uniques structure for table Categories
 -- ----------------------------
-ALTER TABLE [dbo].[Categories] ADD CONSTRAINT [UQ__Categori__8517B2E02A269F3A] UNIQUE NONCLUSTERED ([CategoryName] ASC)
+ALTER TABLE [dbo].[Categories] ADD CONSTRAINT [UQ__Categori__8517B2E0758329C1] UNIQUE NONCLUSTERED ([CategoryName] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1521,7 +1253,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Categories
 -- ----------------------------
-ALTER TABLE [dbo].[Categories] ADD CONSTRAINT [PK__Categori__19093A0B1E9BAAD1] PRIMARY KEY CLUSTERED ([CategoryId])
+ALTER TABLE [dbo].[Categories] ADD CONSTRAINT [PK__Categori__19093A0B56E33CFC] PRIMARY KEY CLUSTERED ([CategoryId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1537,7 +1269,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table EmailLogs
 -- ----------------------------
-ALTER TABLE [dbo].[EmailLogs] ADD CONSTRAINT [PK__EmailLog__E8CB41CCF8A7EC55] PRIMARY KEY CLUSTERED ([EmailLogId])
+ALTER TABLE [dbo].[EmailLogs] ADD CONSTRAINT [PK__EmailLog__E8CB41CC3F898CE0] PRIMARY KEY CLUSTERED ([EmailLogId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1553,7 +1285,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table InventoryCheckDetails
 -- ----------------------------
-ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [UQ__Inventor__CAA79BAB9B757D1C] UNIQUE NONCLUSTERED ([CheckId] ASC, [CopyId] ASC)
+ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [UQ__Inventor__CAA79BAB72DC4FD7] UNIQUE NONCLUSTERED ([CheckId] ASC, [CopyId] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1562,7 +1294,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table InventoryCheckDetails
 -- ----------------------------
-ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [PK__Inventor__135C316D4F99C9BF] PRIMARY KEY CLUSTERED ([DetailId])
+ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [PK__Inventor__135C316D0F1BEB10] PRIMARY KEY CLUSTERED ([DetailId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1578,7 +1310,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table InventoryChecks
 -- ----------------------------
-ALTER TABLE [dbo].[InventoryChecks] ADD CONSTRAINT [UQ__Inventor__C6E286383E051F2F] UNIQUE NONCLUSTERED ([CheckNumber] ASC)
+ALTER TABLE [dbo].[InventoryChecks] ADD CONSTRAINT [UQ__Inventor__C6E286389B847B4B] UNIQUE NONCLUSTERED ([CheckNumber] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1587,7 +1319,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table InventoryChecks
 -- ----------------------------
-ALTER TABLE [dbo].[InventoryChecks] ADD CONSTRAINT [PK__Inventor__8681576640365B02] PRIMARY KEY CLUSTERED ([CheckId])
+ALTER TABLE [dbo].[InventoryChecks] ADD CONSTRAINT [PK__Inventor__86815766EC327904] PRIMARY KEY CLUSTERED ([CheckId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1603,12 +1335,12 @@ GO
 -- ----------------------------
 -- Uniques structure for table LibraryCards
 -- ----------------------------
-ALTER TABLE [dbo].[LibraryCards] ADD CONSTRAINT [UQ__LibraryC__1788CC4DAD3E7E0D] UNIQUE NONCLUSTERED ([UserId] ASC)
+ALTER TABLE [dbo].[LibraryCards] ADD CONSTRAINT [UQ__LibraryC__1788CC4D4F666D90] UNIQUE NONCLUSTERED ([UserId] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[LibraryCards] ADD CONSTRAINT [UQ__LibraryC__A4E9FFE9FFC575B5] UNIQUE NONCLUSTERED ([CardNumber] ASC)
+ALTER TABLE [dbo].[LibraryCards] ADD CONSTRAINT [UQ__LibraryC__A4E9FFE9A9BF6291] UNIQUE NONCLUSTERED ([CardNumber] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1617,7 +1349,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table LibraryCards
 -- ----------------------------
-ALTER TABLE [dbo].[LibraryCards] ADD CONSTRAINT [PK__LibraryC__55FECDAE504F0564] PRIMARY KEY CLUSTERED ([CardId])
+ALTER TABLE [dbo].[LibraryCards] ADD CONSTRAINT [PK__LibraryC__55FECDAE671372C3] PRIMARY KEY CLUSTERED ([CardId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1655,7 +1387,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Notifications
 -- ----------------------------
-ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [PK__Notifica__20CF2E127C960A97] PRIMARY KEY CLUSTERED ([NotificationId])
+ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [PK__Notifica__20CF2E12A5EB9024] PRIMARY KEY CLUSTERED ([NotificationId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1671,7 +1403,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table PasswordResetTokens
 -- ----------------------------
-ALTER TABLE [dbo].[PasswordResetTokens] ADD CONSTRAINT [UQ__Password__1EB4F8174060A0E4] UNIQUE NONCLUSTERED ([Token] ASC)
+ALTER TABLE [dbo].[PasswordResetTokens] ADD CONSTRAINT [UQ__Password__1EB4F8170C84B464] UNIQUE NONCLUSTERED ([Token] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1680,7 +1412,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table PasswordResetTokens
 -- ----------------------------
-ALTER TABLE [dbo].[PasswordResetTokens] ADD CONSTRAINT [PK__Password__658FEEEA1ACB44DB] PRIMARY KEY CLUSTERED ([TokenId])
+ALTER TABLE [dbo].[PasswordResetTokens] ADD CONSTRAINT [PK__Password__658FEEEAAA7521B2] PRIMARY KEY CLUSTERED ([TokenId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1689,14 +1421,14 @@ GO
 -- ----------------------------
 -- Auto increment value for Publishers
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Publishers]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Publishers]', RESEED, 2)
 GO
 
 
 -- ----------------------------
 -- Uniques structure for table Publishers
 -- ----------------------------
-ALTER TABLE [dbo].[Publishers] ADD CONSTRAINT [UQ__Publishe__5F0E2249A5D6DCD6] UNIQUE NONCLUSTERED ([PublisherName] ASC)
+ALTER TABLE [dbo].[Publishers] ADD CONSTRAINT [UQ__Publishe__5F0E2249F3036CF8] UNIQUE NONCLUSTERED ([PublisherName] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1705,7 +1437,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Publishers
 -- ----------------------------
-ALTER TABLE [dbo].[Publishers] ADD CONSTRAINT [PK__Publishe__4C657FABDBD5AF18] PRIMARY KEY CLUSTERED ([PublisherId])
+ALTER TABLE [dbo].[Publishers] ADD CONSTRAINT [PK__Publishe__4C657FAB6CAF7DF5] PRIMARY KEY CLUSTERED ([PublisherId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1721,7 +1453,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table ReadingRoomReservations
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRoomReservations] ADD CONSTRAINT [PK__ReadingR__B7EE5F240D0E8289] PRIMARY KEY CLUSTERED ([ReservationId])
+ALTER TABLE [dbo].[ReadingRoomReservations] ADD CONSTRAINT [PK__ReadingR__B7EE5F242D7CC4AE] PRIMARY KEY CLUSTERED ([ReservationId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1737,7 +1469,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table ReadingRooms
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRooms] ADD CONSTRAINT [UQ__ReadingR__4F9D52314B7DA6C5] UNIQUE NONCLUSTERED ([RoomCode] ASC)
+ALTER TABLE [dbo].[ReadingRooms] ADD CONSTRAINT [UQ__ReadingR__4F9D5231C9A7B930] UNIQUE NONCLUSTERED ([RoomCode] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1746,7 +1478,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table ReadingRooms
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRooms] ADD CONSTRAINT [PK__ReadingR__328639391EDB4FB2] PRIMARY KEY CLUSTERED ([RoomId])
+ALTER TABLE [dbo].[ReadingRooms] ADD CONSTRAINT [PK__ReadingR__32863939DE49259B] PRIMARY KEY CLUSTERED ([RoomId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1762,12 +1494,12 @@ GO
 -- ----------------------------
 -- Uniques structure for table ReadingRoomSeats
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [UQ__ReadingR__2C64E5880E1F2905] UNIQUE NONCLUSTERED ([RoomId] ASC, [SeatNumber] ASC)
+ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [UQ__ReadingR__2C64E58853A36063] UNIQUE NONCLUSTERED ([RoomId] ASC, [SeatNumber] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [UQ__ReadingR__5B869AD9A0299639] UNIQUE NONCLUSTERED ([QRCode] ASC)
+ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [UQ__ReadingR__5B869AD95CC0ADAD] UNIQUE NONCLUSTERED ([QRCode] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1776,7 +1508,32 @@ GO
 -- ----------------------------
 -- Primary Key structure for table ReadingRoomSeats
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [PK__ReadingR__311713F3344279BC] PRIMARY KEY CLUSTERED ([SeatId])
+ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [PK__ReadingR__311713F37B668EDB] PRIMARY KEY CLUSTERED ([SeatId])
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
+ON [PRIMARY]
+GO
+
+
+-- ----------------------------
+-- Auto increment value for RefreshTokens
+-- ----------------------------
+DBCC CHECKIDENT ('[dbo].[RefreshTokens]', RESEED, 1)
+GO
+
+
+-- ----------------------------
+-- Uniques structure for table RefreshTokens
+-- ----------------------------
+ALTER TABLE [dbo].[RefreshTokens] ADD CONSTRAINT [UQ__RefreshT__1EB4F8172B4D81B4] UNIQUE NONCLUSTERED ([Token] ASC)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
+ON [PRIMARY]
+GO
+
+
+-- ----------------------------
+-- Primary Key structure for table RefreshTokens
+-- ----------------------------
+ALTER TABLE [dbo].[RefreshTokens] ADD CONSTRAINT [PK__RefreshT__658FEEEAF26539BD] PRIMARY KEY CLUSTERED ([TokenId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1792,7 +1549,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table Roles
 -- ----------------------------
-ALTER TABLE [dbo].[Roles] ADD CONSTRAINT [UQ__Roles__8A2B616021C21959] UNIQUE NONCLUSTERED ([RoleName] ASC)
+ALTER TABLE [dbo].[Roles] ADD CONSTRAINT [UQ__Roles__8A2B61604EDAD1B4] UNIQUE NONCLUSTERED ([RoleName] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1801,7 +1558,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Roles
 -- ----------------------------
-ALTER TABLE [dbo].[Roles] ADD CONSTRAINT [PK__Roles__8AFACE1A51A3C513] PRIMARY KEY CLUSTERED ([RoleId])
+ALTER TABLE [dbo].[Roles] ADD CONSTRAINT [PK__Roles__8AFACE1AD545CAB6] PRIMARY KEY CLUSTERED ([RoleId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1817,7 +1574,7 @@ GO
 -- ----------------------------
 -- Uniques structure for table SystemSettings
 -- ----------------------------
-ALTER TABLE [dbo].[SystemSettings] ADD CONSTRAINT [UQ__SystemSe__01E719AD2377A5D1] UNIQUE NONCLUSTERED ([SettingKey] ASC)
+ALTER TABLE [dbo].[SystemSettings] ADD CONSTRAINT [UQ__SystemSe__01E719ADDBEF372E] UNIQUE NONCLUSTERED ([SettingKey] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1826,7 +1583,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table SystemSettings
 -- ----------------------------
-ALTER TABLE [dbo].[SystemSettings] ADD CONSTRAINT [PK__SystemSe__54372B1D2E9892DC] PRIMARY KEY CLUSTERED ([SettingId])
+ALTER TABLE [dbo].[SystemSettings] ADD CONSTRAINT [PK__SystemSe__54372B1D80286A84] PRIMARY KEY CLUSTERED ([SettingId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1835,14 +1592,14 @@ GO
 -- ----------------------------
 -- Auto increment value for UserRoles
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[UserRoles]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[UserRoles]', RESEED, 3)
 GO
 
 
 -- ----------------------------
 -- Uniques structure for table UserRoles
 -- ----------------------------
-ALTER TABLE [dbo].[UserRoles] ADD CONSTRAINT [UQ__UserRole__AF2760ACB89C9468] UNIQUE NONCLUSTERED ([UserId] ASC, [RoleId] ASC)
+ALTER TABLE [dbo].[UserRoles] ADD CONSTRAINT [UQ__UserRole__AF2760AC2CF6F187] UNIQUE NONCLUSTERED ([UserId] ASC, [RoleId] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1851,7 +1608,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table UserRoles
 -- ----------------------------
-ALTER TABLE [dbo].[UserRoles] ADD CONSTRAINT [PK__UserRole__3D978A35015EFBBC] PRIMARY KEY CLUSTERED ([UserRoleId])
+ALTER TABLE [dbo].[UserRoles] ADD CONSTRAINT [PK__UserRole__3D978A35220B1C3C] PRIMARY KEY CLUSTERED ([UserRoleId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1860,7 +1617,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Users
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Users]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Users]', RESEED, 3)
 GO
 
 
@@ -1887,31 +1644,14 @@ GO
 
 
 -- ----------------------------
--- Triggers structure for table Users
--- ----------------------------
-CREATE TRIGGER [dbo].[TRG_Users_UpdateUpdatedAt]
-ON [dbo].[Users]
-WITH EXECUTE AS CALLER
-FOR UPDATE
-AS
-BEGIN
-    UPDATE Users
-    SET UpdatedAt = GETDATE()
-    FROM inserted
-    WHERE Users.UserId = inserted.UserId;
-END;
-GO
-
-
--- ----------------------------
 -- Uniques structure for table Users
 -- ----------------------------
-ALTER TABLE [dbo].[Users] ADD CONSTRAINT [UQ__Users__536C85E42758209C] UNIQUE NONCLUSTERED ([Username] ASC)
+ALTER TABLE [dbo].[Users] ADD CONSTRAINT [UQ__Users__536C85E487775C98] UNIQUE NONCLUSTERED ([Username] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[Users] ADD CONSTRAINT [UQ__Users__A9D10534077ACBF3] UNIQUE NONCLUSTERED ([Email] ASC)
+ALTER TABLE [dbo].[Users] ADD CONSTRAINT [UQ__Users__A9D105340C221C02] UNIQUE NONCLUSTERED ([Email] ASC)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1920,7 +1660,7 @@ GO
 -- ----------------------------
 -- Primary Key structure for table Users
 -- ----------------------------
-ALTER TABLE [dbo].[Users] ADD CONSTRAINT [PK__Users__1788CC4C02E2353E] PRIMARY KEY CLUSTERED ([UserId])
+ALTER TABLE [dbo].[Users] ADD CONSTRAINT [PK__Users__1788CC4C932FDE5E] PRIMARY KEY CLUSTERED ([UserId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
 GO
@@ -1929,138 +1669,138 @@ GO
 -- ----------------------------
 -- Foreign Keys structure for table BookAuthors
 -- ----------------------------
-ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [FK__BookAutho__BookI__7E37BEF6] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [FK__BookAutho__BookI__03F0984C] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [FK__BookAutho__Autho__7F2BE32F] FOREIGN KEY ([AuthorId]) REFERENCES [dbo].[Authors] ([AuthorId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookAuthors] ADD CONSTRAINT [FK__BookAutho__Autho__04E4BC85] FOREIGN KEY ([AuthorId]) REFERENCES [dbo].[Authors] ([AuthorId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table BookCopies
 -- ----------------------------
-ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [FK__BookCopie__BookI__07C12930] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookCopies] ADD CONSTRAINT [FK__BookCopie__BookI__0D7A0286] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table BookDamages
 -- ----------------------------
-ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [FK__BookDamag__CopyI__2FCF1A8A] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [FK__BookDamag__CopyI__3587F3E0] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [FK__BookDamag__Repor__30C33EC3] FOREIGN KEY ([ReportedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [FK__BookDamag__Repor__367C1819] FOREIGN KEY ([ReportedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [FK__BookDamag__Proce__31B762FC] FOREIGN KEY ([ProcessedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookDamages] ADD CONSTRAINT [FK__BookDamag__Proce__37703C52] FOREIGN KEY ([ProcessedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table BookImports
 -- ----------------------------
-ALTER TABLE [dbo].[BookImports] ADD CONSTRAINT [FK__BookImpor__BookI__0C85DE4D] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookImports] ADD CONSTRAINT [FK__BookImpor__BookI__123EB7A3] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookImports] ADD CONSTRAINT [FK__BookImpor__Impor__0D7A0286] FOREIGN KEY ([ImportedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookImports] ADD CONSTRAINT [FK__BookImpor__Impor__1332DBDC] FOREIGN KEY ([ImportedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table BookReservations
 -- ----------------------------
-ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [FK__BookReser__UserI__14270015] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [FK__BookReser__UserI__19DFD96B] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [FK__BookReser__BookI__151B244E] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [FK__BookReser__BookI__1AD3FDA4] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [FK__BookReser__Appro__160F4887] FOREIGN KEY ([ApprovedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookReservations] ADD CONSTRAINT [FK__BookReser__Appro__1BC821DD] FOREIGN KEY ([ApprovedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table BookReviews
 -- ----------------------------
-ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [FK__BookRevie__BookI__4B7734FF] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [FK__BookRevie__BookI__51300E55] FOREIGN KEY ([BookId]) REFERENCES [dbo].[Books] ([BookId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [FK__BookRevie__UserI__4C6B5938] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [FK__BookRevie__UserI__5224328E] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [FK__BookRevie__Appro__4D5F7D71] FOREIGN KEY ([ApprovedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BookReviews] ADD CONSTRAINT [FK__BookRevie__Appro__531856C7] FOREIGN KEY ([ApprovedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table Books
 -- ----------------------------
-ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__CategoryI__76969D2E] FOREIGN KEY ([CategoryId]) REFERENCES [dbo].[Categories] ([CategoryId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__CategoryI__7C4F7684] FOREIGN KEY ([CategoryId]) REFERENCES [dbo].[Categories] ([CategoryId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__Publisher__778AC167] FOREIGN KEY ([PublisherId]) REFERENCES [dbo].[Publishers] ([PublisherId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__Publisher__7D439ABD] FOREIGN KEY ([PublisherId]) REFERENCES [dbo].[Publishers] ([PublisherId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__LocationI__787EE5A0] FOREIGN KEY ([LocationId]) REFERENCES [dbo].[BookLocations] ([LocationId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__LocationI__7E37BEF6] FOREIGN KEY ([LocationId]) REFERENCES [dbo].[BookLocations] ([LocationId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__CreatedBy__797309D9] FOREIGN KEY ([CreatedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Books] ADD CONSTRAINT [FK__Books__CreatedBy__7F2BE32F] FOREIGN KEY ([CreatedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table BorrowHistory
 -- ----------------------------
-ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [FK__BorrowHis__Borro__2739D489] FOREIGN KEY ([BorrowId]) REFERENCES [dbo].[Borrows] ([BorrowId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [FK__BorrowHis__Borro__2CF2ADDF] FOREIGN KEY ([BorrowId]) REFERENCES [dbo].[Borrows] ([BorrowId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [FK__BorrowHis__UserI__282DF8C2] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [FK__BorrowHis__UserI__2DE6D218] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [FK__BorrowHis__CopyI__29221CFB] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[BorrowHistory] ADD CONSTRAINT [FK__BorrowHis__CopyI__2EDAF651] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table Borrows
 -- ----------------------------
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__UserId__1F98B2C1] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__UserId__25518C17] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__CopyId__208CD6FA] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__CopyId__2645B050] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__Reserva__2180FB33] FOREIGN KEY ([ReservationId]) REFERENCES [dbo].[BookReservations] ([ReservationId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__Reserva__2739D489] FOREIGN KEY ([ReservationId]) REFERENCES [dbo].[BookReservations] ([ReservationId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__Borrowe__22751F6C] FOREIGN KEY ([BorrowedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__Borrowe__282DF8C2] FOREIGN KEY ([BorrowedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__Returne__236943A5] FOREIGN KEY ([ReturnedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Borrows] ADD CONSTRAINT [FK__Borrows__Returne__29221CFB] FOREIGN KEY ([ReturnedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table EmailLogs
 -- ----------------------------
-ALTER TABLE [dbo].[EmailLogs] ADD CONSTRAINT [FK__EmailLogs__UserI__6DCC4D03] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[EmailLogs] ADD CONSTRAINT [FK__EmailLogs__UserI__73852659] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table InventoryCheckDetails
 -- ----------------------------
-ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [FK__Inventory__Check__3E1D39E1] FOREIGN KEY ([CheckId]) REFERENCES [dbo].[InventoryChecks] ([CheckId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [FK__Inventory__Check__43D61337] FOREIGN KEY ([CheckId]) REFERENCES [dbo].[InventoryChecks] ([CheckId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [FK__Inventory__CopyI__3F115E1A] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[InventoryCheckDetails] ADD CONSTRAINT [FK__Inventory__CopyI__44CA3770] FOREIGN KEY ([CopyId]) REFERENCES [dbo].[BookCopies] ([CopyId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table InventoryChecks
 -- ----------------------------
-ALTER TABLE [dbo].[InventoryChecks] ADD CONSTRAINT [FK__Inventory__Check__395884C4] FOREIGN KEY ([CheckedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[InventoryChecks] ADD CONSTRAINT [FK__Inventory__Check__3F115E1A] FOREIGN KEY ([CheckedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
@@ -2077,13 +1817,13 @@ GO
 -- ----------------------------
 -- Foreign Keys structure for table Notifications
 -- ----------------------------
-ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [FK__Notificat__UserI__671F4F74] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [FK__Notificat__UserI__6CD828CA] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [FK__Notificat__Relat__681373AD] FOREIGN KEY ([RelatedBorrowId]) REFERENCES [dbo].[Borrows] ([BorrowId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [FK__Notificat__Relat__6DCC4D03] FOREIGN KEY ([RelatedBorrowId]) REFERENCES [dbo].[Borrows] ([BorrowId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [FK__Notificat__Relat__690797E6] FOREIGN KEY ([RelatedReservationId]) REFERENCES [dbo].[BookReservations] ([ReservationId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[Notifications] ADD CONSTRAINT [FK__Notificat__Relat__6EC0713C] FOREIGN KEY ([RelatedReservationId]) REFERENCES [dbo].[BookReservations] ([ReservationId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
@@ -2097,24 +1837,31 @@ GO
 -- ----------------------------
 -- Foreign Keys structure for table ReadingRoomReservations
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRoomReservations] ADD CONSTRAINT [FK__ReadingRo__UserI__607251E5] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[ReadingRoomReservations] ADD CONSTRAINT [FK__ReadingRo__UserI__662B2B3B] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[ReadingRoomReservations] ADD CONSTRAINT [FK__ReadingRo__SeatI__6166761E] FOREIGN KEY ([SeatId]) REFERENCES [dbo].[ReadingRoomSeats] ([SeatId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[ReadingRoomReservations] ADD CONSTRAINT [FK__ReadingRo__SeatI__671F4F74] FOREIGN KEY ([SeatId]) REFERENCES [dbo].[ReadingRoomSeats] ([SeatId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table ReadingRoomSeats
 -- ----------------------------
-ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [FK__ReadingRo__RoomI__5AB9788F] FOREIGN KEY ([RoomId]) REFERENCES [dbo].[ReadingRooms] ([RoomId]) ON DELETE CASCADE ON UPDATE NO ACTION
+ALTER TABLE [dbo].[ReadingRoomSeats] ADD CONSTRAINT [FK__ReadingRo__RoomI__607251E5] FOREIGN KEY ([RoomId]) REFERENCES [dbo].[ReadingRooms] ([RoomId]) ON DELETE CASCADE ON UPDATE NO ACTION
+GO
+
+
+-- ----------------------------
+-- Foreign Keys structure for table RefreshTokens
+-- ----------------------------
+ALTER TABLE [dbo].[RefreshTokens] ADD CONSTRAINT [FK__RefreshTo__UserI__5DCAEF64] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 
 
 -- ----------------------------
 -- Foreign Keys structure for table SystemSettings
 -- ----------------------------
-ALTER TABLE [dbo].[SystemSettings] ADD CONSTRAINT [FK__SystemSet__Updat__43D61337] FOREIGN KEY ([UpdatedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+ALTER TABLE [dbo].[SystemSettings] ADD CONSTRAINT [FK__SystemSet__Updat__498EEC8D] FOREIGN KEY ([UpdatedBy]) REFERENCES [dbo].[Users] ([UserId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 

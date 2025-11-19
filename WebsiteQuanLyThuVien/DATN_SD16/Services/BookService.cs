@@ -67,8 +67,28 @@ namespace DATN_SD16.Services
 
         public async Task<bool> UpdateBookAsync(Book book)
         {
-            book.UpdatedAt = DateTime.Now;
-            await _bookRepository.UpdateAsync(book);
+            var existing = await _bookRepository.GetByIdAsync(book.BookId);
+            if (existing == null) return false;
+
+            existing.Title = book.Title;
+            existing.ISBN = book.ISBN;
+            existing.Description = book.Description;
+            existing.CoverImage = string.IsNullOrWhiteSpace(book.CoverImage) ? existing.CoverImage : book.CoverImage;
+            existing.Language = book.Language;
+            existing.PublicationYear = book.PublicationYear;
+            existing.PageCount = book.PageCount;
+            existing.CategoryId = book.CategoryId;
+            existing.PublisherId = book.PublisherId;
+            existing.LocationId = book.LocationId;
+            existing.TotalCopies = book.TotalCopies;
+            existing.AvailableCopies = book.AvailableCopies;
+            existing.BorrowedCopies = book.BorrowedCopies;
+            existing.LostCopies = book.LostCopies;
+            existing.DamagedCopies = book.DamagedCopies;
+            existing.Status = book.Status;
+            existing.UpdatedAt = DateTime.Now;
+
+            await _bookRepository.UpdateAsync(existing);
             return true;
         }
 

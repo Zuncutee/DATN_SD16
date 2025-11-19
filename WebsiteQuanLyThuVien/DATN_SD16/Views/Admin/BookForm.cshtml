@@ -1,0 +1,175 @@
+@model DATN_SD16.Models.Entities.Book
+@using DATN_SD16.Models.Entities
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = ViewBag.PageTitle ?? "Quản lý sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var categories = ViewBag.Categories as IEnumerable<Category> ?? Enumerable.Empty<Category>();
+    var publishers = ViewBag.Publishers as IEnumerable<Publisher> ?? Enumerable.Empty<Publisher>();
+    var locations = ViewBag.Locations as IEnumerable<BookLocation> ?? Enumerable.Empty<BookLocation>();
+    bool isEdit = ViewBag.IsEdit ?? false;
+    string formAction = ViewBag.FormAction ?? "CreateBook";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">@ViewData["Title"]</h2>
+        <p class="text-muted mb-0">
+            @if (isEdit)
+            {
+                @:Cập nhật thông tin sách trong thư viện
+            }
+            else
+            {
+                @:Thêm mới sách vào thư viện của bạn
+            }
+        </p>
+    </div>
+    <a asp-action="Books" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="@formAction"
+              asp-controller="Admin"
+              method="post"
+              enctype="multipart/form-data"
+              class="row g-3">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="BookId" />
+            <input type="hidden" asp-for="CoverImage" />
+            <div class="col-12">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="ISBN" class="form-label"></label>
+                <input asp-for="ISBN" class="form-control" />
+                <span asp-validation-for="ISBN" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="Language" class="form-label"></label>
+                <input asp-for="Language" class="form-control" />
+                <span asp-validation-for="Language" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="PublicationYear" class="form-label"></label>
+                <input asp-for="PublicationYear" class="form-control" />
+                <span asp-validation-for="PublicationYear" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="PageCount" class="form-label"></label>
+                <input asp-for="PageCount" class="form-control" />
+                <span asp-validation-for="PageCount" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Ảnh bìa</label>
+                <input type="file" name="coverImageFile" class="form-control" accept="image/*" />
+                <small class="text-muted">Hỗ trợ định dạng JPG, PNG. Tối đa 2MB.</small>
+            </div>
+
+            <div class="col-md-6 d-flex align-items-end">
+                @if (!string.IsNullOrEmpty(Model?.CoverImage))
+                {
+                    <div>
+                        <label class="form-label d-block">Ảnh hiện tại</label>
+                        <img src="@Model.CoverImage" alt="Cover" style="width: 120px; height: 160px; object-fit: cover; border-radius: 8px;" />
+                    </div>
+                }
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="CategoryId" class="form-label">Thể loại</label>
+                <select asp-for="CategoryId" class="form-select"
+                        asp-items="@(new SelectList(categories, nameof(Category.CategoryId), nameof(Category.CategoryName)))">
+                    <option value="">-- Chọn thể loại --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="PublisherId" class="form-label">Nhà xuất bản</label>
+                <select asp-for="PublisherId" class="form-select"
+                        asp-items="@(new SelectList(publishers, nameof(Publisher.PublisherId), nameof(Publisher.PublisherName)))">
+                    <option value="">-- Chọn NXB --</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="LocationId" class="form-label">Vị trí sách</label>
+                <select asp-for="LocationId" class="form-select"
+                        asp-items="@(new SelectList(locations, nameof(BookLocation.LocationId), nameof(BookLocation.LocationCode)))">
+                    <option value="">-- Chọn vị trí --</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="TotalCopies" class="form-label"></label>
+                <input asp-for="TotalCopies" class="form-control" />
+                <span asp-validation-for="TotalCopies" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="AvailableCopies" class="form-label"></label>
+                <input asp-for="AvailableCopies" class="form-control" />
+                <span asp-validation-for="AvailableCopies" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="BorrowedCopies" class="form-label"></label>
+                <input asp-for="BorrowedCopies" class="form-control" readonly />
+                <span asp-validation-for="BorrowedCopies" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="Status" class="form-label"></label>
+                <select asp-for="Status" class="form-select">
+                    <option value="Active">Hoạt động</option>
+                    <option value="Inactive">Ngưng sử dụng</option>
+                    <option value="Archived">Lưu trữ</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="LostCopies" class="form-label"></label>
+                <input asp-for="LostCopies" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-3">
+                <label asp-for="DamagedCopies" class="form-label"></label>
+                <input asp-for="DamagedCopies" class="form-control" readonly />
+            </div>
+
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Lưu thông tin
+                </button>
+                <a asp-action="Books" class="btn btn-link text-muted ms-2">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
+

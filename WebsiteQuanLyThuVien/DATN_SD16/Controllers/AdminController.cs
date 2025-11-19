@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using DATN_SD16.Services.Interfaces;
 using DATN_SD16.Repositories.Interfaces;
 using DATN_SD16.Models.Entities;
 using DATN_SD16.Helpers;
 using DATN_SD16.Attributes;
+using System.IO;
 
 namespace DATN_SD16.Controllers
 {
@@ -25,6 +28,7 @@ namespace DATN_SD16.Controllers
         private readonly IRepository<SystemSetting> _systemSettingRepository;
         private readonly IBorrowRepository _borrowRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public AdminController(
             IUserService userService,
@@ -36,7 +40,8 @@ namespace DATN_SD16.Controllers
             IRepository<Role> roleRepository,
             IRepository<SystemSetting> systemSettingRepository,
             IBorrowRepository borrowRepository,
-            IBookRepository bookRepository)
+            IBookRepository bookRepository,
+            IWebHostEnvironment webHostEnvironment)
         {
             _userService = userService;
             _bookService = bookService;
@@ -48,6 +53,7 @@ namespace DATN_SD16.Controllers
             _systemSettingRepository = systemSettingRepository;
             _borrowRepository = borrowRepository;
             _bookRepository = bookRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Admin/Dashboard
@@ -637,6 +643,105 @@ namespace DATN_SD16.Controllers
             return View(books);
         }
 
+        // GET: Admin/Books/Create
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> CreateBook()
+        {
+            await PopulateBookDropdownsAsync();
+            ViewBag.FormAction = nameof(CreateBook);
+            ViewBag.PageTitle = "Thêm sách mới";
+            ViewBag.IsEdit = false;
+            return View("BookForm", new Book());
+        }
+
+        // POST: Admin/Books/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> CreateBook(Book book, IFormFile? coverImageFile)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateBookDropdownsAsync();
+                ViewBag.FormAction = nameof(CreateBook);
+                ViewBag.PageTitle = "Thêm sách mới";
+                ViewBag.IsEdit = false;
+                return View("BookForm", book);
+            }
+
+            book.CoverImage = await SaveCoverImageAsync(coverImageFile);
+            var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+            await _bookService.CreateBookAsync(book, createdBy);
+            TempData["Success"] = "Thêm sách mới thành công!";
+            return RedirectToAction(nameof(Books));
+        }
+
+        // GET: Admin/Books/Edit/5
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> EditBook(int id)
+        {
+            var book = await _bookService.GetBookByIdAsync(id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            await PopulateBookDropdownsAsync();
+            ViewBag.FormAction = nameof(EditBook);
+            ViewBag.PageTitle = "Chỉnh sửa sách";
+            ViewBag.IsEdit = true;
+            return View("BookForm", book);
+        }
+
+        // POST: Admin/Books/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> EditBook(int id, Book book, IFormFile? coverImageFile)
+        {
+            if (id != book.BookId)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateBookDropdownsAsync();
+                ViewBag.FormAction = nameof(EditBook);
+                ViewBag.PageTitle = "Chỉnh sửa sách";
+                ViewBag.IsEdit = true;
+                return View("BookForm", book);
+            }
+
+            book.CoverImage = await SaveCoverImageAsync(coverImageFile, book.CoverImage);
+            var success = await _bookService.UpdateBookAsync(book);
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            TempData["Success"] = "Cập nhật sách thành công!";
+            return RedirectToAction(nameof(Books));
+        }
+
+        // POST: Admin/Books/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin")]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            var success = await _bookService.DeleteBookAsync(id);
+            if (!success)
+            {
+                TempData["Error"] = "Không tìm thấy sách cần xóa.";
+            }
+            else
+            {
+                TempData["Success"] = "Đã xóa sách thành công.";
+            }
+            return RedirectToAction(nameof(Books));
+        }
+
         // POST: Admin/Books/Import
         [HttpPost]
         public async Task<IActionResult> ImportBooks(int bookId, int quantity)
@@ -653,6 +758,53 @@ namespace DATN_SD16.Controllers
             }
         }
         #endregion
+
+        private async Task PopulateBookDropdownsAsync()
+        {
+            ViewBag.Categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Publishers = await _publisherRepository.GetAllAsync();
+            ViewBag.Locations = await _bookLocationRepository.GetAllAsync();
+        }
+
+        private async Task<string?> SaveCoverImageAsync(IFormFile? coverImageFile, string? existingPath = null)
+        {
+            if (coverImageFile == null || coverImageFile.Length == 0)
+            {
+                return existingPath;
+            }
+
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "books");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(coverImageFile.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await coverImageFile.CopyToAsync(stream);
+            }
+
+            if (!string.IsNullOrWhiteSpace(existingPath))
+            {
+                var oldPhysicalPath = GetPhysicalPath(existingPath);
+                if (System.IO.File.Exists(oldPhysicalPath))
+                {
+                    System.IO.File.Delete(oldPhysicalPath);
+                }
+            }
+
+            return $"/uploads/books/{fileName}";
+        }
+
+        private string GetPhysicalPath(string relativePath)
+        {
+            var cleanPath = relativePath.TrimStart('~').TrimStart('/');
+            cleanPath = cleanPath.Replace("/", Path.DirectorySeparatorChar.ToString());
+            return Path.Combine(_webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), cleanPath);
+        }
 
         #region Quản lý Hệ thống
         // GET: Admin/Settings

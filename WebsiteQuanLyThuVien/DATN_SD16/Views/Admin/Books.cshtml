@@ -7,7 +7,7 @@
 <div class="card">
     <div class="card-header">
         <i class="fas fa-book-open"></i> Quản lý Sách
-        <a asp-controller="Books" asp-action="Create" class="btn btn-light btn-sm float-end">
+        <a asp-controller="Admin" asp-action="CreateBook" class="btn btn-light btn-sm float-end">
             <i class="fas fa-plus"></i> Thêm sách mới
         </a>
     </div>
@@ -61,15 +61,19 @@
                                 }
                             </td>
                             <td>
-                                <a asp-controller="Books" asp-action="Edit" asp-route-id="@book.BookId" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Sửa">
+                                <a asp-controller="Admin" asp-action="EditBook" asp-route-id="@book.BookId" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button class="btn btn-sm btn-warning" onclick="openImportModal(@book.BookId, '@book.Title')" data-bs-toggle="tooltip" title="Nhập sách">
                                     <i class="fas fa-box"></i>
                                 </button>
-                                <a asp-controller="Books" asp-action="Delete" asp-route-id="@book.BookId" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <form asp-action="DeleteBook" asp-controller="Admin" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa sách này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@book.BookId" />
+                                    <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     }

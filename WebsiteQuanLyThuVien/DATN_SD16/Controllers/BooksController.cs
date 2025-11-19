@@ -53,93 +53,56 @@ namespace DATN_SD16.Controllers
 
         // GET: Books/Create
         [AuthorizeRoles("Admin", "Librarian")]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            ViewBag.Categories = await _categoryRepository.GetAllAsync();
-            return View();
+            return RedirectToAction("CreateBook", "Admin");
         }
 
         // POST: Books/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRoles("Admin", "Librarian")]
-        public async Task<IActionResult> Create(Models.Entities.Book book)
+        public IActionResult Create(Models.Entities.Book book)
         {
-            if (ModelState.IsValid)
-            {
-                var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _bookService.CreateBookAsync(book, createdBy);
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Categories = await _categoryRepository.GetAllAsync();
-            return View(book);
+            return RedirectToAction("CreateBook", "Admin");
         }
 
         // GET: Books/Edit/5
         [AuthorizeRoles("Admin", "Librarian")]
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
-            var book = await _bookService.GetBookByIdAsync(id.Value);
-            if (book == null)
-            {
-                return NotFound();
-            }
-            ViewBag.Categories = await _categoryRepository.GetAllAsync();
-            return View(book);
+            return RedirectToAction("EditBook", "Admin", new { id = id.Value });
         }
 
         // POST: Books/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRoles("Admin", "Librarian")]
-        public async Task<IActionResult> Edit(int id, Models.Entities.Book book)
+        public IActionResult Edit(int id, Models.Entities.Book book)
         {
-            if (id != book.BookId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                await _bookService.UpdateBookAsync(book);
-                return RedirectToAction(nameof(Index));
-            }
-            ViewBag.Categories = await _categoryRepository.GetAllAsync();
-            return View(book);
+            return RedirectToAction("EditBook", "Admin", new { id });
         }
 
         // GET: Books/Delete/5
         [AuthorizeRoles("Admin")]
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
-            var book = await _bookService.GetBookWithDetailsAsync(id.Value);
-            if (book == null)
-            {
-                return NotFound();
-            }
-
-            return View(book);
+            return RedirectToAction("Books", "Admin");
         }
 
         // POST: Books/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [AuthorizeRoles("Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _bookService.DeleteBookAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
+        public IActionResult DeleteConfirmed(int id) => RedirectToAction("Books", "Admin");
     }
 }
 
