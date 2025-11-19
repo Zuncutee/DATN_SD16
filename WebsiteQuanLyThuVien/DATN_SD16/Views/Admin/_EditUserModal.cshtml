@@ -31,7 +31,8 @@
     <select name="roleIds" class="form-select" multiple required>
         @foreach (var role in roles)
         {
-            <option value="@role.RoleId" @(userRoles.Contains(role.RoleId) ? "selected" : "")>@role.RoleName</option>
+            var isSelected = userRoles.Contains(role.RoleId);
+            <option value="@role.RoleId" selected="@(isSelected ? "selected" : null)">@role.RoleName</option>
         }
     </select>
     <small class="text-muted">Giữ Ctrl để chọn nhiều vai trò</small>

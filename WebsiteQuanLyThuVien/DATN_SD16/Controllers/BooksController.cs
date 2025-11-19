@@ -68,7 +68,7 @@ namespace DATN_SD16.Controllers
             if (ModelState.IsValid)
             {
                 var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _bookService.CreateBookAsync(book, createdBy.Value);
+                await _bookService.CreateBookAsync(book, createdBy);
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Categories = await _categoryRepository.GetAllAsync();

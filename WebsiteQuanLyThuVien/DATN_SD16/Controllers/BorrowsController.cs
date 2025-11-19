@@ -23,7 +23,7 @@ namespace DATN_SD16.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-            var borrows = await _borrowService.GetBorrowsByUserIdAsync(userId.Value);
+            var borrows = await _borrowService.GetBorrowsByUserIdAsync(userId);
             return View(borrows);
         }
 
@@ -31,7 +31,7 @@ namespace DATN_SD16.Controllers
         public async Task<IActionResult> MyBorrows()
         {
             var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-            var activeBorrows = await _borrowService.GetActiveBorrowsByUserIdAsync(userId.Value);
+            var activeBorrows = await _borrowService.GetActiveBorrowsByUserIdAsync(userId);
             return View(activeBorrows);
         }
 
@@ -69,7 +69,7 @@ namespace DATN_SD16.Controllers
                 var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
                 var borrowedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
 
-                var borrow = await _borrowService.CreateBorrowAsync(userId.Value, copyId, borrowedBy.Value, reservationId);
+                var borrow = await _borrowService.CreateBorrowAsync(userId, copyId, borrowedBy, reservationId);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -88,7 +88,7 @@ namespace DATN_SD16.Controllers
             try
             {
                 var returnedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _borrowService.ReturnBookAsync(id, returnedBy.Value, conditionOnReturn);
+                await _borrowService.ReturnBookAsync(id, returnedBy, conditionOnReturn);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

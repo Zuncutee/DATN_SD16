@@ -23,7 +23,7 @@ namespace DATN_SD16.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-            var reservations = await _reservationService.GetReservationsByUserIdAsync(userId.Value);
+            var reservations = await _reservationService.GetReservationsByUserIdAsync(userId);
             return View(reservations);
         }
 
@@ -52,7 +52,7 @@ namespace DATN_SD16.Controllers
             try
             {
                 var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _reservationService.CreateReservationAsync(userId.Value, bookId);
+                await _reservationService.CreateReservationAsync(userId, bookId);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -88,7 +88,7 @@ namespace DATN_SD16.Controllers
             try
             {
                 var approvedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _reservationService.ApproveReservationAsync(id, approvedBy.Value);
+                await _reservationService.ApproveReservationAsync(id, approvedBy);
                 return RedirectToAction("Pending", "Admin");
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace DATN_SD16.Controllers
             try
             {
                 var rejectedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _reservationService.RejectReservationAsync(id, rejectedBy.Value, reason);
+                await _reservationService.RejectReservationAsync(id, rejectedBy, reason);
                 return RedirectToAction("Pending", "Admin");
             }
             catch (Exception ex)

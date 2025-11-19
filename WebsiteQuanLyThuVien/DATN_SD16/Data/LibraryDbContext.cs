@@ -73,6 +73,18 @@ namespace DATN_SD16.Data
                 .HasIndex(ur => new { ur.UserId, ur.RoleId })
                 .IsUnique();
 
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Role>()
+                .HasMany(r => r.UserRoles)
+                .WithOne(ur => ur.Role)
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Book - Author (Many-to-Many)
             modelBuilder.Entity<BookAuthor>()
                 .HasIndex(ba => new { ba.BookId, ba.AuthorId })
@@ -87,6 +99,27 @@ namespace DATN_SD16.Data
             modelBuilder.Entity<BookReview>()
                 .HasIndex(br => new { br.BookId, br.UserId })
                 .IsUnique();
+
+            // BookReview - ApprovedBy relationship
+            modelBuilder.Entity<BookReview>()
+                .HasOne(br => br.ApprovedByUser)
+                .WithMany()
+                .HasForeignKey(br => br.ApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // LibraryCard - CreatedBy relationship
+            modelBuilder.Entity<LibraryCard>()
+                .HasOne(lc => lc.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(lc => lc.CreatedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // BookReservation - ApprovedBy relationship
+            modelBuilder.Entity<BookReservation>()
+                .HasOne(br => br.ApprovedByUser)
+                .WithMany()
+                .HasForeignKey(br => br.ApprovedBy)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ReadingRoomSeat - Unique constraint
             modelBuilder.Entity<ReadingRoomSeat>()
@@ -147,6 +180,32 @@ namespace DATN_SD16.Data
             modelBuilder.Entity<Borrow>()
                 .Property(b => b.FinePaid)
                 .HasDefaultValue(0);
+
+            // Borrow - Librarian relationships
+            modelBuilder.Entity<Borrow>()
+                .HasOne(b => b.BorrowedByUser)
+                .WithMany()
+                .HasForeignKey(b => b.BorrowedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Borrow>()
+                .HasOne(b => b.ReturnedByUser)
+                .WithMany()
+                .HasForeignKey(b => b.ReturnedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Notification relationships
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.RelatedBorrow)
+                .WithMany(b => b.Notifications)
+                .HasForeignKey(n => n.RelatedBorrowId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.RelatedReservation)
+                .WithMany(r => r.Notifications)
+                .HasForeignKey(n => n.RelatedReservationId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Seed data cho Roles
             modelBuilder.Entity<Role>().HasData(
