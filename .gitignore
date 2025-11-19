@@ -54,9 +54,15 @@ TestResult.xml
 nunit-*.xml
 
 # Visual Studio
-WebsiteQuanLyThuVien/.vs/*
+.vs/
+**/.vs/
+*.vs/
 *.user
 *.userosscache
 *.sln.docstates
 *.suo
 *.userprefs
+.vscode/
+*.swp
+*.swo
+*~
