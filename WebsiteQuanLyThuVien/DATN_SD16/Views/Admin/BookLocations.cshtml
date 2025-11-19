@@ -1,0 +1,51 @@
+@model IEnumerable<DATN_SD16.Models.Entities.BookLocation>
+@{
+    ViewData["Title"] = "Quản lý Vị trí Sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-map-marker-alt"></i> Quản lý Vị trí Sách
+        <button class="btn btn-light btn-sm float-end" onclick="openModal('createLocationModal')">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã vị trí</th>
+                        <th>Số kệ</th>
+                        <th>Số hàng</th>
+                        <th>Mô tả</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var location in Model)
+                    {
+                        <tr>
+                            <td>@location.LocationId</td>
+                            <td><strong>@location.LocationCode</strong></td>
+                            <td>@(location.ShelfNumber ?? "-")</td>
+                            <td>@(location.RowNumber ?? "-")</td>
+                            <td>@(location.Description ?? "-")</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

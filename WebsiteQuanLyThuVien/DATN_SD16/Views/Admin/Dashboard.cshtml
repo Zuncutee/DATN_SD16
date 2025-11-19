@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-card-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.TotalUsers</div>
+        <div class="stat-card-label">Tổng số người dùng</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-card-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.TotalBooks</div>
+        <div class="stat-card-label">Tổng số sách</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-card-icon">
+            <i class="fas fa-book-reader"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.TotalBorrows</div>
+        <div class="stat-card-label">Tổng số lượt mượn</div>
+    </div>
+    
+    <div class="stat-card danger">
+        <div class="stat-card-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.OverdueBorrows</div>
+        <div class="stat-card-label">Sách quá hạn</div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i> Thống kê mượn sách
+            </div>
+            <div class="card-body">
+                <canvas id="borrowChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-pie"></i> Phân loại sách
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Borrow Chart
+        const borrowCtx = document.getElementById('borrowChart').getContext('2d');
+        new Chart(borrowCtx, {
+            type: 'line',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6'],
+                datasets: [{
+                    label: 'Số lượt mượn',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Văn học', 'Khoa học', 'Lịch sử', 'Kinh tế', 'Khác'],
+                datasets: [{
+                    data: [30, 25, 20, 15, 10],
+                    backgroundColor: [
+                        '#6366f1',
+                        '#8b5cf6',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+}
+

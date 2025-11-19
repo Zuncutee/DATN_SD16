@@ -1,0 +1,144 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Category>
+@{
+    ViewData["Title"] = "Quản lý Thể loại";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-tag"></i> Quản lý Thể loại
+        <button class="btn btn-light btn-sm float-end" onclick="openModal('createCategoryModal')">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên thể loại</th>
+                        <th>Mô tả</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in Model)
+                    {
+                        <tr>
+                            <td>@category.CategoryId</td>
+                            <td><strong>@category.CategoryName</strong></td>
+                            <td>@(category.Description ?? "-")</td>
+                            <td>@category.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editCategory(@category.CategoryId, '@category.CategoryName', '@(category.Description ?? "")')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCategory(@category.CategoryId)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Category Modal -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Thêm thể loại mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createCategoryForm" asp-action="CreateCategory" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên thể loại *</label>
+                        <input type="text" name="CategoryName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa thể loại</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editCategoryForm" asp-action="EditCategory" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="CategoryId" id="editCategoryId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên thể loại *</label>
+                        <input type="text" name="CategoryName" id="editCategoryName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="Description" id="editCategoryDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editCategory(id, name, description) {
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('editCategoryName').value = name;
+            document.getElementById('editCategoryDescription').value = description;
+            openModal('editCategoryModal');
+        }
+
+        function deleteCategory(id) {
+            if (confirm('Bạn có chắc muốn xóa thể loại này?')) {
+                showLoading();
+                fetch('@Url.Action("DeleteCategory", "Admin")/' + id, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showToast('Thành công', data.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Lỗi', data.message, 'error');
+                    }
+                });
+            }
+        }
+
+        submitForm('createCategoryForm');
+        submitForm('editCategoryForm');
+    </script>
+}
+

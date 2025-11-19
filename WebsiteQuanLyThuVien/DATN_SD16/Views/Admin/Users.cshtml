@@ -1,0 +1,189 @@
+@model IEnumerable<DATN_SD16.Models.Entities.User>
+@{
+    ViewData["Title"] = "Quản lý Tài khoản";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users"></i> Quản lý Tài khoản & Phân quyền
+        <button class="btn btn-light btn-sm float-end" onclick="openModal('createUserModal')">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        var userData = (ViewBag.UsersWithRoles as List<dynamic>)?.FirstOrDefault(u => u.User.UserId == user.UserId);
+                        var roles = userData?.Roles as List<string> ?? new List<string>();
+                        <tr>
+                            <td>@user.UserId</td>
+                            <td>@user.Username</td>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                @foreach (var role in roles)
+                                {
+                                    <span class="badge bg-primary">@role</span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsActive && !user.IsLocked)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else if (user.IsLocked)
+                                {
+                                    <span class="badge bg-danger">Đã khóa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Vô hiệu</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="editUser(@user.UserId)" data-bs-toggle="tooltip" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="toggleLock(@user.UserId, @user.IsLocked.ToString().ToLower())" data-bs-toggle="tooltip" title="@(user.IsLocked ? "Mở khóa" : "Khóa")">
+                                    <i class="fas fa-@(user.IsLocked ? "unlock" : "lock")"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-plus"></i> Thêm tài khoản mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createUserForm" asp-action="CreateUser" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên đăng nhập *</label>
+                        <input type="text" name="Username" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Họ tên *</label>
+                        <input type="text" name="FullName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email *</label>
+                        <input type="email" name="Email" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu *</label>
+                        <input type="password" name="password" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" name="PhoneNumber" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vai trò *</label>
+                        <select name="roleIds" class="form-select" multiple required>
+                            @foreach (var role in ViewBag.Roles as IEnumerable<DATN_SD16.Models.Entities.Role>)
+                            {
+                                <option value="@role.RoleId">@role.RoleName</option>
+                            }
+                        </select>
+                        <small class="text-muted">Giữ Ctrl để chọn nhiều vai trò</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-edit"></i> Sửa tài khoản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editUserForm" asp-action="EditUser" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" id="editUserId" />
+                <div class="modal-body" id="editUserBody">
+                    <!-- Content will be loaded via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editUser(userId) {
+            showLoading();
+            fetch('@Url.Action("EditUser", "Admin")/' + userId)
+                .then(response => response.text())
+                .then(html => {
+                    hideLoading();
+                    document.getElementById('editUserBody').innerHTML = html;
+                    document.getElementById('editUserId').value = userId;
+                    openModal('editUserModal');
+                });
+        }
+
+        function toggleLock(userId, isLocked) {
+            const message = isLocked ? 'Bạn có chắc muốn mở khóa tài khoản này?' : 'Bạn có chắc muốn khóa tài khoản này?';
+            if (confirm(message)) {
+                showLoading();
+                fetch('@Url.Action("ToggleLock", "Admin")/' + userId, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showToast('Thành công', data.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Lỗi', data.message, 'error');
+                    }
+                });
+            }
+        }
+
+        submitForm('createUserForm');
+        submitForm('editUserForm');
+    </script>
+}
+

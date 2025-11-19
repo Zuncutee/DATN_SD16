@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản trị Thư viện</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" />
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-book"></i> Quản trị Thư viện</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a asp-controller="Admin" asp-action="Dashboard" class="nav-link">
+                            <i class="fas fa-home"></i> <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Admin" asp-action="Users" class="nav-link">
+                            <i class="fas fa-users"></i> <span>Tài khoản & Phân quyền</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#categories-menu" data-bs-toggle="collapse" class="nav-link">
+                            <i class="fas fa-list"></i> <span>Danh mục</span> <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="collapse" id="categories-menu">
+                            <li><a asp-controller="Admin" asp-action="Categories" class="nav-link"><i class="fas fa-tag"></i> Thể loại</a></li>
+                            <li><a asp-controller="Admin" asp-action="Authors" class="nav-link"><i class="fas fa-user-pen"></i> Tác giả</a></li>
+                            <li><a asp-controller="Admin" asp-action="Publishers" class="nav-link"><i class="fas fa-building"></i> Nhà xuất bản</a></li>
+                            <li><a asp-controller="Admin" asp-action="BookLocations" class="nav-link"><i class="fas fa-map-marker-alt"></i> Vị trí sách</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a asp-controller="Admin" asp-action="Books" class="nav-link">
+                            <i class="fas fa-book-open"></i> <span>Quản lý Sách</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Admin" asp-action="Settings" class="nav-link">
+                            <i class="fas fa-cog"></i> <span>Cấu hình Hệ thống</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Admin" asp-action="Reports" class="nav-link">
+                            <i class="fas fa-chart-bar"></i> <span>Báo cáo & Thống kê</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="page-title">@ViewData["Title"]</h4>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-menu">
+                        <span class="user-name">@UserHelper.GetFullName(User)</span>
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Thông tin cá nhân</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form asp-controller="AdminAuth" asp-action="Logout" method="post" class="d-inline">
+                                        <button type="submit" class="dropdown-item"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

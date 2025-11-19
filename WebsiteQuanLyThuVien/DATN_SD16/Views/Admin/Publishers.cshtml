@@ -1,0 +1,51 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Publisher>
+@{
+    ViewData["Title"] = "Quản lý Nhà xuất bản";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-building"></i> Quản lý Nhà xuất bản
+        <button class="btn btn-light btn-sm float-end" onclick="openModal('createPublisherModal')">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên nhà xuất bản</th>
+                        <th>Địa chỉ</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var publisher in Model)
+                    {
+                        <tr>
+                            <td>@publisher.PublisherId</td>
+                            <td><strong>@publisher.PublisherName</strong></td>
+                            <td>@(publisher.Address ?? "-")</td>
+                            <td>@(publisher.Email ?? "-")</td>
+                            <td>@(publisher.PhoneNumber ?? "-")</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

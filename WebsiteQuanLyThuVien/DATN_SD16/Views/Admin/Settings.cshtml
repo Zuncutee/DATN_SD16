@@ -1,0 +1,80 @@
+@model IEnumerable<DATN_SD16.Models.Entities.SystemSetting>
+@{
+    ViewData["Title"] = "Cấu hình Hệ thống";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-cog"></i> Cấu hình Hệ thống
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Cấu hình</th>
+                        <th>Giá trị</th>
+                        <th>Mô tả</th>
+                        <th>Nhóm</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var setting in Model)
+                    {
+                        <tr>
+                            <td><strong>@setting.SettingKey</strong></td>
+                            <td>
+                                <input type="text" id="setting_@setting.SettingId" class="form-control form-control-sm" value="@setting.SettingValue" />
+                            </td>
+                            <td>@(setting.Description ?? "-")</td>
+                            <td><span class="badge bg-secondary">@(setting.Category ?? "-")</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="updateSetting(@setting.SettingId)">
+                                    <i class="fas fa-save"></i> Lưu
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateSetting(settingId) {
+            const value = document.getElementById('setting_' + settingId).value;
+            if (!value) {
+                showToast('Lỗi', 'Vui lòng nhập giá trị', 'error');
+                return;
+            }
+
+            showLoading();
+            fetch('@Url.Action("UpdateSetting", "Admin")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': '@Html.AntiForgeryToken()'
+                },
+                body: `settingId=${settingId}&settingValue=${encodeURIComponent(value)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    showToast('Thành công', data.message, 'success');
+                } else {
+                    showToast('Lỗi', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('Lỗi', 'Có lỗi xảy ra', 'error');
+            });
+        }
+    </script>
+}
+

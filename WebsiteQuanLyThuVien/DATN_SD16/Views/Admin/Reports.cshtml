@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Báo cáo & Thống kê";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-bar"></i> Sách mượn nhiều nhất
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên sách</th>
+                                <th>Thể loại</th>
+                                <th>Số lượt mượn</th>
+                                <th>Số người mượn</th>
+                                <th>Tổng số bản</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int index = 1;
+                            }
+                            @foreach (var book in ViewBag.MostBorrowedBooks as IEnumerable<DATN_SD16.Models.Entities.Book>)
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td><strong>@book.Title</strong></td>
+                                    <td>@book.Category?.CategoryName</td>
+                                    <td><span class="badge bg-primary">@(book.BookCopies?.SelectMany(bc => bc.Borrows).Count() ?? 0)</span></td>
+                                    <td><span class="badge bg-info">@(book.BookCopies?.SelectMany(bc => bc.Borrows).Select(b => b.UserId).Distinct().Count() ?? 0)</span></td>
+                                    <td>@book.TotalCopies</td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exclamation-triangle"></i> Sách quá hạn
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Độc giả</th>
+                                <th>Sách</th>
+                                <th>Ngày mượn</th>
+                                <th>Hạn trả</th>
+                                <th>Số ngày quá hạn</th>
+                                <th>Phí phạt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var borrow in ViewBag.OverdueBorrows as IEnumerable<DATN_SD16.Models.Entities.Borrow>)
+                            {
+                                var daysOverdue = (DateTime.Now - borrow.DueDate).Days;
+                                <tr>
+                                    <td>@borrow.BorrowNumber</td>
+                                    <td>@borrow.User.FullName</td>
+                                    <td>@borrow.Copy.Book.Title</td>
+                                    <td>@borrow.BorrowDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@borrow.DueDate.ToString("dd/MM/yyyy")</td>
+                                    <td><span class="badge bg-danger">@daysOverdue ngày</span></td>
+                                    <td><strong>@borrow.FineAmount.ToString("N0") VNĐ</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

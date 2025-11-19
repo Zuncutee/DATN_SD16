@@ -1,0 +1,123 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Book>
+@{
+    ViewData["Title"] = "Quản lý Sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-book-open"></i> Quản lý Sách
+        <a asp-controller="Books" asp-action="Create" class="btn btn-light btn-sm float-end">
+            <i class="fas fa-plus"></i> Thêm sách mới
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ảnh</th>
+                        <th>Tên sách</th>
+                        <th>Thể loại</th>
+                        <th>Tổng số</th>
+                        <th>Có sẵn</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var book in Model)
+                    {
+                        <tr>
+                            <td>@book.BookId</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(book.CoverImage))
+                                {
+                                    <img src="@book.CoverImage" alt="@book.Title" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px;" />
+                                }
+                                else
+                                {
+                                    <div style="width: 50px; height: 70px; background: #e2e8f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-book text-muted"></i>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <strong>@book.Title</strong><br />
+                                <small class="text-muted">@book.ISBN</small>
+                            </td>
+                            <td>@book.Category?.CategoryName</td>
+                            <td><span class="badge bg-info">@book.TotalCopies</span></td>
+                            <td><span class="badge bg-success">@book.AvailableCopies</span></td>
+                            <td>
+                                @if (book.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@book.Status</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-controller="Books" asp-action="Edit" asp-route-id="@book.BookId" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-warning" onclick="openImportModal(@book.BookId, '@book.Title')" data-bs-toggle="tooltip" title="Nhập sách">
+                                    <i class="fas fa-box"></i>
+                                </button>
+                                <a asp-controller="Books" asp-action="Delete" asp-route-id="@book.BookId" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Import Books Modal -->
+<div class="modal fade" id="importBooksModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-box"></i> Nhập sách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="importBooksForm" asp-action="ImportBooks" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="bookId" id="importBookId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên sách</label>
+                        <input type="text" id="importBookTitle" class="form-control" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số lượng nhập *</label>
+                        <input type="number" name="quantity" class="form-control" min="1" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Nhập sách</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openImportModal(bookId, bookTitle) {
+            document.getElementById('importBookId').value = bookId;
+            document.getElementById('importBookTitle').value = bookTitle;
+            openModal('importBooksModal');
+        }
+
+        submitForm('importBooksForm');
+    </script>
+}
+
