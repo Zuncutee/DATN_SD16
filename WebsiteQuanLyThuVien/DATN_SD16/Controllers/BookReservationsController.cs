@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using DATN_SD16.Services.Interfaces;
+using DATN_SD16.Attributes;
+using DATN_SD16.Helpers;
 
 namespace DATN_SD16.Controllers
 {
     /// <summary>
     /// Controller quản lý đặt sách
     /// </summary>
+    [Authorize]
     public class BookReservationsController : Controller
     {
         private readonly IBookReservationService _reservationService;
@@ -18,9 +22,8 @@ namespace DATN_SD16.Controllers
         // GET: BookReservations
         public async Task<IActionResult> Index()
         {
-            // TODO: Lấy userId từ session/claims
-            int userId = 1; // Tạm thời hardcode
-            var reservations = await _reservationService.GetReservationsByUserIdAsync(userId);
+            var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+            var reservations = await _reservationService.GetReservationsByUserIdAsync(userId.Value);
             return View(reservations);
         }
 
@@ -48,10 +51,8 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // TODO: Lấy userId từ session/claims
-                int userId = 1; // Tạm thời hardcode
-
-                await _reservationService.CreateReservationAsync(userId, bookId);
+                var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _reservationService.CreateReservationAsync(userId.Value, bookId);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -81,14 +82,13 @@ namespace DATN_SD16.Controllers
         // POST: BookReservations/Approve/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Librarian", "Admin")]
         public async Task<IActionResult> Approve(int id)
         {
             try
             {
-                // TODO: Lấy approvedBy từ session/claims
-                int approvedBy = 2; // Thủ thư
-
-                await _reservationService.ApproveReservationAsync(id, approvedBy);
+                var approvedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _reservationService.ApproveReservationAsync(id, approvedBy.Value);
                 return RedirectToAction("Pending", "Admin");
             }
             catch (Exception ex)
@@ -101,14 +101,13 @@ namespace DATN_SD16.Controllers
         // POST: BookReservations/Reject/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Librarian", "Admin")]
         public async Task<IActionResult> Reject(int id, string reason)
         {
             try
             {
-                // TODO: Lấy rejectedBy từ session/claims
-                int rejectedBy = 2; // Thủ thư
-
-                await _reservationService.RejectReservationAsync(id, rejectedBy, reason);
+                var rejectedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _reservationService.RejectReservationAsync(id, rejectedBy.Value, reason);
                 return RedirectToAction("Pending", "Admin");
             }
             catch (Exception ex)

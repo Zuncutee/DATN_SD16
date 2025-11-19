@@ -1,12 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using DATN_SD16.Services.Interfaces;
 using DATN_SD16.Repositories.Interfaces;
+using DATN_SD16.Attributes;
 
 namespace DATN_SD16.Controllers
 {
     /// <summary>
     /// Controller quản lý sách
     /// </summary>
+    [Authorize]
     public class BooksController : Controller
     {
         private readonly IBookService _bookService;
@@ -48,6 +51,7 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Books/Create
+        [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Categories = await _categoryRepository.GetAllAsync();
@@ -57,13 +61,13 @@ namespace DATN_SD16.Controllers
         // POST: Books/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> Create(Models.Entities.Book book)
         {
             if (ModelState.IsValid)
             {
-                // TODO: Lấy userId từ session/claims
-                int createdBy = 1; // Tạm thời hardcode
-                await _bookService.CreateBookAsync(book, createdBy);
+                var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _bookService.CreateBookAsync(book, createdBy.Value);
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Categories = await _categoryRepository.GetAllAsync();
@@ -71,6 +75,7 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Books/Edit/5
+        [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -90,6 +95,7 @@ namespace DATN_SD16.Controllers
         // POST: Books/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> Edit(int id, Models.Entities.Book book)
         {
             if (id != book.BookId)
@@ -107,6 +113,7 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Books/Delete/5
+        [AuthorizeRoles("Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -126,6 +133,7 @@ namespace DATN_SD16.Controllers
         // POST: Books/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _bookService.DeleteBookAsync(id);

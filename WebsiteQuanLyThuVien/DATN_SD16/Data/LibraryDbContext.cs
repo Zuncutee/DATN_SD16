@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using DATN_SD16.Models.Entities;
+using System;
 
 namespace DATN_SD16.Data
 {
@@ -57,6 +58,9 @@ namespace DATN_SD16.Data
         // Thông báo tự động
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<EmailLog> EmailLogs { get; set; }
+
+        // JWT Refresh Tokens
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

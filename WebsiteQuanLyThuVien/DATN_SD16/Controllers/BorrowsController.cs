@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using DATN_SD16.Services.Interfaces;
+using DATN_SD16.Attributes;
+using DATN_SD16.Helpers;
 
 namespace DATN_SD16.Controllers
 {
     /// <summary>
     /// Controller quản lý mượn-trả sách
     /// </summary>
+    [Authorize]
     public class BorrowsController : Controller
     {
         private readonly IBorrowService _borrowService;
@@ -18,18 +22,16 @@ namespace DATN_SD16.Controllers
         // GET: Borrows
         public async Task<IActionResult> Index()
         {
-            // TODO: Lấy userId từ session/claims
-            int userId = 1; // Tạm thời hardcode
-            var borrows = await _borrowService.GetBorrowsByUserIdAsync(userId);
+            var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+            var borrows = await _borrowService.GetBorrowsByUserIdAsync(userId.Value);
             return View(borrows);
         }
 
         // GET: Borrows/MyBorrows
         public async Task<IActionResult> MyBorrows()
         {
-            // TODO: Lấy userId từ session/claims
-            int userId = 1; // Tạm thời hardcode
-            var activeBorrows = await _borrowService.GetActiveBorrowsByUserIdAsync(userId);
+            var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+            var activeBorrows = await _borrowService.GetActiveBorrowsByUserIdAsync(userId.Value);
             return View(activeBorrows);
         }
 
@@ -59,15 +61,15 @@ namespace DATN_SD16.Controllers
         // POST: Borrows/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Librarian", "Admin")]
         public async Task<IActionResult> Create(int copyId, int? reservationId)
         {
             try
             {
-                // TODO: Lấy userId và borrowedBy từ session/claims
-                int userId = 1;
-                int borrowedBy = 2; // Thủ thư
+                var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                var borrowedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
 
-                var borrow = await _borrowService.CreateBorrowAsync(userId, copyId, borrowedBy, reservationId);
+                var borrow = await _borrowService.CreateBorrowAsync(userId.Value, copyId, borrowedBy.Value, reservationId);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -80,14 +82,13 @@ namespace DATN_SD16.Controllers
         // POST: Borrows/Return/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Librarian", "Admin")]
         public async Task<IActionResult> Return(int id, string? conditionOnReturn)
         {
             try
             {
-                // TODO: Lấy returnedBy từ session/claims
-                int returnedBy = 2; // Thủ thư
-
-                await _borrowService.ReturnBookAsync(id, returnedBy, conditionOnReturn);
+                var returnedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _borrowService.ReturnBookAsync(id, returnedBy.Value, conditionOnReturn);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
