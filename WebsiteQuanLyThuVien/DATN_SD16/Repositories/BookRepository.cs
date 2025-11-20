@@ -14,6 +14,16 @@ namespace DATN_SD16.Repositories
         {
         }
 
+        public override async Task<IEnumerable<Book>> GetAllAsync()
+        {
+            return await _dbSet
+                .Include(b => b.Category)
+                .Include(b => b.Publisher)
+                .Include(b => b.Location)
+                .OrderByDescending(b => b.UpdatedAt)
+                .ToListAsync();
+        }
+
         public async Task<Book?> GetBookWithDetailsAsync(int bookId)
         {
             return await _dbSet

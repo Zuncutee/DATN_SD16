@@ -32,7 +32,8 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form asp-action="@formAction"
+        <form id="bookForm"
+              asp-action="@formAction"
               asp-controller="Admin"
               method="post"
               enctype="multipart/form-data"
@@ -97,10 +98,13 @@
             </div>
 
             <div class="col-md-4">
-                <label asp-for="CategoryId" class="form-label">Thể loại</label>
-                <select asp-for="CategoryId" class="form-select"
-                        asp-items="@(new SelectList(categories, nameof(Category.CategoryId), nameof(Category.CategoryName)))">
+                <label asp-for="CategoryId" class="form-label">Thể loại *</label>
+                <select asp-for="CategoryId" class="form-select" required name="CategoryId">
                     <option value="">-- Chọn thể loại --</option>
+                    @foreach (var category in categories)
+                    {
+                        <option value="@category.CategoryId" selected="@(Model?.CategoryId == category.CategoryId ? "selected" : null)">@category.CategoryName</option>
+                    }
                 </select>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
@@ -108,7 +112,7 @@
             <div class="col-md-4">
                 <label asp-for="PublisherId" class="form-label">Nhà xuất bản</label>
                 <select asp-for="PublisherId" class="form-select"
-                        asp-items="@(new SelectList(publishers, nameof(Publisher.PublisherId), nameof(Publisher.PublisherName)))">
+                        asp-items="@(new SelectList(publishers, nameof(Publisher.PublisherId), nameof(Publisher.PublisherName), Model?.PublisherId))">
                     <option value="">-- Chọn NXB --</option>
                 </select>
             </div>
@@ -116,7 +120,7 @@
             <div class="col-md-4">
                 <label asp-for="LocationId" class="form-label">Vị trí sách</label>
                 <select asp-for="LocationId" class="form-select"
-                        asp-items="@(new SelectList(locations, nameof(BookLocation.LocationId), nameof(BookLocation.LocationCode)))">
+                        asp-items="@(new SelectList(locations, nameof(BookLocation.LocationId), nameof(BookLocation.LocationCode), Model?.LocationId))">
                     <option value="">-- Chọn vị trí --</option>
                 </select>
             </div>
@@ -171,5 +175,14 @@
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            submitForm('bookForm', function (data) {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                }
+            });
+        });
+    </script>
 }
 

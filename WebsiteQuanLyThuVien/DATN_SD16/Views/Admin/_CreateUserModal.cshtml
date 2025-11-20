@@ -1,0 +1,40 @@
+@model DATN_SD16.Models.Entities.User
+@{
+    var roles = ViewBag.Roles as IEnumerable<DATN_SD16.Models.Entities.Role> ?? Enumerable.Empty<DATN_SD16.Models.Entities.Role>();
+}
+
+<div class="mb-3">
+    <label class="form-label">Tên đăng nhập *</label>
+    <input type="text" name="Username" class="form-control" required />
+</div>
+<div class="mb-3">
+    <label class="form-label">Họ tên *</label>
+    <input type="text" name="FullName" class="form-control" required />
+</div>
+<div class="mb-3">
+    <label class="form-label">Email *</label>
+    <input type="email" name="Email" class="form-control" required />
+</div>
+<div class="mb-3">
+    <label class="form-label">Mật khẩu *</label>
+    <input type="password" name="password" class="form-control" required />
+</div>
+<div class="mb-3">
+    <label class="form-label">Số điện thoại</label>
+    <input type="text" name="PhoneNumber" class="form-control" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Địa chỉ</label>
+    <input type="text" name="Address" class="form-control" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Vai trò *</label>
+    <select name="roleIds" class="form-select" multiple required>
+        @foreach (var role in roles)
+        {
+            <option value="@role.RoleId">@role.RoleName</option>
+        }
+    </select>
+    <small class="text-muted">Giữ Ctrl để chọn nhiều vai trò</small>
+</div>
+

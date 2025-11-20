@@ -32,10 +32,19 @@
                             <td>@(author.Nationality ?? "-")</td>
                             <td>@(author.Biography != null && author.Biography.Length > 50 ? author.Biography.Substring(0, 50) + "..." : author.Biography ?? "-")</td>
                             <td>
-                                <button class="btn btn-sm btn-primary" onclick="editAuthor(@author.AuthorId)">
+                                <button type="button"
+                                        class="btn btn-sm btn-primary"
+                                        data-id="@author.AuthorId"
+                                        data-name="@author.AuthorName"
+                                        data-nationality="@(author.Nationality ?? string.Empty)"
+                                        data-biography="@(author.Biography ?? string.Empty)"
+                                        onclick="openEditAuthor(this)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteAuthor(@author.AuthorId)">
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        data-id="@author.AuthorId"
+                                        onclick="deleteAuthor(this)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -116,22 +125,41 @@
 
 @section Scripts {
     <script>
-        function loadAuthorForEdit(id, name, nationality, biography) {
+        const authorTokenField = '__RequestVerificationToken';
+
+        function getAuthorToken() {
+            const input = document.querySelector(`form input[name="${authorTokenField}"]`);
+            return input ? input.value : '';
+        }
+
+        function buildAuthorFormData(payload) {
+            const formData = new FormData();
+            const token = getAuthorToken();
+            if (token) {
+                formData.append(authorTokenField, token);
+            }
+            Object.entries(payload || {}).forEach(([key, value]) => formData.append(key, value ?? ''));
+            return formData;
+        }
+
+        function openEditAuthor(button) {
+            const { id, name, nationality, biography } = button.dataset;
             document.getElementById('editAuthorId').value = id;
-            document.getElementById('editAuthorName').value = name;
-            document.getElementById('editAuthorNationality').value = nationality;
-            document.getElementById('editAuthorBiography').value = biography;
+            document.getElementById('editAuthorName').value = name || '';
+            document.getElementById('editAuthorNationality').value = nationality || '';
+            document.getElementById('editAuthorBiography').value = biography || '';
             openModal('editAuthorModal');
         }
 
-        function deleteAuthor(id) {
+        function deleteAuthor(button) {
+            const id = button.dataset.id;
+            if (!id) return;
+
             if (confirm('Bạn có chắc muốn xóa tác giả này?')) {
                 showLoading();
-                fetch('@Url.Action("DeleteAuthor", "Admin")/' + id, {
+                fetch('@Url.Action("DeleteAuthor", "Admin")', {
                     method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
-                    }
+                    body: buildAuthorFormData({ id })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -142,12 +170,18 @@
                     } else {
                         showToast('Lỗi', data.message, 'error');
                     }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast('Lỗi', error.message, 'error');
                 });
             }
         }
 
-        submitForm('createAuthorForm');
-        submitForm('editAuthorForm');
+        document.addEventListener('DOMContentLoaded', function () {
+            submitForm('createAuthorForm');
+            submitForm('editAuthorForm');
+        });
     </script>
 }
 

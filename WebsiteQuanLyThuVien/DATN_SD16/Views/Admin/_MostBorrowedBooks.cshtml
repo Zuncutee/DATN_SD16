@@ -1,0 +1,44 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Book>
+
+<div class="table-container">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên sách</th>
+                <th>Thể loại</th>
+                <th>Số lượt mượn</th>
+                <th>Số người mượn</th>
+                <th>Tổng số bản</th>
+                <th>Có sẵn</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int index = 1;
+            }
+            @foreach (var book in Model)
+            {
+                var borrowCount = book.BookCopies?.SelectMany(bc => bc.Borrows).Count() ?? 0;
+                var uniqueBorrowers = book.BookCopies?.SelectMany(bc => bc.Borrows).Select(b => b.UserId).Distinct().Count() ?? 0;
+                <tr>
+                    <td>@index</td>
+                    <td><strong>@book.Title</strong></td>
+                    <td>@book.Category?.CategoryName</td>
+                    <td><span class="badge bg-primary">@borrowCount</span></td>
+                    <td><span class="badge bg-info">@uniqueBorrowers</span></td>
+                    <td>@book.TotalCopies</td>
+                    <td><span class="badge bg-success">@book.AvailableCopies</span></td>
+                </tr>
+                index++;
+            }
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Chưa có dữ liệu</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

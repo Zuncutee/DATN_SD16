@@ -34,10 +34,20 @@
                             <td>@(location.RowNumber ?? "-")</td>
                             <td>@(location.Description ?? "-")</td>
                             <td>
-                                <button class="btn btn-sm btn-primary" onclick="loadLocationForEdit(@location.LocationId, '@location.LocationCode', '@(location.ShelfNumber ?? "")', '@(location.RowNumber ?? "")', '@(location.Description ?? "")')">
+                                <button type="button"
+                                        class="btn btn-sm btn-primary"
+                                        data-id="@location.LocationId"
+                                        data-code="@location.LocationCode"
+                                        data-shelf="@(location.ShelfNumber ?? string.Empty)"
+                                        data-row="@(location.RowNumber ?? string.Empty)"
+                                        data-description="@(location.Description ?? string.Empty)"
+                                        onclick="openEditLocation(this)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteLocation(@location.LocationId)">
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        data-id="@location.LocationId"
+                                        onclick="deleteLocation(this)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -126,23 +136,42 @@
 
 @section Scripts {
     <script>
-        function loadLocationForEdit(id, code, shelf, row, description) {
+        const locationTokenField = '__RequestVerificationToken';
+
+        function getLocationToken() {
+            const input = document.querySelector(`form input[name="${locationTokenField}"]`);
+            return input ? input.value : '';
+        }
+
+        function buildLocationFormData(payload) {
+            const formData = new FormData();
+            const token = getLocationToken();
+            if (token) {
+                formData.append(locationTokenField, token);
+            }
+            Object.entries(payload || {}).forEach(([key, value]) => formData.append(key, value ?? ''));
+            return formData;
+        }
+
+        function openEditLocation(button) {
+            const { id, code, shelf, row, description } = button.dataset;
             document.getElementById('editLocationId').value = id;
-            document.getElementById('editLocationCode').value = code;
-            document.getElementById('editShelfNumber').value = shelf;
-            document.getElementById('editRowNumber').value = row;
-            document.getElementById('editLocationDescription').value = description;
+            document.getElementById('editLocationCode').value = code || '';
+            document.getElementById('editShelfNumber').value = shelf || '';
+            document.getElementById('editRowNumber').value = row || '';
+            document.getElementById('editLocationDescription').value = description || '';
             openModal('editLocationModal');
         }
 
-        function deleteLocation(id) {
+        function deleteLocation(button) {
+            const id = button.dataset.id;
+            if (!id) return;
+
             if (confirm('Bạn có chắc muốn xóa vị trí sách này?')) {
                 showLoading();
-                fetch('@Url.Action("DeleteBookLocation", "Admin")/' + id, {
+                fetch('@Url.Action("DeleteBookLocation", "Admin")', {
                     method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
-                    }
+                    body: buildLocationFormData({ id })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -153,12 +182,18 @@
                     } else {
                         showToast('Lỗi', data.message, 'error');
                     }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast('Lỗi', error.message, 'error');
                 });
             }
         }
 
-        submitForm('createLocationForm');
-        submitForm('editLocationForm');
+        document.addEventListener('DOMContentLoaded', function () {
+            submitForm('createLocationForm');
+            submitForm('editLocationForm');
+        });
     </script>
 }
 

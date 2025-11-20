@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace DATN_SD16.Models.Entities
 {
@@ -59,21 +60,30 @@ namespace DATN_SD16.Models.Entities
 
         // Navigation properties
         [ForeignKey("CategoryId")]
-        public virtual Category Category { get; set; } = null!;
+        [ValidateNever]
+        public virtual Category? Category { get; set; }
 
         [ForeignKey("PublisherId")]
+        [ValidateNever]
         public virtual Publisher? Publisher { get; set; }
 
         [ForeignKey("LocationId")]
+        [ValidateNever]
         public virtual BookLocation? Location { get; set; }
 
         [ForeignKey("CreatedBy")]
+        [ValidateNever]
         public virtual User? CreatedByUser { get; set; }
 
+        [ValidateNever]
         public virtual ICollection<BookAuthor> BookAuthors { get; set; } = new List<BookAuthor>();
+        [ValidateNever]
         public virtual ICollection<BookCopy> BookCopies { get; set; } = new List<BookCopy>();
+        [ValidateNever]
         public virtual ICollection<BookImport> BookImports { get; set; } = new List<BookImport>();
+        [ValidateNever]
         public virtual ICollection<BookReservation> BookReservations { get; set; } = new List<BookReservation>();
+        [ValidateNever]
         public virtual ICollection<BookReview> BookReviews { get; set; } = new List<BookReview>();
     }
 }

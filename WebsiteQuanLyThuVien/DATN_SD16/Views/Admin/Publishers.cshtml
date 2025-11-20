@@ -34,10 +34,20 @@
                             <td>@(publisher.Email ?? "-")</td>
                             <td>@(publisher.PhoneNumber ?? "-")</td>
                             <td>
-                                <button class="btn btn-sm btn-primary" onclick="loadPublisherForEdit(@publisher.PublisherId, '@publisher.PublisherName', '@(publisher.Address ?? "")', '@(publisher.PhoneNumber ?? "")', '@(publisher.Email ?? "")')">
+                                <button type="button"
+                                        class="btn btn-sm btn-primary"
+                                        data-id="@publisher.PublisherId"
+                                        data-name="@publisher.PublisherName"
+                                        data-address="@(publisher.Address ?? string.Empty)"
+                                        data-phone="@(publisher.PhoneNumber ?? string.Empty)"
+                                        data-email="@(publisher.Email ?? string.Empty)"
+                                        onclick="openEditPublisher(this)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="deletePublisher(@publisher.PublisherId)">
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        data-id="@publisher.PublisherId"
+                                        onclick="deletePublisher(this)">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -126,23 +136,42 @@
 
 @section Scripts {
     <script>
-        function loadPublisherForEdit(id, name, address, phone, email) {
+        const publisherTokenField = '__RequestVerificationToken';
+
+        function getPublisherToken() {
+            const input = document.querySelector(`form input[name="${publisherTokenField}"]`);
+            return input ? input.value : '';
+        }
+
+        function buildPublisherFormData(payload) {
+            const formData = new FormData();
+            const token = getPublisherToken();
+            if (token) {
+                formData.append(publisherTokenField, token);
+            }
+            Object.entries(payload || {}).forEach(([key, value]) => formData.append(key, value ?? ''));
+            return formData;
+        }
+
+        function openEditPublisher(button) {
+            const { id, name, address, phone, email } = button.dataset;
             document.getElementById('editPublisherId').value = id;
-            document.getElementById('editPublisherName').value = name;
-            document.getElementById('editPublisherAddress').value = address;
-            document.getElementById('editPublisherPhone').value = phone;
-            document.getElementById('editPublisherEmail').value = email;
+            document.getElementById('editPublisherName').value = name || '';
+            document.getElementById('editPublisherAddress').value = address || '';
+            document.getElementById('editPublisherPhone').value = phone || '';
+            document.getElementById('editPublisherEmail').value = email || '';
             openModal('editPublisherModal');
         }
 
-        function deletePublisher(id) {
+        function deletePublisher(button) {
+            const id = button.dataset.id;
+            if (!id) return;
+
             if (confirm('Bạn có chắc muốn xóa nhà xuất bản này?')) {
                 showLoading();
-                fetch('@Url.Action("DeletePublisher", "Admin")/' + id, {
+                fetch('@Url.Action("DeletePublisher", "Admin")', {
                     method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
-                    }
+                    body: buildPublisherFormData({ id })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -153,12 +182,18 @@
                     } else {
                         showToast('Lỗi', data.message, 'error');
                     }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showToast('Lỗi', error.message, 'error');
                 });
             }
         }
 
-        submitForm('createPublisherForm');
-        submitForm('editPublisherForm');
+        document.addEventListener('DOMContentLoaded', function () {
+            submitForm('createPublisherForm');
+            submitForm('editPublisherForm');
+        });
     </script>
 }
 

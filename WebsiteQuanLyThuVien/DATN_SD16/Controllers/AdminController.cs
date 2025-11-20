@@ -8,6 +8,7 @@ using DATN_SD16.Models.Entities;
 using DATN_SD16.Helpers;
 using DATN_SD16.Attributes;
 using System.IO;
+using System.Linq;
 
 namespace DATN_SD16.Controllers
 {
@@ -144,11 +145,14 @@ namespace DATN_SD16.Controllers
 
                 var newUser = await _userService.CreateUserAsync(user, password);
                 
-                // Gán roles
-                var currentUserId = UserHelper.GetUserId(User) ?? 1;
-                foreach (var roleId in roleIds)
+                // Gán roles - Đảm bảo roleIds không null và có phần tử
+                if (roleIds != null && roleIds.Any())
                 {
-                    await _userService.AssignRoleAsync(newUser.UserId, roleId, currentUserId);
+                    var currentUserId = UserHelper.GetUserId(User) ?? 1;
+                    foreach (var roleId in roleIds)
+                    {
+                        await _userService.AssignRoleAsync(newUser.UserId, roleId, currentUserId);
+                    }
                 }
 
                 return Json(new { success = true, message = "Tạo tài khoản thành công!" });
@@ -183,23 +187,27 @@ namespace DATN_SD16.Controllers
                 var currentUser = await _userService.GetUserWithRolesAsync(user.UserId);
                 var currentUserId = UserHelper.GetUserId(User) ?? 1;
                 
-                // Xóa tất cả roles cũ
-                foreach (var userRole in currentUser?.UserRoles ?? new List<UserRole>())
+                // Xóa tất cả roles cũ - Tạo copy của collection để tránh lỗi "Collection was modified"
+                var rolesToRemove = currentUser?.UserRoles?.ToList() ?? new List<UserRole>();
+                foreach (var userRole in rolesToRemove)
                 {
                     await _userService.RemoveRoleAsync(user.UserId, userRole.RoleId);
                 }
                 
                 // Thêm roles mới
-                foreach (var roleId in roleIds ?? new List<int>())
+                if (roleIds != null && roleIds.Any())
                 {
-                    await _userService.AssignRoleAsync(user.UserId, roleId, currentUserId);
+                    foreach (var roleId in roleIds)
+                    {
+                        await _userService.AssignRoleAsync(user.UserId, roleId, currentUserId);
+                    }
                 }
 
                 return Json(new { success = true, message = "Cập nhật tài khoản thành công!" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
             }
         }
 
@@ -660,20 +668,54 @@ namespace DATN_SD16.Controllers
         [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> CreateBook(Book book, IFormFile? coverImageFile)
         {
-            if (!ModelState.IsValid)
+            try
             {
+                // Validate CategoryId manually
+                if (book.CategoryId <= 0)
+                {
+                    ModelState.AddModelError(nameof(book.CategoryId), "Vui lòng chọn thể loại sách.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    if (IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = BuildModelErrorMessage() });
+                    }
+                    await PopulateBookDropdownsAsync();
+                    ViewBag.FormAction = nameof(CreateBook);
+                    ViewBag.PageTitle = "Thêm sách mới";
+                    ViewBag.IsEdit = false;
+                    return View("BookForm", book);
+                }
+
+                book.CoverImage = await SaveCoverImageAsync(coverImageFile);
+                var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _bookService.CreateBookAsync(book, createdBy);
+                var message = "Thêm sách mới thành công!";
+                TempData["Success"] = message;
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message, redirectUrl = Url.Action(nameof(Books)) });
+                }
+
+                return RedirectToAction(nameof(Books));
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+                }
+
+                ModelState.AddModelError(string.Empty, ex.Message);
                 await PopulateBookDropdownsAsync();
                 ViewBag.FormAction = nameof(CreateBook);
                 ViewBag.PageTitle = "Thêm sách mới";
                 ViewBag.IsEdit = false;
                 return View("BookForm", book);
             }
-
-            book.CoverImage = await SaveCoverImageAsync(coverImageFile);
-            var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-            await _bookService.CreateBookAsync(book, createdBy);
-            TempData["Success"] = "Thêm sách mới thành công!";
-            return RedirectToAction(nameof(Books));
         }
 
         // GET: Admin/Books/Edit/5
@@ -697,31 +739,79 @@ namespace DATN_SD16.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AuthorizeRoles("Admin", "Librarian")]
-        public async Task<IActionResult> EditBook(int id, Book book, IFormFile? coverImageFile)
+        public async Task<IActionResult> EditBook(Book book, IFormFile? coverImageFile)
         {
-            if (id != book.BookId)
+            try
             {
-                return NotFound();
-            }
+                // Validate BookId
+                if (book.BookId <= 0)
+                {
+                    var errorMsg = "Không tìm thấy ID sách cần cập nhật.";
+                    if (IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = errorMsg });
+                    }
+                    return NotFound();
+                }
 
-            if (!ModelState.IsValid)
+                // Validate CategoryId manually
+                if (book.CategoryId <= 0)
+                {
+                    ModelState.AddModelError(nameof(book.CategoryId), "Vui lòng chọn thể loại sách.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    if (IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = BuildModelErrorMessage() });
+                    }
+                    await PopulateBookDropdownsAsync();
+                    ViewBag.FormAction = nameof(EditBook);
+                    ViewBag.PageTitle = "Chỉnh sửa sách";
+                    ViewBag.IsEdit = true;
+                    return View("BookForm", book);
+                }
+
+                book.CoverImage = await SaveCoverImageAsync(coverImageFile, book.CoverImage);
+                var success = await _bookService.UpdateBookAsync(book);
+                if (!success)
+                {
+                    var errorMsg = "Không tìm thấy sách cần cập nhật.";
+                    if (IsAjaxRequest())
+                    {
+                        return Json(new { success = false, message = errorMsg });
+                    }
+                    return NotFound();
+                }
+
+                var message = "Cập nhật sách thành công!";
+                TempData["Success"] = message;
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message, redirectUrl = Url.Action(nameof(Books)) });
+                }
+
+                return RedirectToAction(nameof(Books));
+            }
+            catch (Exception ex)
             {
+                // Log exception for debugging
+                // You can add logging here if needed
+                
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+                }
+
+                ModelState.AddModelError(string.Empty, ex.Message);
                 await PopulateBookDropdownsAsync();
                 ViewBag.FormAction = nameof(EditBook);
                 ViewBag.PageTitle = "Chỉnh sửa sách";
                 ViewBag.IsEdit = true;
                 return View("BookForm", book);
             }
-
-            book.CoverImage = await SaveCoverImageAsync(coverImageFile, book.CoverImage);
-            var success = await _bookService.UpdateBookAsync(book);
-            if (!success)
-            {
-                return NotFound();
-            }
-
-            TempData["Success"] = "Cập nhật sách thành công!";
-            return RedirectToAction(nameof(Books));
         }
 
         // POST: Admin/Books/Delete/5
@@ -764,6 +854,36 @@ namespace DATN_SD16.Controllers
             ViewBag.Categories = await _categoryRepository.GetAllAsync();
             ViewBag.Publishers = await _publisherRepository.GetAllAsync();
             ViewBag.Locations = await _bookLocationRepository.GetAllAsync();
+        }
+
+        private bool IsAjaxRequest()
+        {
+            if (Request?.Headers.TryGetValue("X-Requested-With", out var requestedWith) == true &&
+                string.Equals(requestedWith, "XMLHttpRequest", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (Request?.Headers.TryGetValue("Accept", out var acceptValues) == true)
+            {
+                return acceptValues.Any(value => value != null &&
+                    value.Contains("application/json", StringComparison.OrdinalIgnoreCase));
+            }
+
+            return false;
+        }
+
+        private string BuildModelErrorMessage()
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => !string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.ErrorMessage : e.Exception?.Message)
+                .Where(message => !string.IsNullOrWhiteSpace(message))
+                .ToList();
+
+            return errors.Any()
+                ? string.Join(" ", errors)
+                : "Vui lòng kiểm tra lại các trường dữ liệu.";
         }
 
         private async Task<string?> SaveCoverImageAsync(IFormFile? coverImageFile, string? existingPath = null)

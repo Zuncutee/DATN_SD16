@@ -72,35 +72,92 @@ function submitForm(formId, successCallback) {
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Validate CategoryId for book forms
+        if (formId === 'bookForm') {
+            const categorySelect = form.querySelector('select[name="CategoryId"]');
+            if (categorySelect && (!categorySelect.value || categorySelect.value === '' || categorySelect.value === '0')) {
+                showToast('Lỗi', 'Vui lòng chọn thể loại sách.', 'error');
+                categorySelect.focus();
+                return false;
+            }
+        }
+        
+        // Check HTML5 validation
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return false;
+        }
+        
         showLoading();
         
         const formData = new FormData(form);
+        
+        // FormData will automatically include the anti-forgery token from the form
+        // No need to add it to headers when using FormData
         
         fetch(form.action, {
             method: 'POST',
             body: formData,
             headers: {
-                'RequestVerificationToken': formData.get('__RequestVerificationToken')
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+                // Don't set Content-Type - let browser set it with boundary for FormData
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                // If response is not OK, try to get error message
+                return response.text().then(text => {
+                    let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const json = JSON.parse(text);
+                        if (json.message) errorMsg = json.message;
+                    } catch (e) {
+                        // Not JSON, use status text
+                    }
+                    throw new Error(errorMsg);
+                });
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return response.json();
+            } else {
+                return response.text().then(text => {
+                    throw new Error('Server trả về HTML thay vì JSON. Có thể do lỗi validation hoặc exception.');
+                });
+            }
+        })
         .then(data => {
             hideLoading();
             if (data.success) {
                 showToast('Thành công', data.message, 'success');
-                if (successCallback) successCallback(data);
+                if (successCallback) {
+                    successCallback(data);
+                }
                 // Close modal if exists
                 const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
                 if (modal) modal.hide();
-                // Reload page after 1 second
-                setTimeout(() => location.reload(), 1000);
+                // Redirect if provided, otherwise reload
+                if (data.redirectUrl) {
+                    setTimeout(() => window.location.href = data.redirectUrl, 1000);
+                } else {
+                    setTimeout(() => location.reload(), 1000);
+                }
             } else {
-                showToast('Lỗi', data.message, 'error');
+                showToast('Lỗi', data.message || 'Có lỗi xảy ra', 'error');
             }
         })
         .catch(error => {
             hideLoading();
-            showToast('Lỗi', 'Có lỗi xảy ra: ' + error.message, 'error');
+            console.error('Form submit error:', error);
+            let errorMessage = 'Có lỗi xảy ra khi gửi dữ liệu.';
+            if (error.message) {
+                errorMessage = error.message;
+            } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+            }
+            showToast('Lỗi', errorMessage, 'error');
         });
     });
 }
