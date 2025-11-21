@@ -72,6 +72,11 @@ namespace DATN_SD16.Controllers
             return View();
         }
 
+        public async Task<IActionResult> BorrowBook()
+        {
+            return View();
+        }
+
         #region Quản lý Tài khoản & Phân quyền
         // GET: Admin/Users
         public async Task<IActionResult> Users()
