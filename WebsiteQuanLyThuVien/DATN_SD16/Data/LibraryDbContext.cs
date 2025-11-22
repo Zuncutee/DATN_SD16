@@ -292,7 +292,7 @@ namespace DATN_SD16.Data
                 {
                     UserRoleId = 2,
                     UserId = 2, 
-                    RoleId = 2, 
+                    RoleId = 3, 
                     AssignedAt = DateTime.Now,
                     AssignedBy = 1 
                 }
