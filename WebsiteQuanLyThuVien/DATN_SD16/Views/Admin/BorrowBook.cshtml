@@ -1,0 +1,121 @@
+﻿@model IEnumerable<DATN_SD16.Models.Entities.Borrow>
+@{
+    ViewData["Title"] = "Phiếu mượn";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1>Tạo Phiếu Mượn</h1>
+        <a class="btn btn-primary" asp-controller="Admin" asp-action="BorowBook">
+            <i class="fas fa-plus me-1"></i> Phiếu Mượn Mới
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Danh sách sách -->
+        <div class="col-md-7">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Sách
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 d-flex">
+                        <input type="text" class="form-control me-2" placeholder="Tìm kiếm sách..." />
+                        <button class="btn btn-warning me-2" type="submit">Tìm kiếm</button>
+                        <button class="btn btn-secondary" type="button" onclick="location.reload()">Làm mới</button>
+                    </div>
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tên sách</th>
+                                <th>Thể loại</th>
+                                <th>Ảnh</th>
+                                <th>Số lượng</th>
+                                <th>Giá thuê</th>
+                                <th>Tiền cọc</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Title</td>
+                                <td>Category</td>
+                                <td><img src="ImageUrl" width="50" /></td>
+                                <td>
+                                    <input type="number" value="1" min="1" max="AvailableQuantity" class="form-control" />
+                                </td>
+                                <td>RentalPrice</td>
+                                <td>Deposit</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm">Thêm</button>
+                                    <button class="btn btn-info btn-sm">Xem</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin phiếu mượn -->
+        <div class="col-md-5">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Thông tin phiếu mượn
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label>Người mượn</label>
+                        <input type="text" class="form-control" placeholder="Tìm kiếm người mượn..." />
+                    </div>
+                    <div class="mb-3">
+                        <label>Ngày mượn</label>
+                        <input type="date" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Ngày trả dự kiến</label>
+                        <input type="date" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Ghi chú</label>
+                        <textarea class="form-control"></textarea>
+                    </div>
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tên sách</th>
+                                <th>SL</th>
+                                <th>Giá thuê</th>
+                                <th>Tiền cọc</th>
+                                <th>Thành tiền</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Title</td>
+                                <td>Quantity</td>
+                                <td>RentalPrice</td>
+                                <td>Deposit</td>
+                                <td>TotalPrice</td>
+                                <td><button class="btn btn-danger btn-sm">Xóa</button></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Tổng</th>
+                                <th>TotalDeposit</th>
+                                <th>TotalAmount</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <button class="btn btn-primary w-100 mt-2">Tạo phiếu mượn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -194,18 +194,37 @@ namespace DATN_SD16.Data
                 .HasForeignKey(b => b.ReturnedBy)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Notification relationships
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.RelatedBorrow)
                 .WithMany(b => b.Notifications)
                 .HasForeignKey(n => n.RelatedBorrowId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.RelatedReservation)
                 .WithMany(r => r.Notifications)
                 .HasForeignKey(n => n.RelatedReservationId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BorrowHistory>()
+                .HasOne(bh => bh.Borrow)
+                .WithMany(b => b.BorrowHistories)
+                .HasForeignKey(bh => bh.BorrowId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BorrowHistory>()
+                .HasOne(bh => bh.User)
+                .WithMany()
+                .HasForeignKey(bh => bh.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<BorrowHistory>()
+                .HasOne(bh => bh.Copy)
+                .WithMany()
+                .HasForeignKey(bh => bh.CopyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
 
             // Seed data cho Roles
             modelBuilder.Entity<Role>().HasData(
@@ -223,6 +242,60 @@ namespace DATN_SD16.Data
                 new SystemSetting { SettingId = 5, SettingKey = "ReservationExpiryDays", SettingValue = "3", Description = "Số ngày hết hạn đặt sách", Category = "Reservation", UpdatedAt = DateTime.Now },
                 new SystemSetting { SettingId = 6, SettingKey = "EmailReturnReminderDays", SettingValue = "2", Description = "Số ngày trước khi trả để gửi email nhắc", Category = "Notification", UpdatedAt = DateTime.Now },
                 new SystemSetting { SettingId = 7, SettingKey = "EmailOverdueAlertDays", SettingValue = "1", Description = "Số ngày quá hạn để gửi email cảnh báo", Category = "Notification", UpdatedAt = DateTime.Now }
+            );
+            // Seed data cho Users
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    UserId = 1,
+                    Username = "admin",
+                    Email = "admin@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"), // hash password
+                    FullName = "Admin User",
+                    PhoneNumber = "0123456789",
+                    Address = "123 Admin Street",
+                    Gender = "Other",
+                    IsActive = true,
+                    IsLocked = false,
+                    FailedLoginAttempts = 0,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                },
+                new User
+                {
+                    UserId = 2,
+                    Username = "john_doe",
+                    Email = "john.doe@example.com",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("John1234"),
+                    FullName = "John Doe",
+                    PhoneNumber = "0987654321",
+                    Address = "456 John Street",
+                    Gender = "Male",
+                    IsActive = true,
+                    IsLocked = false,
+                    FailedLoginAttempts = 0,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                }
+            );
+            // Seed data cho UserRole
+            modelBuilder.Entity<UserRole>().HasData(
+                new UserRole
+                {
+                    UserRoleId = 1,
+                    UserId = 1, 
+                    RoleId = 1, 
+                    AssignedAt = DateTime.Now,
+                    AssignedBy = null
+                },
+                new UserRole
+                {
+                    UserRoleId = 2,
+                    UserId = 2, 
+                    RoleId = 3, 
+                    AssignedAt = DateTime.Now,
+                    AssignedBy = 1 
+                }
             );
         }
     }
