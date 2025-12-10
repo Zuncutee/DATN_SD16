@@ -155,27 +155,30 @@
             const id = button.dataset.id;
             if (!id) return;
 
-            if (confirm('Bạn có chắc muốn xóa tác giả này?')) {
-                showLoading();
-                fetch('@Url.Action("DeleteAuthor", "Admin")', {
-                    method: 'POST',
-                    body: buildAuthorFormData({ id })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        showToast('Thành công', data.message, 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showToast('Lỗi', data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    hideLoading();
-                    showToast('Lỗi', error.message, 'error');
-                });
-            }
+            showConfirmModal({
+                message: 'Bạn có chắc muốn xóa tác giả này?',
+                onConfirm: () => {
+                    showLoading();
+                    fetch('@Url.Action("DeleteAuthor", "Admin")', {
+                        method: 'POST',
+                        body: buildAuthorFormData({ id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading();
+                        if (data.success) {
+                            showToast('Thành công', data.message, 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast('Lỗi', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showToast('Lỗi', error.message, 'error');
+                    });
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {

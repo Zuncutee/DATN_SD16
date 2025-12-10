@@ -1,0 +1,317 @@
+@model IEnumerable<DATN_SD16.Models.Entities.BookReservation>
+@using System.Linq
+@{
+    ViewData["Title"] = "Đặt sách của tôi";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var reservations = Model.ToList();
+    var pendingReservations = reservations.Where(r => r.Status == "Pending").ToList();
+    var approvedReservations = reservations.Where(r => r.Status == "Approved").ToList();
+    var rejectedReservations = reservations.Where(r => r.Status == "Rejected").ToList();
+    var cancelledReservations = reservations.Where(r => r.Status == "Cancelled").ToList();
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <span class="material-symbols-outlined align-middle">bookmark</span>
+            Đặt sách của tôi
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Quản lý các yêu cầu đặt mượn sách của bạn
+        </p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Chờ duyệt</p>
+                    <h3 class="text-3xl font-bold text-yellow-600 mt-2">@pendingReservations.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-yellow-600 text-2xl">schedule</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Đã duyệt</p>
+                    <h3 class="text-3xl font-bold text-green-600 mt-2">@approvedReservations.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Từ chối</p>
+                    <h3 class="text-3xl font-bold text-red-600 mt-2">@rejectedReservations.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 text-2xl">cancel</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Đã hủy</p>
+                    <h3 class="text-3xl font-bold text-gray-600 mt-2">@cancelledReservations.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-gray-600 text-2xl">close</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Reservations -->
+    @if (pendingReservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">schedule</span>
+                Đang chờ duyệt
+            </h2>
+
+            <div class="space-y-4">
+                @foreach (var reservation in pendingReservations)
+                {
+                    <div class="border border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- Book Cover -->
+                            <div class="w-24 h-32 bg-gray-200 dark:bg-gray-700 rounded flex-shrink-0">
+                                @if (!string.IsNullOrEmpty(reservation.Book?.CoverImage))
+                                {
+                                    <img src="@reservation.Book.CoverImage" 
+                                         alt="@reservation.Book.Title" 
+                                         class="w-full h-full object-cover rounded" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-gray-400">book</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Reservation Info -->
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">
+                                    @reservation.Book?.Title
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-3">
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Ngày đặt:</span> @reservation.ReservationDate.ToString("dd/MM/yyyy")
+                                    </p>
+                                    @if (reservation.ExpiryDate != null)
+                                    {
+                                        <p class="text-gray-600 dark:text-gray-400">
+                                            <span class="font-medium">Hết hạn:</span> @reservation.ExpiryDate?.ToString("dd/MM/yyyy")
+                                        </p>
+                                    }
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Tác giả:</span>
+                                        @if (reservation.Book?.BookAuthors != null && reservation.Book.BookAuthors.Any())
+                                        {
+                                            @string.Join(", ", reservation.Book.BookAuthors.Select(ba => ba.Author?.AuthorName))
+                                        }
+                                        else
+                                        {
+                                            <span>N/A</span>
+                                        }
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Thể loại:</span> @(reservation.Book?.Category?.CategoryName ?? "N/A")
+                                    </p>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <a href="@Url.Action("Details", "BookReservations", new { id = reservation.ReservationId })"
+                                       class="inline-flex items-center gap-1 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-blue-600 transition">
+                                        Xem chi tiết
+                                    </a>
+
+                                    <form method="post" asp-action="Cancel" asp-route-id="@reservation.ReservationId" class="inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" 
+                                                onclick="return confirm('Bạn có chắc muốn hủy đặt sách này?')"
+                                                class="inline-flex items-center gap-1 px-4 py-2 border border-red-300 text-red-600 text-sm rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                                            <span class="material-symbols-outlined text-sm">close</span>
+                                            Hủy đặt
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Approved Reservations -->
+    @if (approvedReservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">check_circle</span>
+                Đã duyệt - Sẵn sàng mượn
+            </h2>
+
+            <div class="space-y-4">
+                @foreach (var reservation in approvedReservations)
+                {
+                    <div class="border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- Book Cover -->
+                            <div class="w-24 h-32 bg-gray-200 dark:bg-gray-700 rounded flex-shrink-0">
+                                @if (!string.IsNullOrEmpty(reservation.Book?.CoverImage))
+                                {
+                                    <img src="@reservation.Book.CoverImage" 
+                                         alt="@reservation.Book.Title" 
+                                         class="w-full h-full object-cover rounded" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-gray-400">book</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Reservation Info -->
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">
+                                    @reservation.Book?.Title
+                                </h3>
+                                
+                                <div class="bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded px-3 py-2 mb-3">
+                                    <p class="text-green-800 dark:text-green-200 text-sm font-medium">
+                                        <span class="material-symbols-outlined align-middle text-sm">check_circle</span>
+                                        Sách đã sẵn sàng. Vui lòng đến thư viện để nhận sách
+                                        @if (reservation.ExpiryDate != null)
+                                        {
+                                            <span> trước ngày @reservation.ExpiryDate?.ToString("dd/MM/yyyy")</span>
+                                        }
+                                    </p>
+                                </div>
+
+                                <a href="@Url.Action("Details", "BookReservations", new { id = reservation.ReservationId })"
+                                   class="inline-flex items-center gap-1 text-primary hover:underline text-sm">
+                                    Xem chi tiết
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Other Reservations (Rejected/Cancelled) -->
+    @if (rejectedReservations.Any() || cancelledReservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">history</span>
+                Lịch sử đặt sách
+            </h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Sách</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Ngày đặt</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Trạng thái</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach (var reservation in rejectedReservations.Concat(cancelledReservations).OrderByDescending(r => r.ReservationDate))
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-gray-900 dark:text-white">
+                                        @reservation.Book?.Title
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    @reservation.ReservationDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="px-4 py-3">
+                                    @if (reservation.Status == "Rejected")
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                            <span class="material-symbols-outlined text-sm">cancel</span>
+                                            Từ chối
+                                        </span>
+                                    }
+                                    else if (reservation.Status == "Cancelled")
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                                            <span class="material-symbols-outlined text-sm">close</span>
+                                            Đã hủy
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                                    @(reservation.Notes ?? "-")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- Empty State -->
+    @if (!reservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center">
+            <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">bookmark_border</span>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Chưa có đặt sách nào
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Hãy tìm kiếm và đặt mượn sách yêu thích của bạn
+            </p>
+            <a href="@Url.Action("Index", "Books")"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                <span class="material-symbols-outlined">search</span>
+                Tìm kiếm sách
+            </a>
+        </div>
+    }
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Success"]');
+        });
+    </script>
+}
+
+@if (TempData["Error"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Error"]');
+        });
+    </script>
+}
+

@@ -6,7 +6,6 @@ using DATN_SD16.Repositories;
 using DATN_SD16.Repositories.Interfaces;
 using DATN_SD16.Services;
 using DATN_SD16.Services.Interfaces;
-using DATN_SD16.Models.Entities;
 using DATN_SD16.Middleware;
 using System.Text;
 
@@ -18,7 +17,13 @@ builder.Services.AddControllersWithViews();
 // Cấu hình Entity Framework Core
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<LibraryDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null);
+    }));
 
 // Đăng ký Repositories
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

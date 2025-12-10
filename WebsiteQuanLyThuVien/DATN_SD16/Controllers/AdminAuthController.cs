@@ -29,11 +29,20 @@ namespace DATN_SD16.Controllers
 
         // POST: AdminAuth/Login
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest? jsonRequest, [FromForm] LoginRequest? formRequest)
         {
-            if (!ModelState.IsValid)
+            // Check if it's an AJAX request
+            bool isAjaxRequest = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            
+            // Get the request from either JSON or Form
+            var request = jsonRequest ?? formRequest;
+            
+            if (request == null || !ModelState.IsValid)
             {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                }
                 return View(request);
             }
 
@@ -42,7 +51,12 @@ namespace DATN_SD16.Controllers
                 var response = await _authService.LoginAsync(request);
                 if (response == null)
                 {
-                    ViewBag.Error = "Tên đăng nhập hoặc mật khẩu không đúng";
+                    var errorMsg = "Tên đăng nhập hoặc mật khẩu không đúng";
+                    if (isAjaxRequest)
+                    {
+                        return Json(new { success = false, message = errorMsg });
+                    }
+                    ViewBag.Error = errorMsg;
                     return View(request);
                 }
 
@@ -53,19 +67,29 @@ namespace DATN_SD16.Controllers
                 string redirectController = "";
                 string redirectAction = "";
 
-                if (roles.Contains("Admin") || roles.Contains("Librarian"))
+                if (roles.Contains("Admin"))
                 {
                     redirectController = "Admin";
                     redirectAction = "Dashboard";
                 }
+                else if (roles.Contains("Librarian"))
+                {
+                    redirectController = "Librarian";
+                    redirectAction = "Dashboard";
+                }
                 else if (roles.Contains("Reader"))
                 {
-                    redirectController = "Home";
-                    redirectAction = "Index";
+                    redirectController = "Reader";
+                    redirectAction = "Dashboard";
                 }
                 else
                 {
-                    ViewBag.Error = "Tài khoản không có quyền truy cập hệ thống.";
+                    var errorMsg = "Tài khoản không có quyền truy cập hệ thống.";
+                    if (isAjaxRequest)
+                    {
+                        return Json(new { success = false, message = errorMsg });
+                    }
+                    ViewBag.Error = errorMsg;
                     return View(request);
                 }
 
@@ -91,11 +115,26 @@ namespace DATN_SD16.Controllers
 
                 Response.Cookies.Append("RefreshToken", response.RefreshToken, refreshCookieOptions);
 
+                // Return based on request type
+                if (isAjaxRequest)
+                {
+                    return Json(new 
+                    { 
+                        success = true, 
+                        message = "Đăng nhập thành công",
+                        redirectUrl = Url.Action(redirectAction, redirectController)
+                    });
+                }
+
                 // Điều hướng theo role
                 return RedirectToAction(redirectAction, redirectController);
             }
             catch (Exception ex)
             {
+                if (isAjaxRequest)
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
                 ViewBag.Error = ex.Message;
                 return View(request);
             }

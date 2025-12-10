@@ -1,0 +1,91 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Borrow>
+@{
+    ViewData["Title"] = "Quản lý Mượn-Trả";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-book"></i> Quản lý Mượn-Trả
+        <div class="float-end">
+            <a asp-action="CreateBorrow" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Tạo phiếu mượn
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <form method="get" class="d-flex gap-2">
+                <select name="status" class="form-select" style="width: auto;">
+                    <option value="All" selected="@(ViewBag.Status == "All")">Tất cả</option>
+                    <option value="Borrowed" selected="@(ViewBag.Status == "Borrowed")">Đang mượn</option>
+                    <option value="Returned" selected="@(ViewBag.Status == "Returned")">Đã trả</option>
+                    <option value="Overdue" selected="@(ViewBag.Status == "Overdue")">Quá hạn</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Lọc</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Số phiếu</th>
+                        <th>Độc giả</th>
+                        <th>Sách</th>
+                        <th>Ngày mượn</th>
+                        <th>Hạn trả</th>
+                        <th>Ngày trả</th>
+                        <th>Trạng thái</th>
+                        <th>Phí phạt</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var borrow in Model)
+                    {
+                        <tr>
+                            <td>@borrow.BorrowNumber</td>
+                            <td>@borrow.User?.FullName</td>
+                            <td>@borrow.Copy?.Book?.Title</td>
+                            <td>@borrow.BorrowDate.ToString("dd/MM/yyyy")</td>
+                            <td>@borrow.DueDate.ToString("dd/MM/yyyy")</td>
+                            <td>@(borrow.ReturnDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                            <td>
+                                @if (borrow.Status == "Borrowed")
+                                {
+                                    <span class="badge bg-primary">Đang mượn</span>
+                                }
+                                else if (borrow.Status == "Returned")
+                                {
+                                    <span class="badge bg-success">Đã trả</span>
+                                }
+                                else if (borrow.Status == "Overdue")
+                                {
+                                    <span class="badge bg-danger">Quá hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@borrow.Status</span>
+                                }
+                            </td>
+                            <td>@borrow.FineAmount.ToString("N0") đ</td>
+                            <td>
+                                <a asp-action="BorrowDetails" asp-route-id="@borrow.BorrowId" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if (borrow.Status == "Borrowed")
+                                {
+                                    <a asp-action="Return" asp-route-id="@borrow.BorrowId" class="btn btn-sm btn-success">
+                                        <i class="fas fa-undo"></i> Trả sách
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

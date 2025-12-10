@@ -18,6 +18,7 @@ namespace DATN_SD16.Services.Interfaces
         Task<bool> DeleteBookAsync(int bookId);
         Task<bool> ImportBooksAsync(int bookId, int quantity, int importedBy);
         Task<bool> AddAuthorToBookAsync(int bookId, int authorId, bool isPrimary = true);
+        Task<IEnumerable<BookCopy>> GetAvailableCopiesAsync(int bookId);
     }
 }
 

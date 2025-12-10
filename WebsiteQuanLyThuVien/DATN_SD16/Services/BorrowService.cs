@@ -2,6 +2,7 @@ using DATN_SD16.Models.Entities;
 using DATN_SD16.Repositories.Interfaces;
 using DATN_SD16.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace DATN_SD16.Services
 {
@@ -61,7 +62,7 @@ namespace DATN_SD16.Services
         public async Task<Borrow> CreateBorrowAsync(int userId, int copyId, int borrowedBy, int? reservationId = null)
         {
             var copy = await _bookCopyRepository.GetByIdAsync(copyId);
-            if (copy == null || copy.Status != "Available")
+            if (copy == null || !IsCopyAvailable(copy.Status))
                 throw new Exception("Sách không có sẵn để mượn");
 
             var book = await _bookRepository.GetByIdAsync(copy.BookId);
@@ -91,15 +92,12 @@ namespace DATN_SD16.Services
                 UpdatedAt = DateTime.Now
             };
 
-            // Cập nhật trạng thái copy
+            // Cập nhật trạng thái copy - Trigger sẽ tự động cập nhật Books
             copy.Status = "Borrowed";
             copy.UpdatedAt = DateTime.Now;
             await _bookCopyRepository.UpdateAsync(copy);
-
-            // Cập nhật số lượng sách
-            book.AvailableCopies = Math.Max(0, book.AvailableCopies - 1);
-            book.BorrowedCopies += 1;
-            await _bookRepository.UpdateAsync(book);
+            
+            // Không cần cập nhật Books thủ công vì trigger TRG_BookCopies_UpdateAvailableCopies_Update sẽ tự động cập nhật
 
             // Cập nhật reservation nếu có
             if (reservationId.HasValue)
@@ -230,6 +228,12 @@ namespace DATN_SD16.Services
             await _borrowHistoryRepository.AddAsync(history);
 
             return true;
+        }
+
+        private static bool IsCopyAvailable(string? status)
+        {
+            var normalized = status?.Trim();
+            return string.IsNullOrEmpty(normalized) || normalized.Equals("Available", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -10,7 +10,6 @@ namespace DATN_SD16.Controllers
     /// <summary>
     /// Controller quản lý sách
     /// </summary>
-    [Authorize]
     public class BooksController : Controller
     {
         private readonly IBookService _bookService;
@@ -23,6 +22,7 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Books
+        [AllowAnonymous]
         public async Task<IActionResult> Index(string? title, string? author, int? categoryId, bool? availableOnly)
         {
             var books = await _bookService.SearchBooksAsync(title, author, categoryId, availableOnly);
@@ -35,6 +35,7 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Books/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -103,6 +104,42 @@ namespace DATN_SD16.Controllers
         [ValidateAntiForgeryToken]
         [AuthorizeRoles("Admin")]
         public IActionResult DeleteConfirmed(int id) => RedirectToAction("Books", "Admin");
+
+        // GET: Books/GetAvailableCopies
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetAvailableCopies(int bookId)
+        {
+            try
+            {
+                if (bookId <= 0)
+                {
+                    return Json(new { error = "BookId không hợp lệ" });
+                }
+
+                var copies = await _bookService.GetAvailableCopiesAsync(bookId);
+                
+                var result = copies.Select(c => new
+                {
+                    copyId = c.CopyId,
+                    copyNumber = c.CopyNumber ?? $"Copy-{c.CopyId}",
+                    condition = c.Condition ?? "Good",
+                    status = c.Status ?? "Unknown"
+                }).ToList();
+
+                // Log để debug
+                System.Diagnostics.Debug.WriteLine($"GetAvailableCopies - BookId: {bookId}, Returned {result.Count} copies");
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi để debug
+                System.Diagnostics.Debug.WriteLine($"Error in GetAvailableCopies: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return Json(new { error = ex.Message });
+            }
+        }
     }
 }
 

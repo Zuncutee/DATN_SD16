@@ -168,27 +168,40 @@
                 });
         }
 
+        const userTokenField = '__RequestVerificationToken';
+        function getUserToken() {
+            const input = document.querySelector(`form input[name="${userTokenField}"]`);
+            return input ? input.value : '';
+        }
+
         function toggleLock(userId, isLocked) {
             const message = isLocked ? 'Bạn có chắc muốn mở khóa tài khoản này?' : 'Bạn có chắc muốn khóa tài khoản này?';
-            if (confirm(message)) {
-                showLoading();
-                fetch('@Url.Action("ToggleLock", "Admin")/' + userId, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': '@Html.AntiForgeryToken()'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        showToast('Thành công', data.message, 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showToast('Lỗi', data.message, 'error');
-                    }
-                });
-            }
+            showConfirmModal({
+                message,
+                onConfirm: () => {
+                    showLoading();
+                    fetch('@Url.Action("ToggleLock", "Admin")/' + userId, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': getUserToken()
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading();
+                        if (data.success) {
+                            showToast('Thành công', data.message, 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast('Lỗi', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showToast('Lỗi', error.message, 'error');
+                    });
+                }
+            });
         }
 
         submitForm('createUserForm');

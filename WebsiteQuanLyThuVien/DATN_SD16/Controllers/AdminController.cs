@@ -29,6 +29,8 @@ namespace DATN_SD16.Controllers
         private readonly IRepository<SystemSetting> _systemSettingRepository;
         private readonly IBorrowRepository _borrowRepository;
         private readonly IBookRepository _bookRepository;
+        private readonly IRepository<BookCopy> _bookCopyRepository;
+        private readonly IBorrowService _borrowService;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public AdminController(
@@ -42,6 +44,8 @@ namespace DATN_SD16.Controllers
             IRepository<SystemSetting> systemSettingRepository,
             IBorrowRepository borrowRepository,
             IBookRepository bookRepository,
+            IRepository<BookCopy> bookCopyRepository,
+            IBorrowService borrowService,
             IWebHostEnvironment webHostEnvironment)
         {
             _userService = userService;
@@ -54,6 +58,8 @@ namespace DATN_SD16.Controllers
             _systemSettingRepository = systemSettingRepository;
             _borrowRepository = borrowRepository;
             _bookRepository = bookRepository;
+            _bookCopyRepository = bookCopyRepository;
+            _borrowService = borrowService;
             _webHostEnvironment = webHostEnvironment;
         }
 
@@ -74,8 +80,157 @@ namespace DATN_SD16.Controllers
 
         public async Task<IActionResult> BorrowBook()
         {
+            await PrepareBorrowBookDropdownsAsync();
             return View();
         }
+
+        // POST: Admin/BorrowBook
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BorrowBook(int userId, int copyId, int? reservationId)
+        {
+            try
+            {
+                var borrowedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
+                await _borrowService.CreateBorrowAsync(userId, copyId, borrowedBy, reservationId);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Tạo phiếu mượn thành công!",
+                        redirectUrl = Url.Action(nameof(BorrowBook))
+                    });
+                }
+
+                TempData["Success"] = "Tạo phiếu mượn thành công!";
+                return RedirectToAction(nameof(BorrowBook));
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                await PrepareBorrowBookDropdownsAsync();
+                return View();
+            }
+        }
+
+        #region Quản lý bản sách (BookCopies)
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> BookCopies(int? bookId)
+        {
+            var books = (await _bookService.GetAllBooksAsync()).OrderBy(b => b.Title).ToList();
+            var selectedBookId = bookId ?? books.FirstOrDefault()?.BookId;
+            IEnumerable<BookCopy> copies = Enumerable.Empty<BookCopy>();
+
+            if (selectedBookId.HasValue)
+            {
+                copies = await _bookCopyRepository.FindAsync(c => c.BookId == selectedBookId.Value);
+                copies = copies.OrderBy(c => c.CopyNumber);
+            }
+
+            ViewBag.Books = books;
+            ViewBag.SelectedBookId = selectedBookId;
+            return View(copies);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> CreateBookCopy(BookCopy copy)
+        {
+            try
+            {
+                if (copy.BookId <= 0)
+                {
+                    throw new Exception("Vui lòng chọn sách.");
+                }
+
+                if (string.IsNullOrWhiteSpace(copy.CopyNumber))
+                {
+                    throw new Exception("Vui lòng nhập mã bản sách (CopyNumber).");
+                }
+
+                copy.Status = string.IsNullOrWhiteSpace(copy.Status) ? "Available" : copy.Status.Trim();
+                copy.Condition = string.IsNullOrWhiteSpace(copy.Condition) ? "Good" : copy.Condition.Trim();
+                copy.CreatedAt = DateTime.Now;
+                copy.UpdatedAt = DateTime.Now;
+
+                await _bookCopyRepository.AddAsync(copy);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Thêm bản sách thành công!" });
+                }
+
+                TempData["Success"] = "Thêm bản sách thành công!";
+                return RedirectToAction(nameof(BookCopies), new { bookId = copy.BookId });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(BookCopies), new { bookId = copy.BookId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> UpdateBookCopyStatus(int copyId, string status, string? condition)
+        {
+            try
+            {
+                var copy = await _bookCopyRepository.GetByIdAsync(copyId);
+                if (copy == null)
+                {
+                    throw new Exception("Không tìm thấy bản sách.");
+                }
+
+                if (string.IsNullOrWhiteSpace(status))
+                {
+                    throw new Exception("Vui lòng chọn trạng thái.");
+                }
+
+                copy.Status = status;
+
+                if (!string.IsNullOrWhiteSpace(condition))
+                {
+                    copy.Condition = condition;
+                }
+
+                copy.UpdatedAt = DateTime.Now;
+                await _bookCopyRepository.UpdateAsync(copy);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Cập nhật bản sách thành công!" });
+                }
+
+                TempData["Success"] = "Cập nhật bản sách thành công!";
+                return RedirectToAction(nameof(BookCopies), new { bookId = copy.BookId });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(BookCopies));
+            }
+        }
+        #endregion
 
         #region Quản lý Tài khoản & Phân quyền
         // GET: Admin/Users
@@ -859,6 +1014,12 @@ namespace DATN_SD16.Controllers
             ViewBag.Categories = await _categoryRepository.GetAllAsync();
             ViewBag.Publishers = await _publisherRepository.GetAllAsync();
             ViewBag.Locations = await _bookLocationRepository.GetAllAsync();
+        }
+
+        private async Task PrepareBorrowBookDropdownsAsync()
+        {
+            ViewBag.Users = await _userService.GetAllUsersAsync();
+            ViewBag.Books = await _bookService.GetAllBooksAsync();
         }
 
         private bool IsAjaxRequest()

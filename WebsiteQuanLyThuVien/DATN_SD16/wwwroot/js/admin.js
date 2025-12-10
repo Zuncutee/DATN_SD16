@@ -64,6 +64,82 @@ function hideLoading() {
     }
 }
 
+// Confirmation Modal
+function showConfirmModal({ title = 'Xác nhận', message, confirmText = 'Đồng ý', cancelText = 'Hủy', onConfirm }) {
+    const modalEl = document.getElementById('confirmModal');
+    if (!modalEl) {
+        if (onConfirm) onConfirm();
+        return;
+    }
+
+    const titleEl = document.getElementById('confirmModalTitle');
+    const messageEl = document.getElementById('confirmModalMessage');
+    const confirmBtn = document.getElementById('confirmModalConfirm');
+    const cancelBtn = document.getElementById('confirmModalCancel');
+
+    if (titleEl) titleEl.textContent = title;
+    if (messageEl) messageEl.textContent = message;
+    if (confirmBtn) confirmBtn.textContent = confirmText;
+    if (cancelBtn) cancelBtn.textContent = cancelText;
+
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+    const handleConfirm = () => {
+        modalInstance.hide();
+        confirmBtn.removeEventListener('click', handleConfirm);
+        if (onConfirm) onConfirm();
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm, { once: true });
+    modalInstance.show();
+}
+
+// AJAX Form Submit Helper
+async function ajaxSubmitForm(form) {
+    if (!form || !(form instanceof HTMLFormElement)) return;
+
+    const method = (form.getAttribute('method') || 'POST').toUpperCase();
+    const formData = new FormData(form);
+
+    showLoading();
+
+    try {
+        const response = await fetch(form.action, {
+            method,
+            body: method === 'GET' ? null : formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || response.statusText);
+        }
+
+        const data = await response.json();
+        hideLoading();
+
+        if (data.success) {
+            showToast('Thành công', data.message || 'Thao tác thành công', 'success');
+            const redirectUrl = data.redirectUrl;
+            setTimeout(() => {
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                } else {
+                    location.reload();
+                }
+            }, 1000);
+        } else {
+            showToast('Lỗi', data.message || 'Có lỗi xảy ra', 'error');
+        }
+    } catch (error) {
+        hideLoading();
+        showToast('Lỗi', error.message || 'Có lỗi xảy ra khi xử lý yêu cầu', 'error');
+    }
+}
+
 // AJAX Form Submit
 function submitForm(formId, successCallback) {
     const form = document.getElementById(formId);
@@ -164,31 +240,33 @@ function submitForm(formId, successCallback) {
 
 // Delete Confirmation
 function confirmDelete(message, deleteUrl, token) {
-    if (confirm(message)) {
-        showLoading();
-        
-        fetch(deleteUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': token
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            hideLoading();
-            if (data.success) {
-                showToast('Thành công', data.message, 'success');
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('Lỗi', data.message, 'error');
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            showToast('Lỗi', 'Có lỗi xảy ra: ' + error.message, 'error');
-        });
-    }
+    showConfirmModal({
+        message: message,
+        onConfirm: () => {
+            showLoading();
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    showToast('Thành công', data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Lỗi', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showToast('Lỗi', 'Có lỗi xảy ra: ' + error.message, 'error');
+            });
+        }
+    });
 }
 
 // Open Modal
@@ -224,5 +302,31 @@ $(document).ajaxSuccess(function(event, xhr, settings) {
 
 $(document).ajaxError(function(event, xhr, settings, thrownError) {
     showToast('Lỗi', 'Có lỗi xảy ra khi xử lý yêu cầu', 'error');
+});
+
+// Global handler for forms with data-confirm / data-ajax
+document.addEventListener('submit', function (event) {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) return;
+
+    const confirmMessage = form.dataset.confirm;
+    const useAjax = form.dataset.ajax === 'true';
+
+    if (confirmMessage) {
+        event.preventDefault();
+        showConfirmModal({
+            message: confirmMessage,
+            onConfirm: () => {
+                if (useAjax) {
+                    ajaxSubmitForm(form);
+                } else {
+                    HTMLFormElement.prototype.submit.call(form);
+                }
+            }
+        });
+    } else if (useAjax) {
+        event.preventDefault();
+        ajaxSubmitForm(form);
+    }
 });
 

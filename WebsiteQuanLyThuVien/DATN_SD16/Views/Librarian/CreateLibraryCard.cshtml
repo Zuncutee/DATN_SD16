@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Tạo thẻ thư viện";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-plus"></i> Tạo thẻ thư viện mới
+    </div>
+    <div class="card-body">
+        <form id="createCardForm" method="post" asp-action="CreateLibraryCard">
+            @Html.AntiForgeryToken()
+            
+            <div class="form-group mb-3">
+                <label class="form-label">Độc giả <span class="text-danger">*</span></label>
+                <select name="userId" class="form-select" required>
+                    <option value="">-- Chọn độc giả --</option>
+                    @foreach (var user in ViewBag.Users as IEnumerable<DATN_SD16.Models.Entities.User>)
+                    {
+                        <option value="@user.UserId">@user.FullName (@user.Username)</option>
+                    }
+                </select>
+                <small class="form-text text-muted">Chỉ hiển thị độc giả chưa có thẻ</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Ngày hết hạn</label>
+                <input type="date" name="expiryDate" class="form-control" />
+                <small class="form-text text-muted">Để trống nếu không giới hạn</small>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Tạo thẻ
+                </button>
+                <a asp-action="LibraryCards" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        submitForm('createCardForm', function(data) {
+            window.location.href = '@Url.Action("LibraryCards")';
+        });
+    </script>
+}
+

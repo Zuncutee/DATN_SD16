@@ -67,7 +67,11 @@
                                 <button class="btn btn-sm btn-warning" onclick="openImportModal(@book.BookId, '@book.Title')" data-bs-toggle="tooltip" title="Nhập sách">
                                     <i class="fas fa-box"></i>
                                 </button>
-                                <form asp-action="DeleteBook" asp-controller="Admin" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa sách này?');">
+                                <form asp-action="DeleteBook"
+                                      asp-controller="Admin"
+                                      method="post"
+                                      class="d-inline"
+                                      data-confirm="Bạn có chắc muốn xóa sách này?">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@book.BookId" />
                                     <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Xóa">

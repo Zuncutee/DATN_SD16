@@ -54,16 +54,55 @@
                 </div>
 
                 <nav class="hidden md:flex items-center gap-9 text-gray-700 dark:text-gray-300">
-                    <a class="hover:text-primary" href="/">Home</a>
-                    <a class="hover:text-primary" href="#">Browse Categories</a>
-                    <a class="text-primary font-semibold" href="#">My Account</a>
-                    <a class="hover:text-primary" href="#">Help</a>
-                    <a class="text-primary font-semibold" href="/AdminAuth/Login">Login</a>
+                    <a class="hover:text-primary" href="@Url.Action("Dashboard", "Reader")">Trang chủ</a>
+                    <a class="hover:text-primary" href="@Url.Action("Index", "Books")">Tìm sách</a>
+                    <a class="hover:text-primary" href="@Url.Action("Index", "Borrows")">Mượn sách</a>
+                    <a class="hover:text-primary" href="@Url.Action("Index", "BookReservations")">Đặt sách</a>
                 </nav>
 
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-cover bg-center"
-                         style="background-image:url('/images/user.png');"></div>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- User Menu Dropdown -->
+                        <div class="relative" id="userMenu">
+                            <button class="flex items-center gap-2 hover:text-primary" onclick="toggleUserMenu()">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-semibold">
+                                    @User.Identity.Name.Substring(0, 1).ToUpper()
+                                </div>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                                <a href="@Url.Action("Profile", "Reader")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">account_circle</span>
+                                    Thông tin cá nhân
+                                </a>
+                                <a href="@Url.Action("Index", "Borrows")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">library_books</span>
+                                    Sách đang mượn
+                                </a>
+                                <a href="@Url.Action("Index", "BookReservations")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">bookmark</span>
+                                    Đặt sách của tôi
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                                <form method="post" action="/AdminAuth/Logout">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400">
+                                        <span class="material-symbols-outlined text-sm">logout</span>
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button onclick="openLoginModal()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                            Đăng nhập
+                        </button>
+                    }
                 </div>
             </header>
 
@@ -86,6 +125,27 @@
 
         </div>
     </div>
+
+    <!-- Login Modal -->
+    @await Html.PartialAsync("_LoginModal")
+
+    <script>
+        // Toggle user menu dropdown
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (userMenu && dropdown && !userMenu.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
 
 </body>
 </html>

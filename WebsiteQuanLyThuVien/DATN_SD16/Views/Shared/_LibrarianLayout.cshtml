@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Quản trị Thư viện</title>
+    <title>@ViewData["Title"] - Thủ Thư</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -15,54 +15,53 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <h3><i class="fas fa-book"></i> Quản trị Thư viện</h3>
+                <h3><i class="fas fa-book-reader"></i> Thủ Thư</h3>
             </div>
             <nav class="sidebar-nav">
                 <ul>
                     <li>
-                        <a asp-controller="Admin" asp-action="BorrowBook" class="nav-link">
-                            <i class="fa-solid fa-ticket"></i> <span>Tạo phiếu mượn</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a asp-controller="Admin" asp-action="Dashboard" class="nav-link">
+                        <a asp-controller="Librarian" asp-action="Dashboard" class="nav-link">
                             <i class="fas fa-home"></i> <span>Dashboard</span>
                         </a>
                     </li>
                     <li>
-                        <a asp-controller="Admin" asp-action="Users" class="nav-link">
-                            <i class="fas fa-users"></i> <span>Tài khoản & Phân quyền</span>
+                        <a asp-controller="Librarian" asp-action="Borrows" class="nav-link">
+                            <i class="fas fa-book"></i> <span>Quản lý Mượn-Trả</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#categories-menu" data-bs-toggle="collapse" class="nav-link">
-                            <i class="fas fa-list"></i> <span>Danh mục</span> <i class="fas fa-chevron-down ms-auto"></i>
-                        </a>
-                        <ul class="collapse" id="categories-menu">
-                            <li><a asp-controller="Admin" asp-action="Categories" class="nav-link"><i class="fas fa-tag"></i> Thể loại</a></li>
-                            <li><a asp-controller="Admin" asp-action="Authors" class="nav-link"><i class="fas fa-user-pen"></i> Tác giả</a></li>
-                            <li><a asp-controller="Admin" asp-action="Publishers" class="nav-link"><i class="fas fa-building"></i> Nhà xuất bản</a></li>
-                            <li><a asp-controller="Admin" asp-action="BookLocations" class="nav-link"><i class="fas fa-map-marker-alt"></i> Vị trí sách</a></li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a asp-controller="Admin" asp-action="Books" class="nav-link">
-                            <i class="fas fa-book-open"></i> <span>Quản lý Sách</span>
+                        <a asp-controller="Librarian" asp-action="CreateBorrow" class="nav-link">
+                            <i class="fas fa-plus"></i> <span>Tạo phiếu mượn</span>
                         </a>
                     </li>
                     <li>
-                        <a asp-controller="Admin" asp-action="BookCopies" class="nav-link">
-                            <i class="fas fa-clone"></i> <span>Bản sách</span>
+                        <a asp-controller="Librarian" asp-action="Reservations" class="nav-link">
+                            <i class="fas fa-calendar-check"></i> <span>Xử lý đặt sách</span>
                         </a>
                     </li>
                     <li>
-                        <a asp-controller="Admin" asp-action="Settings" class="nav-link">
-                            <i class="fas fa-cog"></i> <span>Cấu hình Hệ thống</span>
+                        <a asp-controller="Librarian" asp-action="Readers" class="nav-link">
+                            <i class="fas fa-users"></i> <span>Quản lý Độc giả</span>
                         </a>
                     </li>
                     <li>
-                        <a asp-controller="Admin" asp-action="Reports" class="nav-link">
-                            <i class="fas fa-chart-bar"></i> <span>Báo cáo & Thống kê</span>
+                        <a asp-controller="Librarian" asp-action="LibraryCards" class="nav-link">
+                            <i class="fas fa-id-card"></i> <span>Thẻ Thư viện</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Librarian" asp-action="BookDamages" class="nav-link">
+                            <i class="fas fa-exclamation-circle"></i> <span>Sách hỏng/mất</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Librarian" asp-action="InventoryChecks" class="nav-link">
+                            <i class="fas fa-clipboard-check"></i> <span>Kiểm kê sách</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Librarian" asp-action="OverdueBorrows" class="nav-link">
+                            <i class="fas fa-exclamation-triangle"></i> <span>Sách quá hạn</span>
                         </a>
                     </li>
                 </ul>
@@ -81,7 +80,7 @@
                 </div>
                 <div class="topbar-right">
                     <div class="user-menu">
-                        <span class="user-name">@(UserHelper.GetFullName(User) ?? UserHelper.GetUsername(User) ?? "Admin")</span>
+                        <span class="user-name">@(UserHelper.GetFullName(User) ?? UserHelper.GetUsername(User) ?? "Thủ Thư")</span>
                         <div class="dropdown">
                             <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-circle"></i>

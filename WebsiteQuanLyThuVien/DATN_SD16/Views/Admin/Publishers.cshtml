@@ -167,27 +167,30 @@
             const id = button.dataset.id;
             if (!id) return;
 
-            if (confirm('Bạn có chắc muốn xóa nhà xuất bản này?')) {
-                showLoading();
-                fetch('@Url.Action("DeletePublisher", "Admin")', {
-                    method: 'POST',
-                    body: buildPublisherFormData({ id })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        showToast('Thành công', data.message, 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showToast('Lỗi', data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    hideLoading();
-                    showToast('Lỗi', error.message, 'error');
-                });
-            }
+            showConfirmModal({
+                message: 'Bạn có chắc muốn xóa nhà xuất bản này?',
+                onConfirm: () => {
+                    showLoading();
+                    fetch('@Url.Action("DeletePublisher", "Admin")', {
+                        method: 'POST',
+                        body: buildPublisherFormData({ id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading();
+                        if (data.success) {
+                            showToast('Thành công', data.message, 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast('Lỗi', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showToast('Lỗi', error.message, 'error');
+                    });
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {

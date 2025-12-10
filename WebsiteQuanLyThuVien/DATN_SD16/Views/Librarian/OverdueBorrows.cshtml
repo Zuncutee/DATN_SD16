@@ -1,0 +1,55 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Borrow>
+@{
+    ViewData["Title"] = "Sách quá hạn";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-exclamation-triangle"></i> Sách quá hạn
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Số phiếu</th>
+                        <th>Độc giả</th>
+                        <th>Sách</th>
+                        <th>Ngày mượn</th>
+                        <th>Hạn trả</th>
+                        <th>Số ngày quá hạn</th>
+                        <th>Phí phạt</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var borrow in Model)
+                    {
+                        var daysOverdue = (DateTime.Now - borrow.DueDate).Days;
+                        <tr>
+                            <td>@borrow.BorrowNumber</td>
+                            <td>@borrow.User?.FullName</td>
+                            <td>@borrow.Copy?.Book?.Title</td>
+                            <td>@borrow.BorrowDate.ToString("dd/MM/yyyy")</td>
+                            <td>@borrow.DueDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="badge bg-danger">@daysOverdue ngày</span>
+                            </td>
+                            <td>@borrow.FineAmount.ToString("N0") đ</td>
+                            <td>
+                                <a asp-action="BorrowDetails" asp-route-id="@borrow.BorrowId" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a asp-action="Return" asp-route-id="@borrow.BorrowId" class="btn btn-sm btn-success">
+                                    <i class="fas fa-undo"></i> Trả sách
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

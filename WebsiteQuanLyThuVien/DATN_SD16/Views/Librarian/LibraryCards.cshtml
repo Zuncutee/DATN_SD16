@@ -1,0 +1,92 @@
+@model IEnumerable<DATN_SD16.Models.Entities.LibraryCard>
+@{
+    ViewData["Title"] = "Quản lý Thẻ Thư viện";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-id-card"></i> Quản lý Thẻ Thư viện
+        <div class="float-end">
+            <a asp-action="CreateLibraryCard" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Tạo thẻ mới
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Số thẻ</th>
+                        <th>Độc giả</th>
+                        <th>Ngày cấp</th>
+                        <th>Ngày hết hạn</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var card in Model)
+                    {
+                        <tr>
+                            <td>@card.CardNumber</td>
+                            <td>@card.User?.FullName</td>
+                            <td>@card.IssueDate.ToString("dd/MM/yyyy")</td>
+                            <td>@(card.ExpiryDate?.ToString("dd/MM/yyyy") ?? "Không giới hạn")</td>
+                            <td>
+                                @if (card.Status == "Active")
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else if (card.Status == "Expired")
+                                {
+                                    <span class="badge bg-warning">Hết hạn</span>
+                                }
+                                else if (card.Status == "Suspended")
+                                {
+                                    <span class="badge bg-danger">Tạm ngưng</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@card.Status</span>
+                                }
+                            </td>
+                            <td>
+                                @if (card.Status == "Active")
+                                {
+                                    <form method="post"
+                                          asp-action="SuspendLibraryCard"
+                                          asp-route-id="@card.CardId"
+                                          class="d-inline"
+                                          data-confirm="Xác nhận tạm ngưng thẻ này?"
+                                          data-ajax="true">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-pause"></i> Tạm ngưng
+                                        </button>
+                                    </form>
+                                }
+                                else if (card.Status == "Suspended")
+                                {
+                                    <form method="post"
+                                          asp-action="ActivateLibraryCard"
+                                          asp-route-id="@card.CardId"
+                                          class="d-inline"
+                                          data-confirm="Xác nhận kích hoạt thẻ này?"
+                                          data-ajax="true">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-play"></i> Kích hoạt
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

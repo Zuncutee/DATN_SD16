@@ -1,0 +1,167 @@
+<!-- Login Modal -->
+<div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Đăng nhập</h3>
+            <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6">
+            <form id="loginForm">
+                <!-- Username -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tên đăng nhập
+                    </label>
+                    <input type="text" 
+                           name="username" 
+                           id="loginUsername"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="Nhập tên đăng nhập"
+                           required />
+                </div>
+
+                <!-- Password -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Mật khẩu
+                    </label>
+                    <input type="password" 
+                           name="password" 
+                           id="loginPassword"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="Nhập mật khẩu"
+                           required />
+                </div>
+
+                <!-- Error Message -->
+                <div id="loginError" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-800 rounded-lg text-sm">
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex items-center justify-between mb-6">
+                    <label class="flex items-center">
+                        <input type="checkbox" name="rememberMe" class="rounded border-gray-300 text-primary focus:ring-primary">
+                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Ghi nhớ đăng nhập</span>
+                    </label>
+                    <a href="#" class="text-sm text-primary hover:underline">Quên mật khẩu?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        class="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2">
+                    <span id="loginButtonText">Đăng nhập</span>
+                    <span id="loginSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                        Hoặc
+                    </span>
+                </div>
+            </div>
+
+            <!-- Register Link -->
+            <div class="text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Chưa có tài khoản? 
+                    <a href="#" class="text-primary hover:underline font-medium">Đăng ký ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openLoginModal() {
+        document.getElementById('loginModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLoginModal() {
+        document.getElementById('loginModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        // Reset form
+        document.getElementById('loginForm').reset();
+        document.getElementById('loginError').classList.add('hidden');
+    }
+
+    // Close on outside click
+    document.getElementById('loginModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeLoginModal();
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+        const errorDiv = document.getElementById('loginError');
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const buttonText = document.getElementById('loginButtonText');
+        const spinner = document.getElementById('loginSpinner');
+
+        // Show loading
+        submitButton.disabled = true;
+        buttonText.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+
+        try {
+            const response = await fetch('/AdminAuth/Login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Redirect or reload page
+                window.location.href = data.redirectUrl || '/Reader/Dashboard';
+            } else {
+                // Show error
+                errorDiv.textContent = data.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            errorDiv.textContent = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+            errorDiv.classList.remove('hidden');
+        } finally {
+            // Hide loading
+            submitButton.disabled = false;
+            buttonText.classList.remove('hidden');
+            spinner.classList.add('hidden');
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLoginModal();
+        }
+    });
+</script>
+

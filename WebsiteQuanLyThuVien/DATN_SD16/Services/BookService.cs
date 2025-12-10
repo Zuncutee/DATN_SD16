@@ -1,6 +1,9 @@
 using DATN_SD16.Models.Entities;
 using DATN_SD16.Repositories.Interfaces;
 using DATN_SD16.Services.Interfaces;
+using DATN_SD16.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace DATN_SD16.Services
 {
@@ -13,17 +16,20 @@ namespace DATN_SD16.Services
         private readonly IRepository<BookImport> _bookImportRepository;
         private readonly IRepository<BookAuthor> _bookAuthorRepository;
         private readonly IRepository<BookCopy> _bookCopyRepository;
+        private readonly LibraryDbContext _context;
 
         public BookService(
             IBookRepository bookRepository,
             IRepository<BookImport> bookImportRepository,
             IRepository<BookAuthor> bookAuthorRepository,
-            IRepository<BookCopy> bookCopyRepository)
+            IRepository<BookCopy> bookCopyRepository,
+            LibraryDbContext context)
         {
             _bookRepository = bookRepository;
             _bookImportRepository = bookImportRepository;
             _bookAuthorRepository = bookAuthorRepository;
             _bookCopyRepository = bookCopyRepository;
+            _context = context;
         }
 
         public async Task<Book?> GetBookByIdAsync(int bookId)
@@ -165,6 +171,65 @@ namespace DATN_SD16.Services
 
             await _bookAuthorRepository.AddAsync(bookAuthor);
             return true;
+        }
+
+        public async Task<IEnumerable<BookCopy>> GetAvailableCopiesAsync(int bookId)
+        {
+            try
+            {
+                // Query trực tiếp từ DbContext với Include để đảm bảo có dữ liệu
+                // Theo schema: Status default là 'Available', các giá trị hợp lệ: 'Available', 'Borrowed', 'Reserved', 'Lost', 'Damaged', 'Maintenance'
+                var allCopies = await _context.BookCopies
+                    .Include(c => c.Book)
+                    .Where(c => c.BookId == bookId)
+                    .ToListAsync();
+                
+                // Log để debug
+                System.Diagnostics.Debug.WriteLine($"GetAvailableCopiesAsync - BookId: {bookId}, Total copies: {allCopies.Count}");
+                foreach (var copy in allCopies.Take(5))
+                {
+                    System.Diagnostics.Debug.WriteLine($"  CopyId: {copy.CopyId}, CopyNumber: {copy.CopyNumber}, Status: '{copy.Status}'");
+                }
+                
+                // Lọc trong memory để tránh lỗi với string.IsNullOrEmpty trong LINQ to SQL
+                var availableCopies = allCopies.Where(c => 
+                {
+                    var status = c.Status?.Trim();
+                    var isAvailable = string.IsNullOrEmpty(status) || status.Equals("Available", StringComparison.OrdinalIgnoreCase);
+                    if (!isAvailable)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  Copy {c.CopyId} ({c.CopyNumber}) is not available. Status: '{c.Status}'");
+                    }
+                    return isAvailable;
+                }).ToList();
+                
+                System.Diagnostics.Debug.WriteLine($"GetAvailableCopiesAsync - Available copies: {availableCopies.Count}");
+                
+                // Nếu không có bản Available, vẫn trả về tất cả để hiển thị (có thể đang mượn hoặc trạng thái khác)
+                // Người dùng sẽ thấy và có thể báo cáo nếu cần
+                if (availableCopies.Count == 0 && allCopies.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Warning: No Available copies found, but {allCopies.Count} total copies exist. Returning all copies.");
+                    return allCopies;
+                }
+                
+                return availableCopies;
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi để debug
+                System.Diagnostics.Debug.WriteLine($"Error in GetAvailableCopiesAsync: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw;
+            }
+        }
+
+        private static bool IsCopyAvailable(BookCopy copy)
+        {
+            var status = copy.Status?.Trim();
+            // Theo schema, Status default là 'Available'
+            // Chấp nhận Available, null, hoặc empty string (cho dữ liệu cũ)
+            return string.IsNullOrEmpty(status) || status.Equals("Available", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

@@ -1,0 +1,90 @@
+@model DATN_SD16.Models.Entities.Borrow
+@{
+    ViewData["Title"] = "Trả sách";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-undo"></i> Trả sách - @Model.BorrowNumber
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h5>Thông tin mượn</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Số phiếu:</th>
+                        <td>@Model.BorrowNumber</td>
+                    </tr>
+                    <tr>
+                        <th>Độc giả:</th>
+                        <td>@Model.User?.FullName</td>
+                    </tr>
+                    <tr>
+                        <th>Sách:</th>
+                        <td>@Model.Copy?.Book?.Title</td>
+                    </tr>
+                    <tr>
+                        <th>Ngày mượn:</th>
+                        <td>@Model.BorrowDate.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                    <tr>
+                        <th>Hạn trả:</th>
+                        <td>@Model.DueDate.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                    <tr>
+                        <th>Tình trạng khi mượn:</th>
+                        <td>@Model.ConditionOnBorrow</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>Thông tin trả</h5>
+                @if (ViewBag.FineAmount > 0)
+                {
+                    <div class="alert alert-warning">
+                        <strong>Phí phạt:</strong> @ViewBag.FineAmount.ToString("N0") đ
+                    </div>
+                }
+                <form id="returnForm" method="post" asp-action="Return" asp-route-id="@Model.BorrowId">
+                    @Html.AntiForgeryToken()
+                    
+                    <div class="form-group mb-3">
+                        <label class="form-label">Tình trạng sách khi trả <span class="text-danger">*</span></label>
+                        <select name="conditionOnReturn" class="form-select" required>
+                            <option value="Good">Tốt</option>
+                            <option value="Fair">Khá</option>
+                            <option value="Poor">Kém</option>
+                            <option value="Damaged">Hỏng</option>
+                        </select>
+                    </div>
+
+                    @if (ViewBag.FineAmount > 0)
+                    {
+                        <div class="form-group mb-3">
+                            <label class="form-label">Tiền phạt đã trả</label>
+                            <input type="number" name="finePaid" class="form-control" value="0" min="0" max="@ViewBag.FineAmount" step="1000" />
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Xác nhận trả sách
+                        </button>
+                        <a asp-action="Borrows" class="btn btn-secondary">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        submitForm('returnForm', function(data) {
+            window.location.href = '@Url.Action("Borrows")';
+        });
+    </script>
+}
+

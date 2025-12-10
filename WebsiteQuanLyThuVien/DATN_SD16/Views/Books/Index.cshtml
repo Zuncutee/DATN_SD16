@@ -1,0 +1,157 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Book>
+@{
+    ViewData["Title"] = "Tìm kiếm sách";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Search Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            <span class="material-symbols-outlined align-middle">search</span>
+            Tìm kiếm sách
+        </h1>
+
+        <!-- Search Form -->
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tên sách
+                    </label>
+                    <input type="text" 
+                           name="title" 
+                           value="@ViewBag.Title" 
+                           placeholder="Nhập tên sách..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Tác giả
+                    </label>
+                    <input type="text" 
+                           name="author" 
+                           value="@ViewBag.Author" 
+                           placeholder="Nhập tên tác giả..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Thể loại
+                    </label>
+                    <select name="categoryId" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var category in ViewBag.Categories as IEnumerable<DATN_SD16.Models.Entities.Category>)
+                        {
+                            <option value="@category.CategoryId" selected="@(ViewBag.CategoryId == category.CategoryId)">
+                                @category.CategoryName
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" 
+                           name="availableOnly" 
+                           value="true" 
+                           @(ViewBag.AvailableOnly == true ? "checked" : "")
+                           class="rounded border-gray-300 text-primary focus:ring-primary" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">Chỉ hiển thị sách còn</span>
+                </label>
+
+                <button type="submit" 
+                        class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                    <span class="material-symbols-outlined align-middle text-sm">search</span>
+                    Tìm kiếm
+                </button>
+
+                <a href="@Url.Action("Index", "Books")" 
+                   class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    Xóa bộ lọc
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Kết quả (@Model.Count() sách)
+            </h2>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var book in Model)
+                {
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-lg transition">
+                        <!-- Book Cover -->
+                        <div class="h-64 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                            @if (!string.IsNullOrEmpty(book.CoverImage))
+                            {
+                                <img src="@book.CoverImage" 
+                                     alt="@book.Title" 
+                                     class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-6xl text-gray-400">book</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Book Info -->
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                                @book.Title
+                            </h3>
+                            
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                @(book.Category?.CategoryName ?? "N/A")
+                            </p>
+
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">
+                                    Còn: <span class="font-semibold text-gray-900 dark:text-white">@book.AvailableCopies/@book.TotalCopies</span>
+                                </span>
+                                @if (book.AvailableCopies > 0)
+                                {
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                        Có sẵn
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                        Hết sách
+                                    </span>
+                                }
+                            </div>
+
+                            <a href="@Url.Action("Details", "Books", new { id = book.BookId })" 
+                               class="block w-full px-4 py-2 bg-primary text-white text-center rounded-lg hover:bg-blue-600 transition">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-12">
+                <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">search_off</span>
+                <p class="text-gray-600 dark:text-gray-400">Không tìm thấy sách nào phù hợp</p>
+            </div>
+        }
+    </div>
+</div>
+
