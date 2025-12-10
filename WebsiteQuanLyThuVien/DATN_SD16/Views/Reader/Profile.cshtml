@@ -1,0 +1,243 @@
+@model DATN_SD16.Models.Entities.User
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var libraryCard = ViewBag.LibraryCard as DATN_SD16.Models.Entities.LibraryCard;
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <span class="material-symbols-outlined align-middle">account_circle</span>
+            Thông tin cá nhân
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Quản lý thông tin tài khoản và thẻ thư viện của bạn
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Avatar & Quick Stats -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Avatar Card -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 text-center">
+                <div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center mb-4">
+                    <span class="text-white text-5xl font-bold">
+                        @Model.FullName.Substring(0, 1).ToUpper()
+                    </span>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">
+                    @Model.FullName
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                    @@@Model.Username
+                </p>
+                
+                <div class="flex gap-2 justify-center">
+                    <a href="@Url.Action("EditProfile", "Reader")"
+                       class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition text-sm">
+                        <span class="material-symbols-outlined align-middle text-sm">edit</span>
+                        Chỉnh sửa
+                    </a>
+                    <a href="@Url.Action("ChangePassword", "Reader")"
+                       class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm">
+                        <span class="material-symbols-outlined align-middle text-sm">lock</span>
+                        Đổi MK
+                    </a>
+                </div>
+            </div>
+
+            <!-- Library Card -->
+            @if (libraryCard != null)
+            {
+                <div class="bg-gradient-to-br from-primary to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                    <h3 class="text-lg font-semibold mb-4">Thẻ Thư viện</h3>
+                    <div class="space-y-2 text-sm">
+                        <p><span class="opacity-75">Số thẻ:</span><br /><span class="font-semibold text-lg">@libraryCard.CardNumber</span></p>
+                        <p><span class="opacity-75">Phát hành:</span> @libraryCard.IssueDate.ToString("dd/MM/yyyy")</p>
+                        <p><span class="opacity-75">Hết hạn:</span> @libraryCard.ExpiryDate?.ToString("dd/MM/yyyy")</p>
+                        <p>
+                            <span class="opacity-75">Trạng thái:</span>
+                            @if (libraryCard.Status == "Active")
+                            {
+                                <span class="inline-flex items-center gap-1 bg-green-500 px-2 py-1 rounded text-xs ml-2">
+                                    <span class="material-symbols-outlined text-xs">check_circle</span>
+                                    Hoạt động
+                                </span>
+                            }
+                            else if (libraryCard.Status == "Expired")
+                            {
+                                <span class="inline-flex items-center gap-1 bg-red-500 px-2 py-1 rounded text-xs ml-2">
+                                    <span class="material-symbols-outlined text-xs">warning</span>
+                                    Hết hạn
+                                </span>
+                            }
+                            else if (libraryCard.Status == "Suspended")
+                            {
+                                <span class="inline-flex items-center gap-1 bg-yellow-500 px-2 py-1 rounded text-xs ml-2">
+                                    <span class="material-symbols-outlined text-xs">pause_circle</span>
+                                    Tạm ngưng
+                                </span>
+                            }
+                        </p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Thẻ Thư viện</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
+                        Bạn chưa có thẻ thư viện. Vui lòng liên hệ thủ thư để được cấp thẻ.
+                    </p>
+                </div>
+            }
+        </div>
+
+        <!-- Right Column - Account Details -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Personal Information -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Thông tin cá nhân
+                </h2>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Họ và tên</label>
+                        <p class="text-gray-900 dark:text-white font-medium">@Model.FullName</p>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Tên đăng nhập</label>
+                        <p class="text-gray-900 dark:text-white">@Model.Username</p>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
+                        <p class="text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-400">email</span>
+                            @Model.Email
+                        </p>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Số điện thoại</label>
+                        <p class="text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-400">phone</span>
+                            @(Model.PhoneNumber ?? "Chưa cập nhật")
+                        </p>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Địa chỉ</label>
+                        <p class="text-gray-900 dark:text-white flex items-start gap-2">
+                            <span class="material-symbols-outlined text-gray-400">home</span>
+                            <span>@(Model.Address ?? "Chưa cập nhật")</span>
+                        </p>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Ngày sinh</label>
+                        <p class="text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-400">cake</span>
+                            @(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")
+                        </p>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Giới tính</label>
+                        <p class="text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-gray-400">person</span>
+                            @(Model.Gender == "Male" ? "Nam" : Model.Gender == "Female" ? "Nữ" : "Khác")
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <a href="@Url.Action("EditProfile", "Reader")"
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                        <span class="material-symbols-outlined">edit</span>
+                        Chỉnh sửa thông tin
+                    </a>
+                </div>
+            </div>
+
+            <!-- Account Security -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Bảo mật tài khoản
+                </h2>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-gray-400">lock</span>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white">Mật khẩu</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">••••••••</p>
+                            </div>
+                        </div>
+                        <a href="@Url.Action("ChangePassword", "Reader")"
+                           class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition text-sm">
+                            Đổi mật khẩu
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Stats -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Thông tin tài khoản
+                </h2>
+
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Ngày tạo tài khoản</span>
+                        <span class="text-gray-900 dark:text-white font-medium">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Cập nhật lần cuối</span>
+                        <span class="text-gray-900 dark:text-white font-medium">@Model.UpdatedAt.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 dark:text-gray-400">Trạng thái tài khoản</span>
+                        @if (Model.IsActive && !Model.IsLocked)
+                        {
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                <span class="material-symbols-outlined text-xs">check_circle</span>
+                                Hoạt động
+                            </span>
+                        }
+                        else if (!Model.IsActive)
+                        {
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                                <span class="material-symbols-outlined text-xs">pause_circle</span>
+                                Không hoạt động
+                            </span>
+                        }
+                        else if (Model.IsLocked)
+                        {
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                <span class="material-symbols-outlined text-xs">block</span>
+                                Bị khóa
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Success"]');
+        });
+    </script>
+}
+
