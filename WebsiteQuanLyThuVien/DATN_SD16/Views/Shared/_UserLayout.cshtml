@@ -58,6 +58,7 @@
                     <a class="hover:text-primary" href="@Url.Action("Index", "Books")">Tìm sách</a>
                     <a class="hover:text-primary" href="@Url.Action("Index", "Borrows")">Mượn sách</a>
                     <a class="hover:text-primary" href="@Url.Action("Index", "BookReservations")">Đặt sách</a>
+                    <a class="hover:text-primary" href="@Url.Action("Index", "ReadingRoom")">Phòng đọc</a>
                 </nav>
 
                 <div class="flex items-center gap-4">
@@ -85,6 +86,10 @@
                                 <a href="@Url.Action("Index", "BookReservations")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
                                     <span class="material-symbols-outlined text-sm">bookmark</span>
                                     Đặt sách của tôi
+                                </a>
+                                <a href="@Url.Action("MyReservations", "ReadingRoom")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">event_seat</span>
+                                    Đặt chỗ phòng đọc
                                 </a>
                                 <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
                                 <form method="post" action="/AdminAuth/Logout">
@@ -128,6 +133,9 @@
 
     <!-- Login Modal -->
     @await Html.PartialAsync("_LoginModal")
+    
+    <!-- Register Modal -->
+    @await Html.PartialAsync("_RegisterModal")
 
     <script>
         // Toggle user menu dropdown
@@ -146,6 +154,8 @@
             }
         });
     </script>
+
+    @RenderSection("Scripts", required: false)
 
 </body>
 </html>

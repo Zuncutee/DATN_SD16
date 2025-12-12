@@ -22,14 +22,24 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Books
+        [HttpGet]
+        [Route("Books")]
+        [Route("Books/Index")]
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string? title, string? author, int? categoryId, bool? availableOnly)
+        public async Task<IActionResult> Index(string? title, string? author, string? categoryId, bool? availableOnly)
         {
-            var books = await _bookService.SearchBooksAsync(title, author, categoryId, availableOnly);
+            // Parse categoryId - handle empty string as null
+            int? parsedCategoryId = null;
+            if (!string.IsNullOrWhiteSpace(categoryId) && int.TryParse(categoryId, out int catId))
+            {
+                parsedCategoryId = catId;
+            }
+
+            var books = await _bookService.SearchBooksAsync(title, author, parsedCategoryId, availableOnly);
             ViewBag.Categories = await _categoryRepository.GetAllAsync();
             ViewBag.Title = title;
             ViewBag.Author = author;
-            ViewBag.CategoryId = categoryId;
+            ViewBag.CategoryId = parsedCategoryId;
             ViewBag.AvailableOnly = availableOnly;
             return View(books);
         }

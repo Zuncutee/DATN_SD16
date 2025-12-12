@@ -56,6 +56,15 @@
                         </a>
                     </li>
                     <li>
+                        <a href="#reading-room-menu" data-bs-toggle="collapse" class="nav-link">
+                            <i class="fas fa-door-open"></i> <span>Phòng đọc</span> <i class="fas fa-chevron-down ms-auto"></i>
+                        </a>
+                        <ul class="collapse" id="reading-room-menu">
+                            <li><a asp-controller="Admin" asp-action="ReadingRooms" class="nav-link"><i class="fas fa-door-open"></i> Quản lý phòng</a></li>
+                            <li><a asp-controller="Admin" asp-action="RoomReservations" class="nav-link"><i class="fas fa-calendar-check"></i> Đặt chỗ & QR Code</a></li>
+                        </ul>
+                    </li>
+                    <li>
                         <a asp-controller="Admin" asp-action="Settings" class="nav-link">
                             <i class="fas fa-cog"></i> <span>Cấu hình Hệ thống</span>
                         </a>

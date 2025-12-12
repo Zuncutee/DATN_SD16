@@ -29,6 +29,7 @@ namespace DATN_SD16.Controllers
 
         // POST: AdminAuth/Login
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Login([FromBody] LoginRequest? jsonRequest, [FromForm] LoginRequest? formRequest)
         {
             // Check if it's an AJAX request
@@ -37,11 +38,20 @@ namespace DATN_SD16.Controllers
             // Get the request from either JSON or Form
             var request = jsonRequest ?? formRequest;
             
-            if (request == null || !ModelState.IsValid)
+            // Validate request
+            if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
                 if (isAjaxRequest)
                 {
-                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                    var errorMsg = "Dữ liệu không hợp lệ";
+                    if (request == null)
+                        errorMsg = "Không nhận được dữ liệu đăng nhập. Vui lòng thử lại.";
+                    else if (string.IsNullOrWhiteSpace(request.Username))
+                        errorMsg = "Vui lòng nhập tên đăng nhập";
+                    else if (string.IsNullOrWhiteSpace(request.Password))
+                        errorMsg = "Vui lòng nhập mật khẩu";
+                    
+                    return Json(new { success = false, message = errorMsg });
                 }
                 return View(request);
             }
@@ -196,6 +206,64 @@ namespace DATN_SD16.Controllers
         //    }
         //}
 
+        // POST: AdminAuth/Register
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            try
+            {
+                if (request == null || string.IsNullOrEmpty(request.Username) || string.IsNullOrEmpty(request.Password))
+                {
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                }
+
+                // Check if username exists
+                var existingUser = await _userService.GetUserByUsernameAsync(request.Username);
+                if (existingUser != null)
+                {
+                    return Json(new { success = false, message = "Tên đăng nhập đã tồn tại" });
+                }
+
+                // Check if email exists
+                var emailExists = await _userService.IsEmailExistsAsync(request.Email);
+                if (emailExists)
+                {
+                    return Json(new { success = false, message = "Email đã được sử dụng" });
+                }
+
+                // Create new user
+                var newUser = new Models.Entities.User
+                {
+                    Username = request.Username,
+                    Email = request.Email,
+                    FullName = request.FullName,
+                    PhoneNumber = request.PhoneNumber,
+                    DateOfBirth = request.DateOfBirth,
+                    Gender = request.Gender,
+                    Address = request.Address,
+                    IsActive = true,
+                    IsLocked = false,
+                    FailedLoginAttempts = 0
+                };
+
+                var createdUser = await _userService.CreateUserAsync(newUser, request.Password);
+
+                // Assign Reader role (RoleId = 3 for Reader based on schema)
+                await _userService.AssignRoleAsync(createdUser.UserId, 3, 1); // 1 = System Admin
+
+                return Json(new 
+                { 
+                    success = true, 
+                    message = "Đăng ký thành công! Vui lòng đăng nhập." 
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
         // POST: AdminAuth/Logout
         [HttpPost]
         [Authorize]
@@ -203,8 +271,23 @@ namespace DATN_SD16.Controllers
         {
             Response.Cookies.Delete("AuthToken");
             Response.Cookies.Delete("RefreshToken");
-            return RedirectToAction("Login", "AdminAuth");
+            // Redirect về trang chủ công khai của độc giả
+            return RedirectToAction("Index", "Home");
         }
     }
+}
+
+// DTO for Register Request
+public class RegisterRequest
+{
+    public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string? PhoneNumber { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public string? Gender { get; set; }
+    public string? Address { get; set; }
 }
 

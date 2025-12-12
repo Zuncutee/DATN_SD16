@@ -7,6 +7,8 @@ using DATN_SD16.Repositories.Interfaces;
 using DATN_SD16.Models.Entities;
 using DATN_SD16.Helpers;
 using DATN_SD16.Attributes;
+using DATN_SD16.Data;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Linq;
 
@@ -31,6 +33,11 @@ namespace DATN_SD16.Controllers
         private readonly IBookRepository _bookRepository;
         private readonly IRepository<BookCopy> _bookCopyRepository;
         private readonly IBorrowService _borrowService;
+        private readonly IReadingRoomService _readingRoomService;
+        private readonly IRepository<ReadingRoom> _readingRoomRepository;
+        private readonly IRepository<ReadingRoomSeat> _seatRepository;
+        private readonly IRepository<ReadingRoomReservation> _roomReservationRepository;
+        private readonly LibraryDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         public AdminController(
@@ -46,6 +53,11 @@ namespace DATN_SD16.Controllers
             IBookRepository bookRepository,
             IRepository<BookCopy> bookCopyRepository,
             IBorrowService borrowService,
+            IReadingRoomService readingRoomService,
+            IRepository<ReadingRoom> readingRoomRepository,
+            IRepository<ReadingRoomSeat> seatRepository,
+            IRepository<ReadingRoomReservation> roomReservationRepository,
+            LibraryDbContext context,
             IWebHostEnvironment webHostEnvironment)
         {
             _userService = userService;
@@ -60,6 +72,11 @@ namespace DATN_SD16.Controllers
             _bookRepository = bookRepository;
             _bookCopyRepository = bookCopyRepository;
             _borrowService = borrowService;
+            _readingRoomService = readingRoomService;
+            _readingRoomRepository = readingRoomRepository;
+            _seatRepository = seatRepository;
+            _roomReservationRepository = roomReservationRepository;
+            _context = context;
             _webHostEnvironment = webHostEnvironment;
         }
 
@@ -264,7 +281,6 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // Validation
                 if (string.IsNullOrWhiteSpace(user.Username))
                 {
                     return Json(new { success = false, message = "Tên đăng nhập không được để trống" });
@@ -285,19 +301,16 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự" });
                 }
 
-                // Kiểm tra username tồn tại
                 if (await _userService.IsUsernameExistsAsync(user.Username))
                 {
                     return Json(new { success = false, message = "Tên đăng nhập đã tồn tại" });
                 }
 
-                // Kiểm tra email tồn tại
                 if (await _userService.IsEmailExistsAsync(user.Email))
                 {
                     return Json(new { success = false, message = "Email đã tồn tại" });
                 }
 
-                // Kiểm tra roleIds
                 if (roleIds == null || !roleIds.Any())
                 {
                     return Json(new { success = false, message = "Vui lòng chọn ít nhất một vai trò" });
@@ -305,7 +318,6 @@ namespace DATN_SD16.Controllers
 
                 var newUser = await _userService.CreateUserAsync(user, password);
                 
-                // Gán roles - Đảm bảo roleIds không null và có phần tử
                 if (roleIds != null && roleIds.Any())
                 {
                     var currentUserId = UserHelper.GetUserId(User) ?? 1;
@@ -343,18 +355,15 @@ namespace DATN_SD16.Controllers
             {
                 await _userService.UpdateUserAsync(user);
                 
-                // Cập nhật roles
                 var currentUser = await _userService.GetUserWithRolesAsync(user.UserId);
                 var currentUserId = UserHelper.GetUserId(User) ?? 1;
                 
-                // Xóa tất cả roles cũ - Tạo copy của collection để tránh lỗi "Collection was modified"
                 var rolesToRemove = currentUser?.UserRoles?.ToList() ?? new List<UserRole>();
                 foreach (var userRole in rolesToRemove)
                 {
                     await _userService.RemoveRoleAsync(user.UserId, userRole.RoleId);
                 }
                 
-                // Thêm roles mới
                 if (roleIds != null && roleIds.Any())
                 {
                     foreach (var roleId in roleIds)
@@ -421,7 +430,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Tên thể loại không được để trống" });
                 }
 
-                // Kiểm tra trùng tên
                 var exists = await _categoryRepository.FirstOrDefaultAsync(c => c.CategoryName == category.CategoryName);
                 if (exists != null)
                 {
@@ -459,7 +467,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy thể loại" });
                 }
 
-                // Kiểm tra trùng tên (trừ chính nó)
                 var duplicate = await _categoryRepository.FirstOrDefaultAsync(c => c.CategoryName == category.CategoryName && c.CategoryId != category.CategoryId);
                 if (duplicate != null)
                 {
@@ -491,7 +498,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy thể loại" });
                 }
 
-                // Kiểm tra xem có sách nào đang sử dụng thể loại này không
                 var booksWithCategory = await _bookRepository.FindAsync(b => b.CategoryId == id);
                 if (booksWithCategory.Any())
                 {
@@ -579,7 +585,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy tác giả" });
                 }
 
-                // Kiểm tra xem có sách nào đang sử dụng tác giả này không
                 var booksWithAuthor = await _bookRepository.FindAsync(b => b.BookAuthors.Any(ba => ba.AuthorId == id));
                 if (booksWithAuthor.Any())
                 {
@@ -647,7 +652,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy nhà xuất bản" });
                 }
 
-                // Kiểm tra tên trùng (trừ chính nó)
                 var duplicate = await _publisherRepository.FirstOrDefaultAsync(p => p.PublisherName == publisher.PublisherName && p.PublisherId != publisher.PublisherId);
                 if (duplicate != null)
                 {
@@ -681,7 +685,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy nhà xuất bản" });
                 }
 
-                // Kiểm tra xem có sách nào đang sử dụng nhà xuất bản này không
                 var booksWithPublisher = await _bookRepository.FindAsync(b => b.PublisherId == id);
                 if (booksWithPublisher.Any())
                 {
@@ -749,7 +752,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy vị trí sách" });
                 }
 
-                // Kiểm tra mã vị trí trùng (trừ chính nó)
                 var duplicate = await _bookLocationRepository.FirstOrDefaultAsync(l => l.LocationCode == location.LocationCode && l.LocationId != location.LocationId);
                 if (duplicate != null)
                 {
@@ -783,7 +785,6 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Không tìm thấy vị trí sách" });
                 }
 
-                // Kiểm tra xem có sách nào đang sử dụng vị trí này không
                 var booksUsingLocation = await _bookRepository.FindAsync(b => b.LocationId == id);
                 if (booksUsingLocation.Any())
                 {
@@ -830,7 +831,6 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // Validate CategoryId manually
                 if (book.CategoryId <= 0)
                 {
                     ModelState.AddModelError(nameof(book.CategoryId), "Vui lòng chọn thể loại sách.");
@@ -903,7 +903,6 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // Validate BookId
                 if (book.BookId <= 0)
                 {
                     var errorMsg = "Không tìm thấy ID sách cần cập nhật.";
@@ -1145,6 +1144,404 @@ namespace DATN_SD16.Controllers
         {
             var borrows = await _borrowRepository.GetOverdueBorrowsAsync();
             return PartialView("_OverdueBooks", borrows);
+        }
+        #endregion
+
+        #region Quản lý Phòng đọc
+        // GET: Admin/ReadingRooms
+        public async Task<IActionResult> ReadingRooms()
+        {
+            var rooms = await _readingRoomRepository.GetAllAsync();
+            return View(rooms);
+        }
+
+        // POST: Admin/CreateReadingRoom
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateReadingRoom(ReadingRoom room)
+        {
+            try
+            {
+                var createdBy = UserHelper.GetUserId(User) ?? 1;
+                await _readingRoomService.CreateRoomAsync(room, createdBy);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Tạo phòng đọc thành công!" });
+                }
+
+                TempData["Success"] = "Tạo phòng đọc thành công!";
+                return RedirectToAction(nameof(ReadingRooms));
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(ReadingRooms));
+            }
+        }
+
+        // POST: Admin/UpdateReadingRoom
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateReadingRoom(ReadingRoom room)
+        {
+            try
+            {
+                await _readingRoomService.UpdateRoomAsync(room);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Cập nhật phòng đọc thành công!" });
+                }
+
+                TempData["Success"] = "Cập nhật phòng đọc thành công!";
+                return RedirectToAction(nameof(ReadingRooms));
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(ReadingRooms));
+            }
+        }
+
+        // POST: Admin/DeleteReadingRoom/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReadingRoom(int id)
+        {
+            try
+            {
+                await _readingRoomService.DeleteRoomAsync(id);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Xóa phòng đọc thành công!" });
+                }
+
+                TempData["Success"] = "Xóa phòng đọc thành công!";
+                return RedirectToAction(nameof(ReadingRooms));
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(ReadingRooms));
+            }
+        }
+
+        // GET: Admin/RoomSeats/5
+        public async Task<IActionResult> RoomSeats(int id)
+        {
+            var room = await _readingRoomRepository.GetByIdAsync(id);
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            var seats = await _readingRoomService.GetSeatsByRoomIdAsync(id);
+            
+            ViewBag.Room = room;
+            return View(seats);
+        }
+
+        // POST: Admin/CreateSeat
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateSeat(ReadingRoomSeat seat)
+        {
+            try
+            {
+                await _readingRoomService.CreateSeatAsync(seat);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Tạo chỗ ngồi thành công!" });
+                }
+
+                TempData["Success"] = "Tạo chỗ ngồi thành công!";
+                return RedirectToAction(nameof(RoomSeats), new { id = seat.RoomId });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomSeats), new { id = seat.RoomId });
+            }
+        }
+
+        // POST: Admin/UpdateSeat
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateSeat(ReadingRoomSeat seat)
+        {
+            try
+            {
+                await _readingRoomService.UpdateSeatAsync(seat);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Cập nhật chỗ ngồi thành công!" });
+                }
+
+                TempData["Success"] = "Cập nhật chỗ ngồi thành công!";
+                return RedirectToAction(nameof(RoomSeats), new { id = seat.RoomId });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomSeats), new { id = seat.RoomId });
+            }
+        }
+
+        // POST: Admin/DeleteSeat/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteSeat(int id, int roomId)
+        {
+            try
+            {
+                await _readingRoomService.DeleteSeatAsync(id);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Xóa chỗ ngồi thành công!" });
+                }
+
+                TempData["Success"] = "Xóa chỗ ngồi thành công!";
+                return RedirectToAction(nameof(RoomSeats), new { id = roomId });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomSeats), new { id = roomId });
+            }
+        }
+
+        // POST: Admin/GenerateQRCode/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateQRCode(int id, int roomId)
+        {
+            try
+            {
+                var seat = await _readingRoomService.GetSeatByIdAsync(id);
+                if (seat == null)
+                {
+                    throw new Exception("Không tìm thấy chỗ ngồi");
+                }
+
+                // Generate new QR code
+                var qrCode = await _readingRoomService.GenerateQRCodeForSeatAsync(id);
+                
+                // Update seat with new QR code
+                seat.QRCode = qrCode;
+                seat.UpdatedAt = DateTime.Now;
+                await _readingRoomService.UpdateSeatAsync(seat);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Tạo mã QR thành công!", qrCode = qrCode });
+                }
+
+                TempData["Success"] = $"Tạo mã QR thành công: {qrCode}";
+                return RedirectToAction(nameof(RoomSeats), new { id = roomId });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomSeats), new { id = roomId });
+            }
+        }
+
+        // GET: Admin/RoomReservations
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> RoomReservations(int? roomId, string? status, DateTime? date)
+        {
+            // Get all reservations with navigation properties
+            var query = _context.ReadingRoomReservations
+                .Include(r => r.User)
+                .Include(r => r.Seat)
+                    .ThenInclude(s => s.Room)
+                .OrderByDescending(r => r.CreatedAt)
+                .AsQueryable();
+
+            if (roomId.HasValue)
+            {
+                query = query.Where(r => r.Seat.RoomId == roomId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(r => r.Status == status);
+            }
+
+            if (date.HasValue)
+            {
+                query = query.Where(r => r.ReservationDate.Date == date.Value.Date);
+            }
+
+            var reservations = await query.ToListAsync();
+
+            ViewBag.Rooms = await _readingRoomRepository.GetAllAsync();
+            ViewBag.SelectedRoomId = roomId;
+            ViewBag.SelectedStatus = status;
+            ViewBag.SelectedDate = date;
+            ViewBag.StatusList = new[] { "Reserved", "CheckedIn", "Completed", "Cancelled", "NoShow" };
+
+            return View(reservations);
+        }
+
+        // GET: Admin/RoomReservationDetails/5
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> RoomReservationDetails(int id)
+        {
+            var reservation = await _context.ReadingRoomReservations
+                .Include(r => r.User)
+                .Include(r => r.Seat)
+                    .ThenInclude(s => s.Room)
+                .FirstOrDefaultAsync(r => r.ReservationId == id);
+            
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            return View(reservation);
+        }
+
+        // POST: Admin/CheckInReservation/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> CheckInReservation(int id, string qrCode)
+        {
+            try
+            {
+                var success = await _readingRoomService.CheckInAsync(id, qrCode);
+                if (!success)
+                {
+                    throw new Exception("Check-in thất bại. Vui lòng kiểm tra lại mã QR.");
+                }
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Check-in thành công!" });
+                }
+
+                TempData["Success"] = "Check-in thành công!";
+                return RedirectToAction(nameof(RoomReservationDetails), new { id });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomReservationDetails), new { id });
+            }
+        }
+
+        // POST: Admin/CheckOutReservation/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> CheckOutReservation(int id)
+        {
+            try
+            {
+                var success = await _readingRoomService.CheckOutAsync(id);
+                if (!success)
+                {
+                    throw new Exception("Check-out thất bại.");
+                }
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Check-out thành công!" });
+                }
+
+                TempData["Success"] = "Check-out thành công!";
+                return RedirectToAction(nameof(RoomReservationDetails), new { id });
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomReservationDetails), new { id });
+            }
+        }
+
+        // POST: Admin/CancelRoomReservation/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AuthorizeRoles("Admin", "Librarian")]
+        public async Task<IActionResult> CancelRoomReservation(int id)
+        {
+            try
+            {
+                var success = await _readingRoomService.CancelReservationAsync(id);
+                if (!success)
+                {
+                    throw new Exception("Hủy đặt chỗ thất bại.");
+                }
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Hủy đặt chỗ thành công!" });
+                }
+
+                TempData["Success"] = "Hủy đặt chỗ thành công!";
+                return RedirectToAction(nameof(RoomReservations));
+            }
+            catch (Exception ex)
+            {
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = false, message = ex.Message });
+                }
+
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(RoomReservations));
+            }
         }
         #endregion
     }

@@ -1,83 +1,280 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "City Library - Trang chủ";
     Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var latestBooks = ViewBag.LatestBooks as IEnumerable<DATN_SD16.Models.Entities.Book> ?? Enumerable.Empty<DATN_SD16.Models.Entities.Book>();
+    var topCategories = ViewBag.TopCategories as IEnumerable<DATN_SD16.Models.Entities.Category> ?? Enumerable.Empty<DATN_SD16.Models.Entities.Category>();
+    var popularBooks = ViewBag.PopularBooks as IEnumerable<DATN_SD16.Models.Entities.Book> ?? Enumerable.Empty<DATN_SD16.Models.Entities.Book>();
 }
+
 <!-- Hero Section -->
-<div class="container mx-auto">
-    <div class="flex flex-col gap-6 px-4 py-10 rounded-xl bg-white dark:bg-gray-800/50 md:flex-row">
+<div class="bg-gradient-to-br from-primary/10 to-blue-50 dark:from-gray-800 dark:to-gray-900 py-20">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <!-- Left Side - Text & Search -->
+            <div class="space-y-6">
+                <h1 class="text-5xl font-black text-gray-900 dark:text-white leading-tight">
+                    Khám phá thế giới<br />
+                    <span class="text-primary">Tri thức</span>
+                </h1>
 
-        <!-- Left Side -->
-        <div class="flex flex-col gap-6 md:min-w-[400px]">
-            <h1 class="text-4xl font-black text-gray-900 dark:text-white">
-                Find Your Next Great Read
-            </h1>
+                <p class="text-lg text-gray-600 dark:text-gray-300">
+                    Hàng nghìn đầu sách đang chờ bạn khám phá. Tìm kiếm, đọc và mở rộng kiến thức của bạn ngay hôm nay.
+                </p>
 
-            <h2 class="text-sm text-gray-600 dark:text-gray-300">
-                Search our extensive collection of books and discover your next favorite story.
-            </h2>
+                <!-- Search Bar -->
+                <form action="@Url.Action("Index", "Books")" method="get" class="flex flex-col sm:flex-row gap-3">
+                    <div class="flex-1 flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                        <span class="material-symbols-outlined text-gray-400 px-4">search</span>
+                        <input type="text" 
+                               name="title"
+                               class="flex-1 px-4 py-4 bg-transparent border-0 focus:ring-0 text-gray-900 dark:text-white"
+                               placeholder="Tìm kiếm theo tên sách, tác giả..." />
+                    </div>
+                    <button type="submit" 
+                            class="px-8 py-4 bg-primary text-white font-semibold rounded-lg hover:bg-blue-600 transition shadow-lg hover:shadow-xl">
+                        Tìm kiếm
+                    </button>
+                </form>
 
-            <!-- Search -->
-            <div class="flex h-14 w-full max-w-[480px]">
-                <div class="flex items-center bg-background-light dark:bg-background-dark pl-4 rounded-l-lg">
-                    <span class="material-symbols-outlined text-xl">search</span>
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4 pt-4">
+                    <div class="text-center">
+                        <p class="text-3xl font-bold text-primary">10K+</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Đầu sách</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-3xl font-bold text-primary">5K+</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Độc giả</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-3xl font-bold text-primary">24/7</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Truy cập</p>
+                    </div>
                 </div>
-
-                <input class="form-input flex-1 px-4 bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100"
-                       placeholder="Search by Title, Author, or ISBN" />
-
-                <button class="px-4 bg-primary text-white font-bold rounded-r-lg">
-                    Search
-                </button>
             </div>
-        </div>
 
-        <!-- Right Side Banner -->
-        <div class="w-full bg-cover rounded-lg aspect-video"
-             style="background-image:url('https://lh3.googleusercontent.com/pw/...')">
+            <!-- Right Side - Image -->
+            <div class="hidden lg:block">
+                <div class="relative">
+                    <div class="w-full h-96 bg-gradient-to-br from-primary/20 to-blue-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl shadow-2xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-9xl text-primary/30">library_books</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- New Arrivals -->
-<section class="container mx-auto mt-8">
-    <h2 class="text-2xl font-bold px-4 text-gray-900 dark:text-white">New Arrivals</h2>
+<!-- Categories Section -->
+<section class="max-w-7xl mx-auto px-4 py-16">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Danh mục phổ biến</h2>
+        <a href="@Url.Action("Index", "Books")" class="text-primary hover:underline font-medium">
+            Xem tất cả →
+        </a>
+    </div>
 
-    <div class="flex overflow-x-auto">
-        <div class="flex gap-6 p-4">
-
-            <!-- Book Card -->
-            <div class="flex flex-col min-w-60 bg-white dark:bg-gray-800/50 rounded-xl shadow-sm">
-                <div class="aspect-[3/4] bg-cover"
-                     style="background-image:url('https://lh3.googleusercontent.com/pw/...')">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        @foreach (var category in topCategories)
+        {
+            <a href="@Url.Action("Index", "Books", new { categoryId = category.CategoryId })" 
+               class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-lg transition text-center group">
+                <div class="w-16 h-16 mx-auto mb-3 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition">
+                    <span class="material-symbols-outlined text-3xl text-primary">category</span>
                 </div>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-1">@category.CategoryName</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">@category.Description</p>
+            </a>
+        }
+    </div>
+</section>
 
-                <div class="p-4 flex flex-col gap-2">
-                    <p class="font-semibold text-gray-900 dark:text-white">
-                        Book Title
-                    </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Author Name
-                    </p>
+<!-- Latest Books Section -->
+<section class="bg-gray-50 dark:bg-gray-900 py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Sách mới nhất</h2>
+            <a href="@Url.Action("Index", "Books")" class="text-primary hover:underline font-medium">
+                Xem tất cả →
+            </a>
+        </div>
 
-                    <button class="h-10 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary font-bold">
-                        Reserve
-                    </button>
-                </div>
+        @if (latestBooks.Any())
+        {
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                @foreach (var book in latestBooks)
+                {
+                    <a href="@Url.Action("Details", "Books", new { id = book.BookId })" 
+                       class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition group">
+                        <!-- Book Cover -->
+                        <div class="aspect-[3/4] bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                            @if (!string.IsNullOrEmpty(book.CoverImage))
+                            {
+                                <img src="@book.CoverImage" 
+                                     alt="@book.Title" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-6xl text-gray-400">book</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Book Info -->
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition">
+                                @book.Title
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                                @(book.Category?.CategoryName ?? "N/A")
+                            </p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">
+                                    Còn: <span class="font-semibold text-primary">@book.AvailableCopies</span>
+                                </span>
+                                @if (book.AvailableCopies > 0)
+                                {
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                        Có sẵn
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                        Hết
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </a>
+                }
             </div>
+        }
+        else
+        {
+            <p class="text-center text-gray-500 py-12">Chưa có sách nào</p>
+        }
+    </div>
+</section>
 
-            <!-- Bạn có thể lặp thêm thẻ card ở đây -->
+<!-- Popular Books Section -->
+@if (popularBooks.Any())
+{
+    <section class="max-w-7xl mx-auto px-4 py-16">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Sách được yêu thích</h2>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            @foreach (var book in popularBooks)
+            {
+                <a href="@Url.Action("Details", "Books", new { id = book.BookId })" 
+                   class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition group">
+                    <!-- Book Cover -->
+                    <div class="aspect-[3/4] bg-gray-200 dark:bg-gray-700 overflow-hidden relative">
+                        @if (!string.IsNullOrEmpty(book.CoverImage))
+                        {
+                            <img src="@book.CoverImage" 
+                                 alt="@book.Title" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        }
+                        else
+                        {
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-6xl text-gray-400">book</span>
+                            </div>
+                        }
+                        <div class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+                            <span class="material-symbols-outlined text-sm align-middle">star</span>
+                            Hot
+                        </div>
+                    </div>
+
+                    <!-- Book Info -->
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-primary transition">
+                            @book.Title
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            @(book.Category?.CategoryName ?? "N/A")
+                        </p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">
+                                Còn: <span class="font-semibold text-primary">@book.AvailableCopies</span>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </section>
+}
+
+<!-- CTA Section -->
+<section class="bg-gradient-to-r from-primary to-blue-600 py-16">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold text-white mb-4">
+            Sẵn sàng khám phá?
+        </h2>
+        <p class="text-xl text-blue-100 mb-8">
+            Đăng ký ngay để trải nghiệm hệ thống thư viện hiện đại và tiện lợi
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button onclick="openRegisterModal()" 
+                    class="px-8 py-4 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition shadow-lg">
+                Đăng ký ngay
+            </button>
+            <a href="@Url.Action("Index", "Books")" 
+               class="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-primary transition">
+                Khám phá sách
+            </a>
         </div>
     </div>
 </section>
 
-<!-- My Account Section -->
-<section class="container mx-auto mt-10">
-    <div class="bg-white dark:bg-gray-800/50 rounded-xl p-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            My Account
-        </h2>
+<!-- Features Section -->
+<section class="max-w-7xl mx-auto px-4 py-16">
+    <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+        Tại sao chọn City Library?
+    </h2>
 
-        <p class="text-gray-600 dark:text-gray-300">Welcome back, Alex!</p>
-        <!-- Bạn có thể copy Borrowed Books & Reservations vào đây -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-primary">local_library</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Kho sách phong phú
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Hàng nghìn đầu sách từ nhiều thể loại khác nhau, cập nhật liên tục
+            </p>
+        </div>
+
+        <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-green-600">schedule</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Mở cửa 24/7
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Truy cập và đặt sách mọi lúc mọi nơi, tiện lợi và nhanh chóng
+            </p>
+        </div>
+
+        <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl text-purple-600">support_agent</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Hỗ trợ tận tâm
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Đội ngũ thủ thư chuyên nghiệp, luôn sẵn sàng hỗ trợ bạn
+            </p>
+        </div>
     </div>
 </section>
