@@ -424,7 +424,6 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // Validation
                 if (string.IsNullOrWhiteSpace(category.CategoryName))
                 {
                     return Json(new { success = false, message = "Tên thể loại không được để trống" });
@@ -455,7 +454,6 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // Validation
                 if (string.IsNullOrWhiteSpace(category.CategoryName))
                 {
                     return Json(new { success = false, message = "Tên thể loại không được để trống" });
@@ -913,7 +911,6 @@ namespace DATN_SD16.Controllers
                     return NotFound();
                 }
 
-                // Validate CategoryId manually
                 if (book.CategoryId <= 0)
                 {
                     ModelState.AddModelError(nameof(book.CategoryId), "Vui lòng chọn thể loại sách.");
@@ -1358,10 +1355,8 @@ namespace DATN_SD16.Controllers
                     throw new Exception("Không tìm thấy chỗ ngồi");
                 }
 
-                // Generate new QR code
                 var qrCode = await _readingRoomService.GenerateQRCodeForSeatAsync(id);
                 
-                // Update seat with new QR code
                 seat.QRCode = qrCode;
                 seat.UpdatedAt = DateTime.Now;
                 await _readingRoomService.UpdateSeatAsync(seat);
@@ -1390,7 +1385,6 @@ namespace DATN_SD16.Controllers
         [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> RoomReservations(int? roomId, string? status, DateTime? date)
         {
-            // Get all reservations with navigation properties
             var query = _context.ReadingRoomReservations
                 .Include(r => r.User)
                 .Include(r => r.Seat)
