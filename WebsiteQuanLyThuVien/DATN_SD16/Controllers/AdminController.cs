@@ -953,9 +953,6 @@ namespace DATN_SD16.Controllers
             }
             catch (Exception ex)
             {
-                // Log exception for debugging
-                // You can add logging here if needed
-                
                 if (IsAjaxRequest())
                 {
                     return Json(new { success = false, message = $"Lỗi: {ex.Message}" });

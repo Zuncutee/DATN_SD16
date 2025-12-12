@@ -117,12 +117,10 @@ namespace DATN_SD16.Controllers
 
                 var allReservations = await _bookReservationRepository.GetAllAsync();
                 
-                // Lọc theo userId và status (Pending hoặc Approved)
                 var filtered = allReservations.Where(r => 
                     r.UserId == userId.Value &&
                     (r.Status == "Pending" || r.Status == "Approved"));
                 
-                // Lọc theo bookId nếu có
                 if (bookId.HasValue)
                 {
                     filtered = filtered.Where(r => r.BookId == bookId.Value);
@@ -209,7 +207,6 @@ namespace DATN_SD16.Controllers
                 var returnedBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
                 await _borrowService.ReturnBookAsync(id, returnedBy, conditionOnReturn);
 
-                // Cập nhật tiền phạt đã trả nếu có
                 if (finePaid.HasValue && finePaid.Value > 0)
                 {
                     var borrow = await _borrowRepository.GetByIdAsync(id);
@@ -441,7 +438,6 @@ namespace DATN_SD16.Controllers
         {
             try
             {
-                // Kiểm tra đã có thẻ chưa
                 var existingCard = await _libraryCardRepository.FirstOrDefaultAsync(c => c.UserId == userId);
                 if (existingCard != null)
                 {
@@ -585,8 +581,6 @@ namespace DATN_SD16.Controllers
                 damage.UpdatedAt = DateTime.Now;
 
                 await _bookDamageRepository.AddAsync(damage);
-
-                // Cập nhật trạng thái copy
                 try
                 {
                     var copy = await _bookCopyRepository.GetByIdAsync(damage.CopyId);
@@ -613,8 +607,6 @@ namespace DATN_SD16.Controllers
                 }
                 catch (Exception ex)
                 {
-                    // Log lỗi nhưng không throw vì BookDamage đã được lưu
-                    // Trigger sẽ tự động cập nhật BookCopy status
                     System.Diagnostics.Debug.WriteLine($"Error updating BookCopy: {ex.Message}");
                 }
 
@@ -795,8 +787,6 @@ namespace DATN_SD16.Controllers
                 check.Status = "Completed";
                 check.UpdatedAt = DateTime.Now;
                 await _inventoryCheckRepository.UpdateAsync(check);
-
-                // Cập nhật trạng thái sách theo kết quả kiểm kê
                 var details = await _inventoryCheckDetailRepository.FindAsync(d => d.CheckId == id);
                 foreach (var detail in details)
                 {

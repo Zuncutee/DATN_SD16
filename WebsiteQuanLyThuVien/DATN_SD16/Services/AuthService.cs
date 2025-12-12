@@ -38,15 +38,12 @@ namespace DATN_SD16.Services
             if (!isValidPassword)
                 return null;
 
-            // Lấy roles của user
             var userWithRoles = await _userService.GetUserWithRolesAsync(user.UserId);
             var roles = userWithRoles?.UserRoles.Select(ur => ur.Role.RoleName).ToList() ?? new List<string>();
 
-            // Generate tokens
             var token = _jwtService.GenerateToken(user, roles);
             var refreshToken = _jwtService.GenerateRefreshToken();
 
-            // Lưu refresh token
             var refreshTokenExpirationDays = int.Parse(_configuration["Jwt:RefreshTokenExpirationDays"] ?? "7");
             var refreshTokenEntity = new RefreshToken
             {
@@ -57,7 +54,6 @@ namespace DATN_SD16.Services
             };
             await _refreshTokenRepository.AddAsync(refreshTokenEntity);
 
-            // Cập nhật last login
             user.LastLoginAt = DateTime.Now;
             await _userService.UpdateUserAsync(user);
 
@@ -103,10 +99,8 @@ namespace DATN_SD16.Services
 
             var newUser = await _userService.CreateUserAsync(user, request.Password);
 
-            // Gán role Reader mặc định
-            await _userService.AssignRoleAsync(newUser.UserId, 3, 1); // Role Reader = 3
+            await _userService.AssignRoleAsync(newUser.UserId, 3, 1);
 
-            // Tự động login sau khi đăng ký
             var loginRequest = new LoginRequest
             {
                 Username = request.Username,
@@ -138,16 +132,13 @@ namespace DATN_SD16.Services
 
             var roles = user.UserRoles.Select(ur => ur.Role.RoleName).ToList();
 
-            // Generate new tokens
             var newToken = _jwtService.GenerateToken(user, roles);
             var newRefreshToken = _jwtService.GenerateRefreshToken();
 
-            // Revoke old refresh token
             storedRefreshToken.IsRevoked = true;
             storedRefreshToken.RevokedAt = DateTime.UtcNow;
             await _refreshTokenRepository.UpdateAsync(storedRefreshToken);
 
-            // Save new refresh token
             var refreshTokenExpirationDays = int.Parse(_configuration["Jwt:RefreshTokenExpirationDays"] ?? "7");
             var newRefreshTokenEntity = new RefreshToken
             {

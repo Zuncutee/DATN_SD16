@@ -126,7 +126,6 @@ namespace DATN_SD16.Services
 
         public async Task<string> HashPasswordAsync(string password)
         {
-            // Lưu vào biến tạm để dễ dàng đặt breakpoint/debug và xem chuỗi đã mã hoá
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, BCrypt.Net.BCrypt.GenerateSalt());
             return await Task.FromResult(hashedPassword);
         }

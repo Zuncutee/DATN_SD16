@@ -52,14 +52,12 @@ namespace DATN_SD16.Services
             if (book.AvailableCopies <= 0)
                 throw new Exception("Sách hiện không có sẵn");
 
-            // Kiểm tra xem đã đặt chưa
             var existingReservation = await _reservationRepository.FirstOrDefaultAsync(
                 r => r.UserId == userId && r.BookId == bookId && r.Status == "Pending");
             
             if (existingReservation != null)
                 throw new Exception("Bạn đã đặt sách này rồi");
 
-            // Lấy cấu hình thời gian hết hạn
             var expiryDaysSetting = await _systemSettingRepository.FirstOrDefaultAsync(
                 s => s.SettingKey == "ReservationExpiryDays");
             var expiryDays = expiryDaysSetting != null 

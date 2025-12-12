@@ -28,7 +28,6 @@ namespace DATN_SD16.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index(string? title, string? author, string? categoryId, bool? availableOnly)
         {
-            // Parse categoryId - handle empty string as null
             int? parsedCategoryId = null;
             if (!string.IsNullOrWhiteSpace(categoryId) && int.TryParse(categoryId, out int catId))
             {
@@ -137,14 +136,12 @@ namespace DATN_SD16.Controllers
                     status = c.Status ?? "Unknown"
                 }).ToList();
 
-                // Log để debug
                 System.Diagnostics.Debug.WriteLine($"GetAvailableCopies - BookId: {bookId}, Returned {result.Count} copies");
 
                 return Json(result);
             }
             catch (Exception ex)
             {
-                // Log lỗi để debug
                 System.Diagnostics.Debug.WriteLine($"Error in GetAvailableCopies: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 return Json(new { error = ex.Message });

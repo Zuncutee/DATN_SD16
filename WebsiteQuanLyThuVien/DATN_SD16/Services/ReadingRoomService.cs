@@ -100,12 +100,10 @@ namespace DATN_SD16.Services
             seat.CreatedAt = DateTime.Now;
             seat.UpdatedAt = DateTime.Now;
             
-            // Generate QR Code
-            seat.QRCode = await GenerateQRCodeForSeatAsync(0); // Will be updated after insert
+            seat.QRCode = await GenerateQRCodeForSeatAsync(0);
             
             var created = await _seatRepository.AddAsync(seat);
             
-            // Update QR Code with actual seat ID
             created.QRCode = $"SEAT-{created.SeatId}-{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}";
             await _seatRepository.UpdateAsync(created);
             
@@ -119,7 +117,6 @@ namespace DATN_SD16.Services
 
             existing.SeatNumber = seat.SeatNumber;
             existing.Status = seat.Status;
-            // Update QRCode if provided
             if (!string.IsNullOrEmpty(seat.QRCode))
             {
                 existing.QRCode = seat.QRCode;
@@ -172,7 +169,6 @@ namespace DATN_SD16.Services
                 throw new Exception("Chỗ ngồi không khả dụng");
             }
 
-            // Check for overlapping reservations
             var existingReservations = await _reservationRepository.FindAsync(r =>
                 r.SeatId == seatId &&
                 r.ReservationDate.Date == reservationDate.Date &&
@@ -200,7 +196,6 @@ namespace DATN_SD16.Services
                 UpdatedAt = DateTime.Now
             };
 
-            // Update seat status
             seat.Status = "Reserved";
             seat.UpdatedAt = DateTime.Now;
             await _seatRepository.UpdateAsync(seat);

@@ -69,7 +69,6 @@ namespace DATN_SD16.Services
             if (book == null)
                 throw new Exception("Không tìm thấy sách");
 
-            // Lấy cấu hình thời gian mượn
             var maxBorrowDaysSetting = await _systemSettingRepository.FirstOrDefaultAsync(
                 s => s.SettingKey == "MaxBorrowDays");
             var maxBorrowDays = maxBorrowDaysSetting != null 
@@ -92,14 +91,10 @@ namespace DATN_SD16.Services
                 UpdatedAt = DateTime.Now
             };
 
-            // Cập nhật trạng thái copy - Trigger sẽ tự động cập nhật Books
             copy.Status = "Borrowed";
             copy.UpdatedAt = DateTime.Now;
             await _bookCopyRepository.UpdateAsync(copy);
-            
-            // Không cần cập nhật Books thủ công vì trigger TRG_BookCopies_UpdateAvailableCopies_Update sẽ tự động cập nhật
 
-            // Cập nhật reservation nếu có
             if (reservationId.HasValue)
             {
                 var reservation = await _bookReservationRepository.GetByIdAsync(reservationId.Value);
@@ -111,7 +106,6 @@ namespace DATN_SD16.Services
                 }
             }
 
-            // Tạo lịch sử
             var history = new BorrowHistory
             {
                 BorrowId = borrow.BorrowId,
@@ -137,7 +131,6 @@ namespace DATN_SD16.Services
             var copy = borrow.Copy;
             var book = copy.Book;
 
-            // Cập nhật phiếu mượn
             borrow.ReturnDate = DateTime.Now;
             borrow.Status = "Returned";
             borrow.ReturnedBy = returnedBy;
@@ -152,7 +145,6 @@ namespace DATN_SD16.Services
 
             await _borrowRepository.UpdateAsync(borrow);
 
-            // Cập nhật trạng thái copy
             copy.Status = "Available";
             if (!string.IsNullOrEmpty(conditionOnReturn))
             {
@@ -161,12 +153,10 @@ namespace DATN_SD16.Services
             copy.UpdatedAt = DateTime.Now;
             await _bookCopyRepository.UpdateAsync(copy);
 
-            // Cập nhật số lượng sách
             book.AvailableCopies += 1;
             book.BorrowedCopies = Math.Max(0, book.BorrowedCopies - 1);
             await _bookRepository.UpdateAsync(book);
 
-            // Tạo lịch sử
             var history = new BorrowHistory
             {
                 BorrowId = borrowId,
@@ -216,7 +206,6 @@ namespace DATN_SD16.Services
             borrow.UpdatedAt = DateTime.Now;
             await _borrowRepository.UpdateAsync(borrow);
 
-            // Tạo lịch sử
             var history = new BorrowHistory
             {
                 BorrowId = borrowId,

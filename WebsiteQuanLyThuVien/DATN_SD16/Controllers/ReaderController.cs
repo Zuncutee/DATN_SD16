@@ -43,24 +43,20 @@ namespace DATN_SD16.Controllers
         {
             var userId = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
             
-            // Get user info
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            // Get borrowing statistics
             var allBorrows = await _borrowService.GetBorrowsByUserIdAsync(userId);
             var activeBorrows = await _borrowService.GetActiveBorrowsByUserIdAsync(userId);
             var overdueBorrows = allBorrows.Where(b => 
                 b.Status == "Borrowed" && b.DueDate < DateTime.Now).ToList();
 
-            // Get reservations
             var reservations = await _reservationService.GetReservationsByUserIdAsync(userId);
             var pendingReservations = reservations.Where(r => r.Status == "Pending").ToList();
 
-            // Calculate total fines
             decimal totalFines = 0;
             foreach (var borrow in allBorrows.Where(b => b.Status == "Borrowed"))
             {
@@ -68,7 +64,6 @@ namespace DATN_SD16.Controllers
                 totalFines += fine;
             }
 
-            // Get library card
             var libraryCard = await _context.LibraryCards
                 .Where(lc => lc.UserId == userId)
                 .OrderByDescending(lc => lc.IssueDate)
@@ -97,7 +92,6 @@ namespace DATN_SD16.Controllers
                 return NotFound();
             }
 
-            // Get library card
             var libraryCard = await _context.LibraryCards
                 .Where(lc => lc.UserId == userId)
                 .OrderByDescending(lc => lc.IssueDate)
@@ -137,7 +131,6 @@ namespace DATN_SD16.Controllers
                     return NotFound();
                 }
 
-                // Update only allowed fields
                 user.FullName = model.FullName;
                 user.Email = model.Email;
                 user.PhoneNumber = model.PhoneNumber;
@@ -202,13 +195,11 @@ namespace DATN_SD16.Controllers
                     return NotFound();
                 }
 
-                // Verify current password
                 if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
                 {
                     throw new Exception("Mật khẩu hiện tại không đúng");
                 }
 
-                // Hash and update new password
                 user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
                 user.UpdatedAt = DateTime.Now;
 

@@ -220,8 +220,6 @@ VALUES (
             };
 
             await _context.Database.ExecuteSqlRawAsync(sql, parameters);
-
-            // Lấy lại CopyId để cập nhật entity đang dùng
             var inserted = await _context.Set<BookCopy>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.BookId == bookCopy.BookId && c.CopyNumber == bookCopy.CopyNumber);

@@ -32,13 +32,10 @@ namespace DATN_SD16.Controllers
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Login([FromBody] LoginRequest? jsonRequest, [FromForm] LoginRequest? formRequest)
         {
-            // Check if it's an AJAX request
             bool isAjaxRequest = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
             
-            // Get the request from either JSON or Form
             var request = jsonRequest ?? formRequest;
             
-            // Validate request
             if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
             {
                 if (isAjaxRequest)
@@ -70,10 +67,8 @@ namespace DATN_SD16.Controllers
                     return View(request);
                 }
 
-                // Lấy danh sách role
                 var roles = response.UserInfo.Roles ?? new List<string>();
 
-                // Kiểm tra Role và điều hướng
                 string redirectController = "";
                 string redirectAction = "";
 
@@ -103,7 +98,6 @@ namespace DATN_SD16.Controllers
                     return View(request);
                 }
 
-                // Lưu token vào cookie
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
@@ -114,7 +108,6 @@ namespace DATN_SD16.Controllers
 
                 Response.Cookies.Append("AuthToken", response.Token, cookieOptions);
 
-                // Lưu Refresh Token
                 var refreshCookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
@@ -125,7 +118,6 @@ namespace DATN_SD16.Controllers
 
                 Response.Cookies.Append("RefreshToken", response.RefreshToken, refreshCookieOptions);
 
-                // Return based on request type
                 if (isAjaxRequest)
                 {
                     return Json(new 
@@ -218,21 +210,18 @@ namespace DATN_SD16.Controllers
                     return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
                 }
 
-                // Check if username exists
                 var existingUser = await _userService.GetUserByUsernameAsync(request.Username);
                 if (existingUser != null)
                 {
                     return Json(new { success = false, message = "Tên đăng nhập đã tồn tại" });
                 }
 
-                // Check if email exists
                 var emailExists = await _userService.IsEmailExistsAsync(request.Email);
                 if (emailExists)
                 {
                     return Json(new { success = false, message = "Email đã được sử dụng" });
                 }
 
-                // Create new user
                 var newUser = new Models.Entities.User
                 {
                     Username = request.Username,
@@ -249,8 +238,7 @@ namespace DATN_SD16.Controllers
 
                 var createdUser = await _userService.CreateUserAsync(newUser, request.Password);
 
-                // Assign Reader role (RoleId = 3 for Reader based on schema)
-                await _userService.AssignRoleAsync(createdUser.UserId, 3, 1); // 1 = System Admin
+                await _userService.AssignRoleAsync(createdUser.UserId, 3, 1);
 
                 return Json(new 
                 { 
@@ -271,7 +259,6 @@ namespace DATN_SD16.Controllers
         {
             Response.Cookies.Delete("AuthToken");
             Response.Cookies.Delete("RefreshToken");
-            // Redirect về trang chủ công khai của độc giả
             return RedirectToAction("Index", "Home");
         }
     }
