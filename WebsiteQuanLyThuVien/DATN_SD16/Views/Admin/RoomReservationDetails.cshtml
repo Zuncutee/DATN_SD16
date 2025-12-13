@@ -1,0 +1,309 @@
+@model DATN_SD16.Models.Entities.ReadingRoomReservation
+@{
+    ViewData["Title"] = "Chi tiết Đặt chỗ";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="mb-3">
+    <a asp-action="RoomReservations" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header @(Model.Status == "Reserved" ? "bg-warning" : Model.Status == "CheckedIn" ? "bg-success" : Model.Status == "Completed" ? "bg-secondary" : "bg-danger") text-white">
+        <i class="fas fa-calendar-check"></i> Chi tiết Đặt chỗ #@Model.ReservationId
+    </div>
+    <div class="card-body">
+        <!-- Status Banner -->
+        @if (Model.Status == "Reserved")
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-clock"></i> <strong>Đã đặt</strong> - Chờ check-in
+            </div>
+        }
+        else if (Model.Status == "CheckedIn")
+        {
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <strong>Đã check-in</strong> - Đang sử dụng
+            </div>
+        }
+        else if (Model.Status == "Completed")
+        {
+            <div class="alert alert-secondary">
+                <i class="fas fa-check"></i> <strong>Hoàn thành</strong> - Đã check-out
+            </div>
+        }
+        else if (Model.Status == "Cancelled")
+        {
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> <strong>Đã hủy</strong> - Đặt chỗ này đã bị hủy
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5 class="mb-3"><i class="fas fa-info-circle"></i> Thông tin Đặt chỗ</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="40%">Mã đặt chỗ:</th>
+                        <td><strong>#@Model.ReservationId</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Độc giả:</th>
+                        <td>
+                            <strong>@(Model.User?.FullName ?? Model.User?.Username ?? "N/A")</strong>
+                            <br>
+                            <small class="text-muted">@(Model.User?.Username ?? "")</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Phòng đọc:</th>
+                        <td>@(Model.Seat?.Room?.RoomName ?? "N/A")</td>
+                    </tr>
+                    <tr>
+                        <th>Chỗ ngồi:</th>
+                        <td>
+                            <span class="badge bg-info">@(Model.Seat?.SeatNumber ?? "N/A")</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Ngày đặt:</th>
+                        <td>@Model.ReservationDate.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                    <tr>
+                        <th>Thời gian:</th>
+                        <td>
+                            @Model.StartTime.ToString(@"hh\:mm") - @Model.EndTime.ToString(@"hh\:mm")
+                            <br>
+                            <small class="text-muted">@((Model.EndTime - Model.StartTime).TotalHours) giờ</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Trạng thái:</th>
+                        <td>
+                            @if (Model.Status == "Reserved")
+                            {
+                                <span class="badge bg-warning">Đã đặt</span>
+                            }
+                            else if (Model.Status == "CheckedIn")
+                            {
+                                <span class="badge bg-success">Đã check-in</span>
+                            }
+                            else if (Model.Status == "Completed")
+                            {
+                                <span class="badge bg-secondary">Hoàn thành</span>
+                            }
+                            else if (Model.Status == "Cancelled")
+                            {
+                                <span class="badge bg-danger">Đã hủy</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <h5 class="mb-3"><i class="fas fa-clock"></i> Thời gian</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="40%">Ngày tạo:</th>
+                        <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                    @if (Model.CheckInTime != null)
+                    {
+                        <tr>
+                            <th>Check-in:</th>
+                            <td class="text-success">
+                                <i class="fas fa-sign-in-alt"></i> @Model.CheckInTime.Value.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.CheckOutTime != null)
+                    {
+                        <tr>
+                            <th>Check-out:</th>
+                            <td class="text-info">
+                                <i class="fas fa-sign-out-alt"></i> @Model.CheckOutTime.Value.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <th>Cập nhật:</th>
+                        <td>@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                </table>
+
+                @if (!string.IsNullOrEmpty(Model.Seat?.QRCode))
+                {
+                    <h5 class="mb-3 mt-4"><i class="fas fa-qrcode"></i> QR Code</h5>
+                    <div class="border rounded p-3 text-center bg-light">
+                        <div id="qrcode" class="d-inline-block mb-2"></div>
+                        <p class="font-monospace small mb-0">@Model.Seat.QRCode</p>
+                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyQRCode('@Model.Seat.QRCode')">
+                            <i class="fas fa-copy"></i> Copy QR Code
+                        </button>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <h5 class="mb-3 mt-4"><i class="fas fa-sticky-note"></i> Ghi chú</h5>
+                    <div class="border rounded p-3 bg-light">
+                        <p class="mb-0">@Model.Notes</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-4 pt-4 border-top">
+            <h5 class="mb-3"><i class="fas fa-cogs"></i> Thao tác</h5>
+            <div class="btn-group" role="group">
+                @if (Model.Status == "Reserved")
+                {
+                    <button type="button" class="btn btn-success" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#checkInModal"
+                            onclick="showCheckInModal(@Model.ReservationId, '@Model.Seat?.QRCode')">
+                        <i class="fas fa-sign-in-alt"></i> Check-in
+                    </button>
+                }
+                @if (Model.Status == "CheckedIn")
+                {
+                    <form asp-action="CheckOutReservation" asp-route-id="@Model.ReservationId" 
+                          method="post" class="d-inline" data-ajax="true" data-confirm="Xác nhận check-out?">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-sign-out-alt"></i> Check-out
+                        </button>
+                    </form>
+                }
+                @if (Model.Status == "Reserved" || Model.Status == "CheckedIn")
+                {
+                    <form asp-action="CancelRoomReservation" asp-route-id="@Model.ReservationId" 
+                          method="post" class="d-inline" data-ajax="true" data-confirm="Xác nhận hủy đặt chỗ này?">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Hủy đặt chỗ
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Check-in Modal -->
+<div class="modal fade" id="checkInModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Check-in Đặt chỗ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CheckInReservation" method="post" id="checkInForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="checkInReservationId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Mã QR Code <span class="text-danger">*</span></label>
+                        <input type="text" name="qrCode" id="checkInQRCode" class="form-control" required 
+                               placeholder="Nhập hoặc quét mã QR" />
+                        <small class="text-muted">Mã QR từ chỗ ngồi</small>
+                    </div>
+                    <div id="checkInError" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Check-in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        @if (!string.IsNullOrEmpty(Model.Seat?.QRCode))
+        {
+            <text>
+            // Generate QR Code
+            new QRCode(document.getElementById("qrcode"), {
+                text: "@Model.Seat.QRCode",
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            </text>
+        }
+
+        function copyQRCode(qrCode) {
+            navigator.clipboard.writeText(qrCode).then(function() {
+                alert('Đã copy QR Code: ' + qrCode);
+            }).catch(function(err) {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = qrCode;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Đã copy QR Code: ' + qrCode);
+            });
+        }
+
+        function showCheckInModal(reservationId, qrCode) {
+            document.getElementById('checkInReservationId').value = reservationId;
+            document.getElementById('checkInQRCode').value = '';
+            document.getElementById('checkInQRCode').placeholder = qrCode ? 'Mã QR: ' + qrCode : 'Nhập mã QR';
+            document.getElementById('checkInError').classList.add('d-none');
+        }
+
+        document.getElementById('checkInForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const reservationId = document.getElementById('checkInReservationId').value;
+            const qrCode = document.getElementById('checkInQRCode').value;
+            const errorDiv = document.getElementById('checkInError');
+            
+            errorDiv.classList.add('d-none');
+
+            try {
+                const formData = new FormData();
+                formData.append('id', reservationId);
+                formData.append('qrCode', qrCode);
+                formData.append('__RequestVerificationToken', document.querySelector('#checkInForm input[name="__RequestVerificationToken"]').value);
+
+                const response = await fetch('@Url.Action("CheckInReservation", "Admin")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    errorDiv.textContent = data.message || 'Check-in thất bại. Vui lòng thử lại.';
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Check-in error:', error);
+                errorDiv.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
+}
+
