@@ -49,6 +49,20 @@ namespace DATN_SD16.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Borrow>> GetBorrowsNearingDueDateAsync(int daysBeforeDue)
+        {
+            var targetDate = DateTime.Now.AddDays(daysBeforeDue);
+            return await _dbSet
+                .Include(b => b.User)
+                .Include(b => b.Copy)
+                    .ThenInclude(c => c.Book)
+                .Where(b => b.Status == "Borrowed"
+                    && b.DueDate.Date == targetDate.Date
+                    && b.ReturnDate == null)
+                .OrderBy(b => b.DueDate)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Borrow>> GetActiveBorrowsByUserIdAsync(int userId)
         {
             return await _dbSet

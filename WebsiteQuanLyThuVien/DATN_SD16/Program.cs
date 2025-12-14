@@ -47,6 +47,11 @@ builder.Services.AddScoped<IBookReservationService, BookReservationService>();
 builder.Services.AddScoped<IReadingRoomService, ReadingRoomService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Đăng ký Background Service
+builder.Services.AddHostedService<NotificationBackgroundService>();
 
 // Cấu hình JWT Authentication
 var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? "YourSuperSecretKeyThatIsAtLeast32CharactersLongForJWTTokenGeneration!";

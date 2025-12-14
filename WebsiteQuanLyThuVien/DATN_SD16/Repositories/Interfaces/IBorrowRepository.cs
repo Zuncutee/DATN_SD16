@@ -10,6 +10,7 @@ namespace DATN_SD16.Repositories.Interfaces
         Task<Borrow?> GetBorrowWithDetailsAsync(int borrowId);
         Task<IEnumerable<Borrow>> GetBorrowsByUserIdAsync(int userId);
         Task<IEnumerable<Borrow>> GetOverdueBorrowsAsync();
+        Task<IEnumerable<Borrow>> GetBorrowsNearingDueDateAsync(int daysBeforeDue);
         Task<IEnumerable<Borrow>> GetActiveBorrowsByUserIdAsync(int userId);
         Task<decimal> CalculateFineAsync(int borrowId);
     }
