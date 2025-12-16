@@ -113,6 +113,111 @@ namespace DATN_SD16.Services
             var book = await _bookRepository.GetByIdAsync(bookId);
             if (book == null) return false;
 
+            // Clean up dữ liệu cũ: Update các record có CopyNumber NULL hoặc empty
+            var allCopiesForBook = await _context.BookCopies
+                .Where(bc => bc.BookId == bookId)
+                .ToListAsync();
+            
+            var nullCopies = allCopiesForBook
+                .Where(bc => string.IsNullOrWhiteSpace(bc.CopyNumber))
+                .OrderBy(bc => bc.CopyId)
+                .ToList();
+
+            if (nullCopies.Any())
+            {
+                // Lấy max sequence number từ các CopyNumber hợp lệ
+                // Format: B{BookId}-{sequence}
+                var allValidCopiesForCleanup = allCopiesForBook
+                    .Where(bc => !string.IsNullOrWhiteSpace(bc.CopyNumber))
+                    .Select(bc => bc.CopyNumber)
+                    .ToList();
+
+                var cleanupPrefix = $"B{bookId}-";
+                int cleanupMaxSequence = 0;
+                
+                if (allValidCopiesForCleanup.Any())
+                {
+                    var cleanupSequences = allValidCopiesForCleanup
+                        .Select(cn =>
+                        {
+                            var trimmed = cn.Trim();
+                            // Kiểm tra format B{BookId}-{sequence}
+                            if (trimmed.StartsWith(cleanupPrefix, StringComparison.OrdinalIgnoreCase))
+                            {
+                                var sequenceStr = trimmed.Substring(cleanupPrefix.Length);
+                                if (int.TryParse(sequenceStr, out var seq))
+                                {
+                                    return seq;
+                                }
+                            }
+                            // Kiểm tra format cũ B{sequence} (backward compatibility)
+                            else if (trimmed.StartsWith("B", StringComparison.OrdinalIgnoreCase))
+                            {
+                                var numberStr = trimmed.Substring(1).Replace("-", "");
+                                if (int.TryParse(numberStr, out var num))
+                                {
+                                    return num;
+                                }
+                            }
+                            return 0;
+                        })
+                        .Where(seq => seq > 0)
+                        .ToList();
+
+                    if (cleanupSequences.Any())
+                    {
+                        cleanupMaxSequence = cleanupSequences.Max();
+                    }
+                }
+
+                // Lấy max Barcode sequence để tạo Barcode unique khi clean up
+                var cleanupBarcodePrefix = $"BC-{bookId}-";
+                var cleanupMaxBarcodeSequence = allCopiesForBook
+                    .Where(bc => !string.IsNullOrWhiteSpace(bc.Barcode))
+                    .Select(bc =>
+                    {
+                        var trimmed = bc.Barcode!.Trim();
+                        if (trimmed.StartsWith(cleanupBarcodePrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var sequenceStr = trimmed.Substring(cleanupBarcodePrefix.Length);
+                            if (int.TryParse(sequenceStr, out var seq))
+                            {
+                                return seq;
+                            }
+                        }
+                        return 0;
+                    })
+                    .Where(seq => seq > 0)
+                    .DefaultIfEmpty(0)
+                    .Max();
+
+                // Update từng record NULL với CopyNumber và Barcode hợp lệ bằng SQL trực tiếp
+                // Chỉ update các record có CopyId > 0 (đã tồn tại trong database)
+                foreach (var nullCopy in nullCopies.Where(bc => bc.CopyId > 0))
+                {
+                    cleanupMaxSequence++;
+                    var newCopyNumber = $"{cleanupPrefix}{cleanupMaxSequence:D3}";
+                    
+                    cleanupMaxBarcodeSequence++;
+                    var newBarcode = $"{cleanupBarcodePrefix}{cleanupMaxBarcodeSequence:D3}";
+                    
+                    // Update trực tiếp bằng SQL để đảm bảo update đúng record
+                    var rowsAffected = await _context.Database.ExecuteSqlRawAsync(
+                        @"UPDATE BookCopies 
+                          SET CopyNumber = {0}, 
+                              Barcode = {1},
+                              UpdatedAt = {2}
+                          WHERE CopyId = {3}",
+                        newCopyNumber, newBarcode, DateTime.Now, nullCopy.CopyId);
+                    
+                    // Kiểm tra xem có update được không
+                    if (rowsAffected == 0)
+                    {
+                        throw new InvalidOperationException($"Không thể cập nhật BookCopy với CopyId {nullCopy.CopyId}. Record có thể không tồn tại.");
+                    }
+                }
+            }
+
             var bookImport = new BookImport
             {
                 BookId = bookId,
@@ -123,19 +228,140 @@ namespace DATN_SD16.Services
             };
             await _bookImportRepository.AddAsync(bookImport);
 
+            // Lấy tất cả BookCopies hiện có của BookId này để tính sequence
+            var allExistingCopies = await _context.BookCopies
+                .Where(bc => bc.BookId == bookId)
+                .ToListAsync();
+
+            // Tìm max sequence number từ các CopyNumber hiện có
+            // Format: B{BookId}-{sequence}
+            var maxSequence = 0;
+            var copyNumberPrefix = $"B{bookId}-";
+            
+            if (allExistingCopies.Any())
+            {
+                var sequences = allExistingCopies
+                    .Where(bc => !string.IsNullOrWhiteSpace(bc.CopyNumber))
+                    .Select(bc =>
+                    {
+                        var trimmed = bc.CopyNumber.Trim();
+                        // Kiểm tra format B{BookId}-{sequence}
+                        if (trimmed.StartsWith(copyNumberPrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var sequenceStr = trimmed.Substring(copyNumberPrefix.Length);
+                            if (int.TryParse(sequenceStr, out var seq))
+                            {
+                                return seq;
+                            }
+                        }
+                        // Kiểm tra format cũ B{sequence} (backward compatibility)
+                        else if (trimmed.StartsWith("B", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var numberStr = trimmed.Substring(1).Replace("-", "");
+                            if (int.TryParse(numberStr, out var num))
+                            {
+                                return num;
+                            }
+                        }
+                        return 0;
+                    })
+                    .Where(seq => seq > 0)
+                    .ToList();
+
+                if (sequences.Any())
+                {
+                    maxSequence = sequences.Max();
+                }
+            }
+
+            // Lấy max Barcode sequence để tạo Barcode unique
+            // Format Barcode: BC-{BookId}-{sequence} (VD: BC-3-001, BC-3-002)
+            var maxBarcodeSequence = 0;
+            var barcodePrefix = $"BC-{bookId}-";
+            
+            if (allExistingCopies.Any())
+            {
+                var barcodeSequences = allExistingCopies
+                    .Where(bc => !string.IsNullOrWhiteSpace(bc.Barcode))
+                    .Select(bc =>
+                    {
+                        var trimmed = bc.Barcode!.Trim();
+                        // Kiểm tra format BC-{BookId}-{sequence}
+                        if (trimmed.StartsWith(barcodePrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var sequenceStr = trimmed.Substring(barcodePrefix.Length);
+                            if (int.TryParse(sequenceStr, out var seq))
+                            {
+                                return seq;
+                            }
+                        }
+                        return 0;
+                    })
+                    .Where(seq => seq > 0)
+                    .ToList();
+
+                if (barcodeSequences.Any())
+                {
+                    maxBarcodeSequence = barcodeSequences.Max();
+                }
+            }
+
+            // Lấy danh sách CopyNumber và Barcode hiện có
+            var existingCopyNumbersSet = allExistingCopies
+                .Where(bc => !string.IsNullOrWhiteSpace(bc.CopyNumber))
+                .Select(bc => bc.CopyNumber.Trim())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var existingBarcodesSet = allExistingCopies
+                .Where(bc => !string.IsNullOrWhiteSpace(bc.Barcode))
+                .Select(bc => bc.Barcode!.Trim())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
             var copies = new List<BookCopy>();
-            var existingCopies = await _bookCopyRepository.FindAsync(bc => bc.BookId == bookId);
-            var maxCopyNumber = existingCopies.Any() 
-                ? existingCopies.Max(bc => int.TryParse(bc.CopyNumber.Replace("B", ""), out var num) ? num : 0)
-                : 0;
 
             for (int i = 1; i <= quantity; i++)
             {
-                var copyNumber = $"B{(maxCopyNumber + i):D3}";
+                // Tạo CopyNumber với format: B{BookId}-{sequence}
+                var sequence = maxSequence + i;
+                var copyNumber = $"{copyNumberPrefix}{sequence:D3}";
+                
+                // Đảm bảo CopyNumber không trùng lặp
+                int attempt = 0;
+                while (existingCopyNumbersSet.Contains(copyNumber))
+                {
+                    sequence++;
+                    copyNumber = $"{copyNumberPrefix}{sequence:D3}";
+                    attempt++;
+                    if (attempt > 1000)
+                    {
+                        throw new InvalidOperationException($"Không thể tạo CopyNumber duy nhất cho BookId {bookId}");
+                    }
+                }
+                existingCopyNumbersSet.Add(copyNumber);
+
+                // Tạo Barcode unique với format: BC-{BookId}-{sequence}
+                var barcodeSequence = maxBarcodeSequence + i;
+                var barcode = $"{barcodePrefix}{barcodeSequence:D3}";
+                
+                // Đảm bảo Barcode không trùng lặp
+                attempt = 0;
+                while (existingBarcodesSet.Contains(barcode))
+                {
+                    barcodeSequence++;
+                    barcode = $"{barcodePrefix}{barcodeSequence:D3}";
+                    attempt++;
+                    if (attempt > 1000)
+                    {
+                        throw new InvalidOperationException($"Không thể tạo Barcode duy nhất cho BookId {bookId}");
+                    }
+                }
+                existingBarcodesSet.Add(barcode);
+                
                 copies.Add(new BookCopy
                 {
                     BookId = bookId,
                     CopyNumber = copyNumber,
+                    Barcode = barcode, // Tạo Barcode unique để tránh unique constraint violation
                     Status = "Available",
                     Condition = "Good",
                     CreatedAt = DateTime.Now,

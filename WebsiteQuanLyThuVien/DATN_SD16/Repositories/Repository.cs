@@ -67,7 +67,10 @@ namespace DATN_SD16.Repositories
         {
             if (typeof(T) == typeof(BookCopy))
             {
-                foreach (var copy in entities.Cast<BookCopy>())
+                // Insert từng record một để đảm bảo trigger chạy đúng và tránh conflict
+                // Vì Barcode đã được tạo unique trong BookService, không cần transaction riêng
+                var copies = entities.Cast<BookCopy>().ToList();
+                foreach (var copy in copies)
                 {
                     await AddBookCopyAsync(copy);
                 }
@@ -140,11 +143,33 @@ namespace DATN_SD16.Repositories
 
         private async Task UpdateBookCopyAsync(BookCopy bookCopy)
         {
+            // Đảm bảo CopyId > 0 để tránh insert thay vì update
+            if (bookCopy.CopyId <= 0)
+            {
+                throw new ArgumentException("CopyId must be greater than 0 for update operation", nameof(bookCopy));
+            }
+
+            // Đảm bảo CopyNumber không NULL hoặc empty để tránh vi phạm unique constraint
+            if (string.IsNullOrWhiteSpace(bookCopy.CopyNumber))
+            {
+                throw new ArgumentException("CopyNumber cannot be null or empty", nameof(bookCopy));
+            }
+
             // Detach entity nếu đang được track để tránh conflict
             var entry = _context.Entry(bookCopy);
             if (entry.State != EntityState.Detached)
             {
                 entry.State = EntityState.Detached;
+            }
+
+            // Kiểm tra record có tồn tại không bằng cách query
+            var exists = await _context.Set<BookCopy>()
+                .AsNoTracking()
+                .AnyAsync(bc => bc.CopyId == bookCopy.CopyId);
+
+            if (!exists)
+            {
+                throw new InvalidOperationException($"BookCopy with CopyId {bookCopy.CopyId} does not exist. Cannot update non-existent record.");
             }
 
             const string sql = @"
@@ -164,7 +189,7 @@ WHERE CopyId = @CopyId;";
             var parameters = new[]
             {
                 new SqlParameter("@BookId", bookCopy.BookId),
-                new SqlParameter("@CopyNumber", bookCopy.CopyNumber ?? string.Empty),
+                new SqlParameter("@CopyNumber", bookCopy.CopyNumber.Trim()),
                 new SqlParameter("@Barcode", (object?)bookCopy.Barcode ?? DBNull.Value),
                 new SqlParameter("@Status", bookCopy.Status ?? "Available"),
                 new SqlParameter("@Condition", bookCopy.Condition ?? "Good"),
@@ -176,12 +201,33 @@ WHERE CopyId = @CopyId;";
                 new SqlParameter("@CopyId", bookCopy.CopyId)
             };
 
-            await _context.Database.ExecuteSqlRawAsync(sql, parameters);
+            var rowsAffected = await _context.Database.ExecuteSqlRawAsync(sql, parameters);
+            
+            if (rowsAffected == 0)
+            {
+                throw new InvalidOperationException($"No rows were updated. BookCopy with CopyId {bookCopy.CopyId} may not exist.");
+            }
         }
 
         private async Task AddBookCopyAsync(BookCopy bookCopy)
         {
-            const string sql = @"
+            // Đảm bảo CopyNumber không NULL hoặc empty để tránh vi phạm unique constraint
+            if (string.IsNullOrWhiteSpace(bookCopy.CopyNumber))
+            {
+                throw new ArgumentException("CopyNumber cannot be null or empty", nameof(bookCopy));
+            }
+
+            // Nếu Barcode là NULL hoặc empty, không insert cột Barcode để tránh unique constraint violation
+            // Sử dụng dynamic SQL để không include Barcode nếu nó NULL
+            var hasBarcode = !string.IsNullOrWhiteSpace(bookCopy.Barcode);
+            
+            string sql;
+            SqlParameter[] parameters;
+
+            if (hasBarcode)
+            {
+                // Insert với Barcode
+                sql = @"
 INSERT INTO BookCopies (
     BookId,
     CopyNumber,
@@ -205,19 +251,64 @@ VALUES (
     @CreatedAt,
     @UpdatedAt);";
 
-            var parameters = new[]
+                parameters = new[]
+                {
+                    new SqlParameter("@BookId", bookCopy.BookId),
+                    new SqlParameter("@CopyNumber", bookCopy.CopyNumber.Trim()),
+                    new SqlParameter("@Barcode", bookCopy.Barcode!.Trim()),
+                    new SqlParameter("@Status", bookCopy.Status ?? "Available"),
+                    new SqlParameter("@Condition", bookCopy.Condition ?? "Good"),
+                    new SqlParameter("@PurchaseDate", (object?)bookCopy.PurchaseDate ?? DBNull.Value) { SqlDbType = SqlDbType.DateTime2 },
+                    new SqlParameter("@PurchasePrice", (object?)bookCopy.PurchasePrice ?? DBNull.Value) { SqlDbType = SqlDbType.Decimal, Precision = 18, Scale = 2 },
+                    new SqlParameter("@Notes", (object?)bookCopy.Notes ?? DBNull.Value),
+                    new SqlParameter("@CreatedAt", bookCopy.CreatedAt) { SqlDbType = SqlDbType.DateTime2 },
+                    new SqlParameter("@UpdatedAt", bookCopy.UpdatedAt) { SqlDbType = SqlDbType.DateTime2 }
+                };
+            }
+            else
             {
-                new SqlParameter("@BookId", bookCopy.BookId),
-                new SqlParameter("@CopyNumber", bookCopy.CopyNumber ?? string.Empty),
-                new SqlParameter("@Barcode", (object?)bookCopy.Barcode ?? DBNull.Value),
-                new SqlParameter("@Status", bookCopy.Status ?? "Available"),
-                new SqlParameter("@Condition", bookCopy.Condition ?? "Good"),
-                new SqlParameter("@PurchaseDate", (object?)bookCopy.PurchaseDate ?? DBNull.Value) { SqlDbType = SqlDbType.DateTime2 },
-                new SqlParameter("@PurchasePrice", (object?)bookCopy.PurchasePrice ?? DBNull.Value) { SqlDbType = SqlDbType.Decimal, Precision = 18, Scale = 2 },
-                new SqlParameter("@Notes", (object?)bookCopy.Notes ?? DBNull.Value),
-                new SqlParameter("@CreatedAt", bookCopy.CreatedAt) { SqlDbType = SqlDbType.DateTime2 },
-                new SqlParameter("@UpdatedAt", bookCopy.UpdatedAt) { SqlDbType = SqlDbType.DateTime2 }
-            };
+                // Nếu Barcode NULL, tạo Barcode unique tự động dựa trên CopyNumber
+                // Format: BC-{CopyNumber} để đảm bảo unique
+                var autoBarcode = $"BC-{bookCopy.CopyNumber.Trim()}";
+                
+                sql = @"
+INSERT INTO BookCopies (
+    BookId,
+    CopyNumber,
+    Barcode,
+    Status,
+    Condition,
+    PurchaseDate,
+    PurchasePrice,
+    Notes,
+    CreatedAt,
+    UpdatedAt)
+VALUES (
+    @BookId,
+    @CopyNumber,
+    @Barcode,
+    @Status,
+    @Condition,
+    @PurchaseDate,
+    @PurchasePrice,
+    @Notes,
+    @CreatedAt,
+    @UpdatedAt);";
+
+                parameters = new[]
+                {
+                    new SqlParameter("@BookId", bookCopy.BookId),
+                    new SqlParameter("@CopyNumber", bookCopy.CopyNumber.Trim()),
+                    new SqlParameter("@Barcode", autoBarcode),
+                    new SqlParameter("@Status", bookCopy.Status ?? "Available"),
+                    new SqlParameter("@Condition", bookCopy.Condition ?? "Good"),
+                    new SqlParameter("@PurchaseDate", (object?)bookCopy.PurchaseDate ?? DBNull.Value) { SqlDbType = SqlDbType.DateTime2 },
+                    new SqlParameter("@PurchasePrice", (object?)bookCopy.PurchasePrice ?? DBNull.Value) { SqlDbType = SqlDbType.Decimal, Precision = 18, Scale = 2 },
+                    new SqlParameter("@Notes", (object?)bookCopy.Notes ?? DBNull.Value),
+                    new SqlParameter("@CreatedAt", bookCopy.CreatedAt) { SqlDbType = SqlDbType.DateTime2 },
+                    new SqlParameter("@UpdatedAt", bookCopy.UpdatedAt) { SqlDbType = SqlDbType.DateTime2 }
+                };
+            }
 
             await _context.Database.ExecuteSqlRawAsync(sql, parameters);
             var inserted = await _context.Set<BookCopy>()
