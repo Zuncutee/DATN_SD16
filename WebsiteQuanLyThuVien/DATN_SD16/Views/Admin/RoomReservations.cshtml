@@ -5,10 +5,6 @@
     var rooms = ViewBag.Rooms as IEnumerable<DATN_SD16.Models.Entities.ReadingRoom> ?? new List<DATN_SD16.Models.Entities.ReadingRoom>();
     var statusList = ViewBag.StatusList as IEnumerable<string> ?? new List<string>();
 }
-@* ... skip ... *@
-                const response = await fetch('@Url.Action("CheckInReservation", "RoomReservationManagement")', {
-                    method: 'POST',
-                    body: formData,
 
 <div class="card mb-3">
     <div class="card-header bg-primary text-white">
@@ -249,7 +245,7 @@
                 formData.append('qrCode', qrCode);
                 formData.append('__RequestVerificationToken', document.querySelector('#checkInForm input[name="__RequestVerificationToken"]').value);
 
-                const response = await fetch('@Url.Action("CheckInReservation", "Admin")', {
+                const response = await fetch('@Url.Action("CheckInReservation", "RoomReservationManagement")', {
                     method: 'POST',
                     body: formData,
                     headers: {

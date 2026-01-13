@@ -1,7 +1,7 @@
 @model DATN_SD16.Models.Entities.ReadingRoomReservation
 @{
     ViewData["Title"] = "Chi tiết Đặt chỗ";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = User.IsInRole("Admin") ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_LibrarianLayout.cshtml";
 }
 
 <div class="mb-3">
@@ -282,7 +282,7 @@
                 formData.append('qrCode', qrCode);
                 formData.append('__RequestVerificationToken', document.querySelector('#checkInForm input[name="__RequestVerificationToken"]').value);
 
-                const response = await fetch('@Url.Action("CheckInReservation", "Admin")', {
+                const response = await fetch('@Url.Action("CheckInReservation", "RoomReservationManagement")', {
                     method: 'POST',
                     body: formData,
                     headers: {
