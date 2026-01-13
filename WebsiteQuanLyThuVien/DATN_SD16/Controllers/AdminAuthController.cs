@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using DATN_SD16.Services.Interfaces;
 using DATN_SD16.Models.DTOs;
 using DATN_SD16.Helpers;
+using DATN_SD16.Repositories.Interfaces;
+using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Controllers
 {
@@ -258,6 +260,36 @@ namespace DATN_SD16.Controllers
             Response.Cookies.Delete("AuthToken");
             Response.Cookies.Delete("RefreshToken");
             return RedirectToAction("Index", "Home");
+        }
+
+        // POST: AdminAuth/ForgotPassword
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            try 
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập email." });
+                }
+
+                // Kiểm tra email tồn tại
+                // var user = await _userService.GetUserByEmailAsync(email);
+                // if (user == null) { return Json(new { success = false, message = "Email không tồn tại trong hệ thống." }); }
+                
+                // TODO: Generate Token & Send Email
+                // await _authService.InitiatePasswordResetAsync(email);
+
+                // Giả lập thành công cho demo
+                await Task.Delay(1000); 
+
+                return Json(new { success = true, message = "Nếu email tồn tại, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
         }
     }
 }
