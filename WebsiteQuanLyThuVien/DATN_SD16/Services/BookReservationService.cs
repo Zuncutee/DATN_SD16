@@ -54,7 +54,19 @@ namespace DATN_SD16.Services
                 r => r.UserId == userId && r.BookId == bookId && r.Status == "Pending");
             
             if (existingReservation != null)
-                throw new Exception("Bạn đã đặt sách này rồi");
+            {
+                if (existingReservation.ExpiryDate != null && existingReservation.ExpiryDate < DateTime.Now)
+                {
+                    // Reservation đã hết hạn, cập nhật thành Cancelled và cho phép đặt mới
+                    existingReservation.Status = "Cancelled";
+                    existingReservation.UpdatedAt = DateTime.Now;
+                    await _reservationRepository.UpdateAsync(existingReservation);
+                }
+                else
+                {
+                    throw new Exception("Bạn đã đặt sách này rồi");
+                }
+            }
 
             var expiryDaysSetting = await _systemSettingRepository.FirstOrDefaultAsync(
                 s => s.SettingKey == "ReservationExpiryDays");
