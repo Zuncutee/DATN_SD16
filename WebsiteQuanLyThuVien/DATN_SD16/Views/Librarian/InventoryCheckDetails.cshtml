@@ -1,0 +1,171 @@
+@using DATN_SD16.Models.Entities
+@using System.Linq
+@model InventoryCheck
+@{
+    ViewData["Title"] = "Chi tiết kiểm kê";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+
+    var details = ViewBag.Details as IEnumerable<InventoryCheckDetail> ?? Enumerable.Empty<InventoryCheckDetail>();
+    var detailCount = details.Count();
+}
+
+<div class="card mb-3">
+    <div class="card-header">
+        <i class="fas fa-clipboard-check"></i> Phiếu kiểm kê - @Model.CheckNumber
+        @if (Model.Status == "InProgress")
+        {
+            <div class="float-end">
+                <form method="post"
+                      asp-action="CompleteInventoryCheck"
+                      asp-route-id="@Model.CheckId"
+                      class="d-inline"
+                      data-confirm="Xác nhận hoàn thành kiểm kê?"
+                      data-ajax="true">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="fas fa-check"></i> Hoàn thành
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p><strong>Số phiếu:</strong> @Model.CheckNumber</p>
+                <p><strong>Ngày kiểm kê:</strong> @Model.CheckDate.ToString("dd/MM/yyyy")</p>
+                <p><strong>Người kiểm kê:</strong> @Model.CheckedByUser?.FullName</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Trạng thái:</strong> 
+                    @if (Model.Status == "InProgress")
+                    {
+                        <span class="badge bg-warning">Đang thực hiện</span>
+                    }
+                    else if (Model.Status == "Completed")
+                    {
+                        <span class="badge bg-success">Hoàn thành</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">@Model.Status</span>
+                    }
+                </p>
+                <p><strong>Ghi chú:</strong> @(Model.Notes ?? "-")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Status == "InProgress")
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fas fa-plus"></i> Thêm bản sách kiểm kê
+        </div>
+        <div class="card-body">
+            <form id="addDetailForm" method="post" asp-action="AddInventoryCheckDetail" asp-route-checkId="@Model.CheckId">
+                @Html.AntiForgeryToken()
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Bản sách <span class="text-danger">*</span></label>
+                            <select name="copyId" class="form-select" required>
+                                <option value="">-- Chọn bản sách --</option>
+                                @foreach (var copy in ViewBag.BookCopies as IEnumerable<DATN_SD16.Models.Entities.BookCopy>)
+                                {
+                                    <option value="@copy.CopyId">@copy.CopyNumber - @copy.Book?.Title</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Trạng thái thực tế <span class="text-danger">*</span></label>
+                            <select name="actualStatus" class="form-select" required>
+                                <option value="">-- Chọn trạng thái --</option>
+                                <option value="Available">Có sẵn</option>
+                                <option value="Borrowed">Đang mượn</option>
+                                <option value="Lost">Mất</option>
+                                <option value="Damaged">Hỏng</option>
+                                <option value="Maintenance">Bảo trì</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <input type="text" name="notes" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Thêm
+                </button>
+            </form>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-list"></i> Chi tiết kiểm kê (@detailCount)
+    </div>
+    <div class="card-body">
+        @if (details.Any())
+        {
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bản sách</th>
+                            <th>Trạng thái hệ thống</th>
+                            <th>Trạng thái thực tế</th>
+                            <th>Khớp</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detail in details)
+                        {
+                            <tr class="@(detail.IsMatched ? "" : "table-warning")">
+                                <td>@detail.Copy?.CopyNumber - @detail.Copy?.Book?.Title</td>
+                                <td>@detail.ExpectedStatus</td>
+                                <td>@detail.ActualStatus</td>
+                                <td>
+                                    @if (detail.IsMatched)
+                                    {
+                                        <span class="badge bg-success">Khớp</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Không khớp</span>
+                                    }
+                                </td>
+                                <td>@(detail.Notes ?? "-")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Chưa có chi tiết kiểm kê</p>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="InventoryChecks" class="btn btn-secondary">Quay lại</a>
+</div>
+
+@section Scripts {
+    <script>
+        submitForm('addDetailForm', function(data) {
+            location.reload();
+        });
+    </script>
+}
+

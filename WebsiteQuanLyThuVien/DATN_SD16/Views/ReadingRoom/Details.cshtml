@@ -1,0 +1,149 @@
+@model DATN_SD16.Models.Entities.ReadingRoom
+@{
+    ViewData["Title"] = Model.RoomName;
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var seats = Model.ReadingRoomSeats?.ToList() ?? new List<DATN_SD16.Models.Entities.ReadingRoomSeat>();
+    var availableSeats = seats.Where(s => s.Status == "Available").ToList();
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="@Url.Action("Index", "ReadingRoom")" 
+           class="inline-flex items-center gap-2 text-primary hover:underline">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Quay lại danh sách phòng
+        </a>
+    </div>
+
+    <!-- Room Header -->
+    <div class="bg-gradient-to-r from-primary to-blue-600 rounded-lg shadow-lg p-8 mb-6 text-white">
+        <h1 class="text-3xl font-bold mb-2">@Model.RoomName</h1>
+        <div class="flex items-center gap-6 text-blue-100">
+            <span><i class="fas fa-tag"></i> Mã: @Model.RoomCode</span>
+            <span><i class="fas fa-users"></i> Sức chứa: @Model.Capacity chỗ</span>
+            <span><i class="fas fa-check-circle"></i> Còn trống: @availableSeats.Count chỗ</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="mt-4 text-blue-100">@Model.Description</p>
+        }
+    </div>
+
+    <!-- Instructions -->
+    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400">info</span>
+            <div>
+                <h4 class="font-medium text-yellow-900 dark:text-yellow-200 mb-1">Hướng dẫn đặt chỗ</h4>
+                <ol class="text-sm text-yellow-800 dark:text-yellow-300 space-y-1 list-decimal list-inside">
+                    <li>Chọn chỗ ngồi có trạng thái "Có sẵn" (màu xanh)</li>
+                    <li>Chọn ngày và giờ bạn muốn đến</li>
+                    <li>Xác nhận đặt chỗ</li>
+                    <li>Khi đến phòng đọc, scan mã QR trên ghế để check-in</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seats Layout -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            <span class="material-symbols-outlined align-middle">event_seat</span>
+            Sơ đồ chỗ ngồi
+        </h2>
+
+        @if (seats.Any())
+        {
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                @foreach (var seat in seats.OrderBy(s => s.SeatNumber))
+                {
+                    var isAvailable = seat.Status == "Available";
+                    var statusColor = seat.Status == "Available" ? "green" : 
+                                     seat.Status == "Occupied" ? "red" : 
+                                     seat.Status == "Reserved" ? "yellow" : "gray";
+
+                    <div class="@(isAvailable ? "cursor-pointer hover:scale-105" : "cursor-not-allowed opacity-60") transition">
+                        <a href="@(isAvailable ? Url.Action("Reserve", "ReadingRoom", new { seatId = seat.SeatId }) : "#")"
+                           class="block bg-@(statusColor)-50 dark:bg-@(statusColor)-900/20 border-2 border-@(statusColor)-300 dark:border-@(statusColor)-700 rounded-lg p-4 text-center"
+                           @(isAvailable ? "" : "onclick=\"return false;\"")>
+                            <div class="mb-2">
+                                @if (seat.Status == "Available")
+                                {
+                                    <span class="material-symbols-outlined text-4xl text-green-600">event_seat</span>
+                                }
+                                else if (seat.Status == "Occupied")
+                                {
+                                    <span class="material-symbols-outlined text-4xl text-red-600">person</span>
+                                }
+                                else if (seat.Status == "Reserved")
+                                {
+                                    <span class="material-symbols-outlined text-4xl text-yellow-600">schedule</span>
+                                }
+                                else
+                                {
+                                    <span class="material-symbols-outlined text-4xl text-gray-600">build</span>
+                                }
+                            </div>
+                            <p class="font-bold text-gray-900 dark:text-white">@seat.SeatNumber</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                @if (seat.Status == "Available")
+                                {
+                                    <span>Có sẵn</span>
+                                }
+                                else if (seat.Status == "Occupied")
+                                {
+                                    <span>Đang sử dụng</span>
+                                }
+                                else if (seat.Status == "Reserved")
+                                {
+                                    <span>Đã đặt</span>
+                                }
+                                else
+                                {
+                                    <span>Bảo trì</span>
+                                }
+                            </p>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Legend -->
+            <div class="mt-8 flex flex-wrap gap-6 justify-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-green-100 border-2 border-green-300 rounded"></div>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Có sẵn</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-red-100 border-2 border-red-300 rounded"></div>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Đang sử dụng</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-yellow-100 border-2 border-yellow-300 rounded"></div>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Đã đặt</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-gray-100 border-2 border-gray-300 rounded"></div>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Bảo trì</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-12">
+                <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">event_seat</span>
+                <p class="text-gray-600 dark:text-gray-400">Chưa có chỗ ngồi nào trong phòng này</p>
+            </div>
+        }
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Error"]');
+        });
+    </script>
+}

@@ -1,0 +1,175 @@
+@model IEnumerable<DATN_SD16.Models.Entities.ReadingRoom>
+@{
+    ViewData["Title"] = "Quản lý Phòng đọc";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-door-open"></i> Quản lý Phòng đọc
+        <div class="float-end">
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createRoomModal">
+                <i class="fas fa-plus"></i> Thêm phòng đọc
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã phòng</th>
+                            <th>Tên phòng</th>
+                            <th>Sức chứa</th>
+                            <th>Mô tả</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var room in Model)
+                        {
+                            <tr>
+                                <td>@room.RoomId</td>
+                                <td><span class="badge bg-info">@room.RoomCode</span></td>
+                                <td>@room.RoomName</td>
+                                <td>@room.Capacity chỗ</td>
+                                <td>@(room.Description ?? "-")</td>
+                                <td>
+                                    @if (room.IsActive)
+                                    {
+                                        <span class="badge bg-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngưng hoạt động</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("RoomSeats", new { id = room.RoomId })" class="btn btn-sm btn-info" title="Quản lý chỗ ngồi">
+                                        <i class="fas fa-chair"></i> Chỗ ngồi
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-warning" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editRoomModal"
+                                            onclick="editRoom(@room.RoomId, '@room.RoomCode', '@room.RoomName', @room.Capacity, '@(room.Description ?? "")', @room.IsActive.ToString().ToLower())"
+                                            title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form asp-action="DeleteReadingRoom" asp-route-id="@room.RoomId" method="post" class="d-inline" data-ajax="true" data-confirm="Bạn có chắc muốn xóa phòng này?">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted">Chưa có phòng đọc nào</p>
+        }
+    </div>
+</div>
+
+<!-- Create Room Modal -->
+<div class="modal fade" id="createRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Phòng đọc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateReadingRoom" method="post" data-ajax="true">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Mã phòng <span class="text-danger">*</span></label>
+                        <input type="text" name="roomCode" class="form-control" placeholder="VD: R01" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên phòng <span class="text-danger">*</span></label>
+                        <input type="text" name="roomName" class="form-control" placeholder="VD: Phòng đọc tầng 1" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sức chứa <span class="text-danger">*</span></label>
+                        <input type="number" name="capacity" class="form-control" min="1" placeholder="Số chỗ ngồi tối đa" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Mô tả về phòng đọc"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo phòng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Room Modal -->
+<div class="modal fade" id="editRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Phòng đọc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateReadingRoom" method="post" data-ajax="true">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="roomId" id="editRoomId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Mã phòng <span class="text-danger">*</span></label>
+                        <input type="text" name="roomCode" id="editRoomCode" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên phòng <span class="text-danger">*</span></label>
+                        <input type="text" name="roomName" id="editRoomName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sức chứa <span class="text-danger">*</span></label>
+                        <input type="number" name="capacity" id="editRoomCapacity" class="form-control" min="1" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="description" id="editRoomDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="isActive" id="editRoomIsActive" class="form-select">
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Ngưng hoạt động</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editRoom(id, code, name, capacity, description, isActive) {
+            document.getElementById('editRoomId').value = id;
+            document.getElementById('editRoomCode').value = code;
+            document.getElementById('editRoomName').value = name;
+            document.getElementById('editRoomCapacity').value = capacity;
+            document.getElementById('editRoomDescription').value = description;
+            document.getElementById('editRoomIsActive').value = isActive.toString();
+        }
+    </script>
+}

@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "Tạo phiếu mượn";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-plus"></i> Tạo phiếu mượn mới
+    </div>
+    <div class="card-body">
+        <form id="createBorrowForm" method="post" asp-action="CreateBorrow">
+            @Html.AntiForgeryToken()
+            
+            <div class="form-group mb-3">
+                <label class="form-label">Độc giả <span class="text-danger">*</span></label>
+                <select name="userId" id="userId" class="form-select" required>
+                    <option value="">-- Chọn độc giả --</option>
+                    @foreach (var user in ViewBag.Users as IEnumerable<DATN_SD16.Models.Entities.User>)
+                    {
+                        <option value="@user.UserId">@user.FullName (@user.Username)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Sách <span class="text-danger">*</span></label>
+                <select name="bookId" id="bookId" class="form-select" required>
+                    <option value="">-- Chọn sách --</option>
+                    @foreach (var book in ViewBag.Books as IEnumerable<DATN_SD16.Models.Entities.Book>)
+                    {
+                        <option value="@book.BookId" data-available="@book.AvailableCopies">@book.Title (@book.AvailableCopies bản có sẵn)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Bản sách <span class="text-danger">*</span></label>
+                <select name="copyId" id="copyId" class="form-select" required disabled>
+                    <option value="">-- Chọn sách trước --</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Đặt sách (nếu có)</label>
+                <select name="reservationId" id="reservationId" class="form-select">
+                    <option value="">-- Không có --</option>
+                </select>
+                <small class="form-text text-muted">Chọn đặt sách nếu độc giả đã đặt trước sách này</small>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Tạo phiếu mượn
+                </button>
+                <a asp-action="Borrows" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const userIdSelect = document.getElementById('userId');
+        const bookIdSelect = document.getElementById('bookId');
+        const copySelect = document.getElementById('copyId');
+        const reservationSelect = document.getElementById('reservationId');
+
+        // Load reservations khi chọn độc giả hoặc sách
+        async function loadReservations() {
+            const userId = userIdSelect.value;
+            const bookId = bookIdSelect.value;
+            
+            if (!userId) {
+                reservationSelect.innerHTML = '<option value="">-- Không có --</option>';
+                return;
+            }
+
+            try {
+                let url = `/Librarian/GetReservations?userId=${userId}`;
+                if (bookId) {
+                    url += `&bookId=${bookId}`;
+                }
+
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const reservations = Array.isArray(data) ? data : [];
+
+                reservationSelect.innerHTML = '<option value="">-- Không có --</option>';
+                
+                if (reservations.length > 0) {
+                    reservations.forEach(res => {
+                        const option = document.createElement('option');
+                        option.value = res.reservationId;
+                        const statusText = res.status === 'Pending' ? 'Chờ duyệt' : 'Đã duyệt';
+                        option.textContent = `${res.bookTitle} - Đặt ngày ${res.reservationDate} (${statusText})`;
+                        option.dataset.bookId = res.bookId;
+                        reservationSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading reservations:', error);
+                reservationSelect.innerHTML = '<option value="">-- Không có --</option>';
+            }
+        }
+
+        // Khi chọn reservation, tự động chọn sách tương ứng
+        reservationSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value && selectedOption.dataset.bookId) {
+                const bookId = selectedOption.dataset.bookId;
+                bookIdSelect.value = bookId;
+                bookIdSelect.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Load reservations khi chọn độc giả
+        userIdSelect.addEventListener('change', loadReservations);
+        
+        // Load reservations khi chọn sách
+        bookIdSelect.addEventListener('change', async function() {
+            const bookId = this.value;
+            const copySelect = document.getElementById('copyId');
+            
+            // Load reservations
+            await loadReservations();
+            
+            // Load copies
+            if (!bookId) {
+                copySelect.innerHTML = '<option value="">-- Chọn sách trước --</option>';
+                copySelect.disabled = true;
+                return;
+            }
+
+            copySelect.disabled = true;
+            copySelect.innerHTML = '<option value="">Đang tải...</option>';
+
+            try {
+                const response = await fetch(`/Books/GetAvailableCopies?bookId=${bookId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Kiểm tra nếu có lỗi trong response
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Kiểm tra nếu data là mảng
+                const copies = Array.isArray(data) ? data : [];
+                
+                console.log('Loaded copies:', copies);
+                
+                copySelect.innerHTML = '<option value="">-- Chọn bản sách --</option>';
+                
+                if (copies.length === 0) {
+                    copySelect.innerHTML = '<option value="">Không có bản sách có sẵn</option>';
+                    copySelect.disabled = true;
+                } else {
+                    copies.forEach(copy => {
+                        const option = document.createElement('option');
+                        option.value = copy.copyId;
+                        // Hiển thị status nếu không phải Available
+                        const statusText = copy.status && copy.status !== 'Available' ? ` (${copy.status})` : '';
+                        option.textContent = `${copy.copyNumber} - ${copy.condition}${statusText}`;
+                        copySelect.appendChild(option);
+                    });
+                    copySelect.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error loading copies:', error);
+                copySelect.innerHTML = '<option value="">Lỗi khi tải dữ liệu</option>';
+                copySelect.disabled = true;
+            }
+        });
+
+        submitForm('createBorrowForm', function(data) {
+            window.location.href = '@Url.Action("Borrows")';
+        });
+    </script>
+}
+

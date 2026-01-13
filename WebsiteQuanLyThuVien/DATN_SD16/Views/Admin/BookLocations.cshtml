@@ -1,0 +1,202 @@
+@model IEnumerable<DATN_SD16.Models.Entities.BookLocation>
+@{
+    ViewData["Title"] = "Quản lý Vị trí Sách";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-map-marker-alt"></i> Quản lý Vị trí Sách
+        <button class="btn btn-light btn-sm float-end" onclick="openModal('createLocationModal')">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Mã vị trí</th>
+                        <th>Số kệ</th>
+                        <th>Số hàng</th>
+                        <th>Mô tả</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var location in Model)
+                    {
+                        <tr>
+                            <td>@location.LocationId</td>
+                            <td><strong>@location.LocationCode</strong></td>
+                            <td>@(location.ShelfNumber ?? "-")</td>
+                            <td>@(location.RowNumber ?? "-")</td>
+                            <td>@(location.Description ?? "-")</td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-sm btn-primary"
+                                        data-id="@location.LocationId"
+                                        data-code="@location.LocationCode"
+                                        data-shelf="@(location.ShelfNumber ?? string.Empty)"
+                                        data-row="@(location.RowNumber ?? string.Empty)"
+                                        data-description="@(location.Description ?? string.Empty)"
+                                        onclick="openEditLocation(this)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-sm btn-danger"
+                                        data-id="@location.LocationId"
+                                        onclick="deleteLocation(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create Location Modal -->
+<div class="modal fade" id="createLocationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Thêm vị trí sách mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createLocationForm" asp-controller="Admin" asp-action="CreateBookLocation" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Mã vị trí *</label>
+                        <input type="text" name="LocationCode" class="form-control" placeholder="VD: A-01-001" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số kệ</label>
+                        <input type="text" name="ShelfNumber" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số hàng</label>
+                        <input type="text" name="RowNumber" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Location Modal -->
+<div class="modal fade" id="editLocationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Sửa vị trí sách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editLocationForm" asp-controller="Admin" asp-action="EditBookLocation" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="LocationId" id="editLocationId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Mã vị trí *</label>
+                        <input type="text" name="LocationCode" id="editLocationCode" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số kệ</label>
+                        <input type="text" name="ShelfNumber" id="editShelfNumber" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số hàng</label>
+                        <input type="text" name="RowNumber" id="editRowNumber" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="Description" id="editLocationDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const locationTokenField = '__RequestVerificationToken';
+
+        function getLocationToken() {
+            const input = document.querySelector(`form input[name="${locationTokenField}"]`);
+            return input ? input.value : '';
+        }
+
+        function buildLocationFormData(payload) {
+            const formData = new FormData();
+            const token = getLocationToken();
+            if (token) {
+                formData.append(locationTokenField, token);
+            }
+            Object.entries(payload || {}).forEach(([key, value]) => formData.append(key, value ?? ''));
+            return formData;
+        }
+
+        function openEditLocation(button) {
+            const { id, code, shelf, row, description } = button.dataset;
+            document.getElementById('editLocationId').value = id;
+            document.getElementById('editLocationCode').value = code || '';
+            document.getElementById('editShelfNumber').value = shelf || '';
+            document.getElementById('editRowNumber').value = row || '';
+            document.getElementById('editLocationDescription').value = description || '';
+            openModal('editLocationModal');
+        }
+
+        function deleteLocation(button) {
+            const id = button.dataset.id;
+            if (!id) return;
+
+            showConfirmModal({
+                message: 'Bạn có chắc muốn xóa vị trí sách này?',
+                onConfirm: () => {
+                    showLoading();
+                    fetch('@Url.Action("DeleteBookLocation", "Admin")', {
+                        method: 'POST',
+                        body: buildLocationFormData({ id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading();
+                        if (data.success) {
+                            showToast('Thành công', data.message, 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            showToast('Lỗi', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showToast('Lỗi', error.message, 'error');
+                    });
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            submitForm('createLocationForm');
+            submitForm('editLocationForm');
+        });
+    </script>
+}
+

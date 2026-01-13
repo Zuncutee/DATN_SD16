@@ -1,0 +1,185 @@
+@{
+    ViewData["Title"] = "Trang chủ";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var user = ViewBag.User as DATN_SD16.Models.Entities.User;
+    var libraryCard = ViewBag.LibraryCard as DATN_SD16.Models.Entities.LibraryCard;
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Welcome Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Xin chào, @user.FullName!
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Chào mừng bạn đến với hệ thống thư viện City Library
+        </p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <!-- Active Borrows -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Đang mượn</p>
+                    <h3 class="text-3xl font-bold text-primary mt-2">@ViewBag.ActiveBorrowsCount</h3>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">book</span>
+                </div>
+            </div>
+            <a href="@Url.Action("Index", "Borrows")" class="text-sm text-primary hover:underline mt-4 inline-block">
+                Xem chi tiết →
+            </a>
+        </div>
+
+        <!-- Overdue Books -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Quá hạn</p>
+                    <h3 class="text-3xl font-bold text-red-600 mt-2">@ViewBag.OverdueBorrowsCount</h3>
+                </div>
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 text-2xl">warning</span>
+                </div>
+            </div>
+            @if (ViewBag.OverdueBorrowsCount > 0)
+            {
+                <p class="text-sm text-red-600 mt-4">Vui lòng trả sách sớm nhất có thể</p>
+            }
+            else
+            {
+                <p class="text-sm text-gray-500 mt-4">Không có sách quá hạn</p>
+            }
+        </div>
+
+        <!-- Pending Reservations -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Đặt sách</p>
+                    <h3 class="text-3xl font-bold text-yellow-600 mt-2">@ViewBag.PendingReservationsCount</h3>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-yellow-600 text-2xl">schedule</span>
+                </div>
+            </div>
+            <a href="@Url.Action("Index", "BookReservations")" class="text-sm text-primary hover:underline mt-4 inline-block">
+                Xem chi tiết →
+            </a>
+        </div>
+
+        <!-- Fines -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Tiền phạt</p>
+                    <h3 class="text-3xl font-bold text-orange-600 mt-2">@ViewBag.TotalFines.ToString("N0") đ</h3>
+                </div>
+                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-orange-600 text-2xl">payments</span>
+                </div>
+            </div>
+            @if (ViewBag.TotalFines > 0)
+            {
+                <p class="text-sm text-orange-600 mt-4">Vui lòng thanh toán phí phạt</p>
+            }
+            else
+            {
+                <p class="text-sm text-gray-500 mt-4">Không có phí phạt</p>
+            }
+        </div>
+    </div>
+
+    <!-- Library Card & Quick Actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Library Card -->
+        @if (libraryCard != null)
+        {
+            <div class="bg-gradient-to-br from-primary to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                <h3 class="text-lg font-semibold mb-4">Thẻ Thư viện</h3>
+                <div class="space-y-2">
+                    <p><span class="font-medium">Số thẻ:</span> @libraryCard.CardNumber</p>
+                    <p><span class="font-medium">Ngày phát hành:</span> @libraryCard.IssueDate.ToString("dd/MM/yyyy")</p>
+                    <p><span class="font-medium">Ngày hết hạn:</span> @libraryCard.ExpiryDate?.ToString("dd/MM/yyyy")</p>
+                    <p>
+                        <span class="font-medium">Trạng thái:</span>
+                        @if (libraryCard.Status == "Active")
+                        {
+                            <span class="bg-green-500 px-2 py-1 rounded text-xs">Hoạt động</span>
+                        }
+                        else if (libraryCard.Status == "Expired")
+                        {
+                            <span class="bg-red-500 px-2 py-1 rounded text-xs">Hết hạn</span>
+                        }
+                        else if (libraryCard.Status == "Suspended")
+                        {
+                            <span class="bg-yellow-500 px-2 py-1 rounded text-xs">Tạm ngưng</span>
+                        }
+                    </p>
+                </div>
+                @if (libraryCard.ExpiryDate < DateTime.Now)
+                {
+                    <div class="mt-4 bg-white/20 rounded p-3">
+                        <p class="text-sm">⚠️ Thẻ của bạn đã hết hạn. Vui lòng liên hệ thủ thư để gia hạn.</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Thẻ Thư viện</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Bạn chưa có thẻ thư viện. Vui lòng liên hệ thủ thư để được cấp thẻ.
+                </p>
+                <a href="/Librarian/LibraryCards" class="text-primary hover:underline">
+                    Tìm hiểu thêm →
+                </a>
+            </div>
+        }
+
+        <!-- Quick Actions -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Thao tác nhanh</h3>
+            <div class="space-y-3">
+                <a href="@Url.Action("Index", "Books")"
+                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <span class="material-symbols-outlined text-primary">search</span>
+                    <span class="text-gray-900 dark:text-white">Tìm kiếm sách</span>
+                </a>
+                <a href="@Url.Action("Index", "Borrows")"
+                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <span class="material-symbols-outlined text-primary">library_books</span>
+                    <span class="text-gray-900 dark:text-white">Sách đang mượn</span>
+                </a>
+                <a href="@Url.Action("Index", "BookReservations")"
+                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <span class="material-symbols-outlined text-primary">bookmark</span>
+                    <span class="text-gray-900 dark:text-white">Đặt sách của tôi</span>
+                </a>
+                <a href="@Url.Action("Profile", "Reader")"
+                   class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                    <span class="material-symbols-outlined text-primary">account_circle</span>
+                    <span class="text-gray-900 dark:text-white">Thông tin cá nhân</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Note -->
+    <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">info</span>
+            <div>
+                <h4 class="font-medium text-blue-900 dark:text-blue-200 mb-1">Lưu ý</h4>
+                <p class="text-sm text-blue-800 dark:text-blue-300">
+                    Vui lòng trả sách đúng hạn để tránh bị phạt. Mỗi ngày trễ hạn sẽ bị tính phí phạt theo quy định của thư viện.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+

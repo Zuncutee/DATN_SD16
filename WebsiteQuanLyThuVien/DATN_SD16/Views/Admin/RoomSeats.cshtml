@@ -1,0 +1,350 @@
+@model IEnumerable<DATN_SD16.Models.Entities.ReadingRoomSeat>
+@{
+    ViewData["Title"] = "Quản lý Chỗ ngồi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var room = ViewBag.Room as DATN_SD16.Models.Entities.ReadingRoom;
+}
+
+<div class="mb-3">
+    <a asp-action="ReadingRooms" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Quay lại danh sách phòng
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-door-open"></i> Phòng: @room.RoomName (@room.RoomCode)
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <strong>Sức chứa:</strong> @room.Capacity chỗ
+            </div>
+            <div class="col-md-3">
+                <strong>Đã có:</strong> @Model.Count() chỗ
+            </div>
+            <div class="col-md-3">
+                <strong>Còn trống:</strong> @(room.Capacity - Model.Count()) chỗ
+            </div>
+            <div class="col-md-3">
+                <strong>Trạng thái:</strong> 
+                @if (room.IsActive)
+                {
+                    <span class="badge bg-success">Hoạt động</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Ngưng hoạt động</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-chair"></i> Danh sách Chỗ ngồi
+        <div class="float-end">
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createSeatModal">
+                <i class="fas fa-plus"></i> Thêm chỗ ngồi
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var seat in Model)
+                {
+                    <div class="col-md-4 col-lg-3 mb-3">
+                        <div class="card h-100 @(seat.Status == "Available" ? "border-success" : seat.Status == "Occupied" ? "border-danger" : "border-warning")">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    @if (seat.Status == "Available")
+                                    {
+                                        <i class="fas fa-chair fa-3x text-success"></i>
+                                    }
+                                    else if (seat.Status == "Occupied")
+                                    {
+                                        <i class="fas fa-user fa-3x text-danger"></i>
+                                    }
+                                    else if (seat.Status == "Reserved")
+                                    {
+                                        <i class="fas fa-clock fa-3x text-warning"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-tools fa-3x text-secondary"></i>
+                                    }
+                                </div>
+                                <h5 class="card-title">@seat.SeatNumber</h5>
+                                <p class="card-text">
+                                    @if (seat.Status == "Available")
+                                    {
+                                        <span class="badge bg-success">Có sẵn</span>
+                                    }
+                                    else if (seat.Status == "Occupied")
+                                    {
+                                        <span class="badge bg-danger">Đang sử dụng</span>
+                                    }
+                                    else if (seat.Status == "Reserved")
+                                    {
+                                        <span class="badge bg-warning">Đã đặt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Bảo trì</span>
+                                    }
+                                </p>
+                                @if (!string.IsNullOrEmpty(seat.QRCode))
+                                {
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">QR Code:</small>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control font-monospace" value="@seat.QRCode" id="qrCode_@seat.SeatId" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="copyQRCode('qrCode_@seat.SeatId')" title="Copy QR Code">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-link p-0 mt-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#qrCodeModal"
+                                                onclick="showQRCodeModal('@seat.QRCode', '@seat.SeatNumber')">
+                                            <i class="fas fa-qrcode"></i> Xem QR Code
+                                        </button>
+                                    </div>
+                                }
+                                <div class="btn-group-vertical w-100" role="group">
+                                    <button type="button" class="btn btn-sm btn-warning" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editSeatModal"
+                                            onclick="editSeat(@seat.SeatId, '@seat.SeatNumber', '@seat.Status', @room.RoomId)">
+                                        <i class="fas fa-edit"></i> Sửa
+                                    </button>
+                                    <form asp-action="GenerateQRCode" asp-route-id="@seat.SeatId" asp-route-roomId="@room.RoomId" method="post" class="d-inline" data-ajax="true" data-confirm="@(string.IsNullOrEmpty(seat.QRCode) ? "Tạo mã QR mới?" : "Tạo lại mã QR? Mã cũ sẽ bị thay thế.")">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm @(string.IsNullOrEmpty(seat.QRCode) ? "btn-success" : "btn-info") w-100">
+                                            <i class="fas fa-qrcode"></i> @(string.IsNullOrEmpty(seat.QRCode) ? "Tạo QR" : "Tạo lại QR")
+                                        </button>
+                                    </form>
+                                    <form asp-action="DeleteSeat" asp-route-id="@seat.SeatId" asp-route-roomId="@room.RoomId" method="post" class="d-inline" data-ajax="true" data-confirm="Bạn có chắc muốn xóa chỗ ngồi này?">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-center text-muted">Chưa có chỗ ngồi nào. Hãy thêm chỗ ngồi mới.</p>
+        }
+    </div>
+</div>
+
+<!-- Create Seat Modal -->
+<div class="modal fade" id="createSeatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Chỗ ngồi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateSeat" method="post" data-ajax="true">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="roomId" value="@room.RoomId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Số chỗ ngồi <span class="text-danger">*</span></label>
+                        <input type="text" name="seatNumber" class="form-control" placeholder="VD: A01, B02, ..." required />
+                        <small class="text-muted">Mã định danh cho chỗ ngồi</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo chỗ ngồi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Seat Modal -->
+<div class="modal fade" id="editSeatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Chỗ ngồi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateSeat" method="post" data-ajax="true">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="seatId" id="editSeatId" />
+                <input type="hidden" name="roomId" id="editSeatRoomId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Số chỗ ngồi <span class="text-danger">*</span></label>
+                        <input type="text" name="seatNumber" id="editSeatNumber" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="status" id="editSeatStatus" class="form-select">
+                            <option value="Available">Có sẵn</option>
+                            <option value="Occupied">Đang sử dụng</option>
+                            <option value="Reserved">Đã đặt</option>
+                            <option value="Maintenance">Bảo trì</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR Code - Chỗ ngồi <span id="qrSeatNumber"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrcodeDisplay" class="mb-3"></div>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control font-monospace" id="qrCodeText" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyQRCode('qrCodeText')">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+                <p class="text-muted small">Quét mã QR này để check-in tại chỗ ngồi</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="printQRCode()">
+                    <i class="fas fa-print"></i> In QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        function editSeat(id, number, status, roomId) {
+            document.getElementById('editSeatId').value = id;
+            document.getElementById('editSeatNumber').value = number;
+            document.getElementById('editSeatStatus').value = status;
+            document.getElementById('editSeatRoomId').value = roomId;
+        }
+
+        function copyQRCode(inputId) {
+            const input = document.getElementById(inputId);
+            input.select();
+            input.setSelectionRange(0, 99999); // For mobile devices
+            navigator.clipboard.writeText(input.value).then(function() {
+                // Show toast notification
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    const toastMessage = toast.querySelector('#toastMessage');
+                    if (toastMessage) {
+                        toastMessage.textContent = 'Đã copy QR Code!';
+                        const bsToast = new bootstrap.Toast(toast);
+                        bsToast.show();
+                    }
+                } else {
+                    alert('Đã copy QR Code: ' + input.value);
+                }
+            }).catch(function(err) {
+                // Fallback for older browsers
+                document.execCommand('copy');
+                alert('Đã copy QR Code: ' + input.value);
+            });
+        }
+
+        function showQRCodeModal(qrCode, seatNumber) {
+            document.getElementById('qrSeatNumber').textContent = seatNumber;
+            document.getElementById('qrCodeText').value = qrCode;
+            
+            // Clear previous QR code
+            const qrDisplay = document.getElementById('qrcodeDisplay');
+            qrDisplay.innerHTML = '';
+            
+            // Generate QR code
+            new QRCode(qrDisplay, {
+                text: qrCode,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function printQRCode() {
+            const qrCode = document.getElementById('qrCodeText').value;
+            const seatNumber = document.getElementById('qrSeatNumber').textContent;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>QR Code - Chỗ ${seatNumber}</title>
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                text-align: center; 
+                                padding: 20px;
+                            }
+                            h2 { margin-bottom: 10px; }
+                            .qr-container { margin: 20px 0; }
+                            .qr-code { margin: 0 auto; }
+                            .qr-text { 
+                                font-family: monospace; 
+                                font-size: 14px; 
+                                margin-top: 10px;
+                                padding: 10px;
+                                background: #f5f5f5;
+                                border-radius: 4px;
+                            }
+                        </style>
+                        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"><\/script>
+                    </head>
+                    <body>
+                        <h2>QR Code Check-in</h2>
+                        <p>Chỗ ngồi: <strong>${seatNumber}</strong></p>
+                        <div class="qr-container">
+                            <div id="qrcode" class="qr-code"></div>
+                            <div class="qr-text">${qrCode}</div>
+                        </div>
+                        <p style="margin-top: 20px; font-size: 12px; color: #666;">
+                            Quét mã QR này để check-in tại chỗ ngồi
+                        </p>
+                        <script>
+                            new QRCode(document.getElementById('qrcode'), {
+                                text: '${qrCode}',
+                                width: 300,
+                                height: 300,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
+                            window.onload = function() { window.print(); }
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+    </script>
+}

@@ -1,0 +1,66 @@
+@model IEnumerable<DATN_SD16.Models.Entities.User>
+@{
+    ViewData["Title"] = "Quản lý Độc giả";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users"></i> Quản lý Độc giả
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <form method="get" class="d-flex gap-2">
+                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm theo tên, username, email..." value="@ViewBag.Search" />
+                <button type="submit" class="btn btn-secondary">Tìm kiếm</button>
+                <a asp-action="Readers" class="btn btn-outline-secondary">Xóa bộ lọc</a>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@user.Username</td>
+                            <td>@user.Email</td>
+                            <td>@(user.PhoneNumber ?? "-")</td>
+                            <td>
+                                @if (user.IsActive && !user.IsLocked)
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                                else if (user.IsLocked)
+                                {
+                                    <span class="badge bg-danger">Bị khóa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Không hoạt động</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="ReaderDetails" asp-route-id="@user.UserId" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,157 @@
+@model DATN_SD16.Models.Entities.User
+@{
+    ViewData["Title"] = "Chỉnh sửa thông tin";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="@Url.Action("Profile", "Reader")" 
+           class="inline-flex items-center gap-2 text-primary hover:underline">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Quay lại hồ sơ
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <span class="material-symbols-outlined align-middle">edit</span>
+            Chỉnh sửa thông tin cá nhân
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Cập nhật thông tin tài khoản của bạn
+        </p>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <form asp-action="EditProfile" method="post" id="editProfileForm">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-6">
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Họ và tên <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           asp-for="FullName"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="Nhập họ và tên"
+                           required />
+                    <span asp-validation-for="FullName" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Email <span class="text-red-500">*</span>
+                    </label>
+                    <input type="email" 
+                           asp-for="Email"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="Nhập email"
+                           required />
+                    <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Số điện thoại
+                    </label>
+                    <input type="tel" 
+                           asp-for="PhoneNumber"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                           placeholder="Nhập số điện thoại" />
+                    <span asp-validation-for="PhoneNumber" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Địa chỉ
+                    </label>
+                    <textarea asp-for="Address"
+                              rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                              placeholder="Nhập địa chỉ"></textarea>
+                    <span asp-validation-for="Address" class="text-red-500 text-sm"></span>
+                </div>
+
+                <!-- Note -->
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">info</span>
+                        <div>
+                            <h4 class="font-medium text-blue-900 dark:text-blue-200 mb-1">Lưu ý</h4>
+                            <p class="text-sm text-blue-800 dark:text-blue-300">
+                                Một số thông tin như tên đăng nhập, ngày sinh, và giới tính không thể thay đổi.
+                                Vui lòng liên hệ thủ thư nếu bạn cần cập nhật những thông tin này.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button type="submit" 
+                            class="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        Lưu thay đổi
+                    </button>
+                    <a href="@Url.Action("Profile", "Reader")"
+                       class="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition text-center">
+                        Hủy
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '@Url.Action("Profile", "Reader")';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+}
+
+@if (TempData["Error"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Error"]');
+        });
+    </script>
+}
+

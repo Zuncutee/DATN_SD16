@@ -1,0 +1,286 @@
+@model DATN_SD16.Models.Entities.BookReservation
+@{
+    ViewData["Title"] = "Chi tiết đặt sách";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="@Url.Action("Index", "BookReservations")" 
+           class="inline-flex items-center gap-2 text-primary hover:underline">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Quay lại danh sách
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+        <!-- Header -->
+        <div class="@(Model.Status == "Pending" ? "bg-gradient-to-r from-yellow-500 to-yellow-600" : Model.Status == "Approved" ? "bg-gradient-to-r from-green-500 to-green-600" : Model.Status == "Rejected" ? "bg-gradient-to-r from-red-500 to-red-600" : "bg-gradient-to-r from-gray-500 to-gray-600") px-6 py-4">
+            <h1 class="text-2xl font-bold text-white">Chi tiết đặt sách</h1>
+            <p class="text-white/80 text-sm">Ngày đặt: @Model.ReservationDate.ToString("dd/MM/yyyy")</p>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6">
+            <!-- Status Banner -->
+            @if (Model.Status == "Pending")
+            {
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400">schedule</span>
+                        <div>
+                            <h3 class="font-semibold text-yellow-900 dark:text-yellow-200 mb-1">Đang chờ xử lý</h3>
+                            <p class="text-yellow-800 dark:text-yellow-300 text-sm">
+                                Yêu cầu đặt sách của bạn đang được thủ thư xem xét. Bạn sẽ nhận được thông báo khi có kết quả.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Approved")
+            {
+                <div class="bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
+                        <div>
+                            <h3 class="font-semibold text-green-900 dark:text-green-200 mb-1">Đã duyệt</h3>
+                            <p class="text-green-800 dark:text-green-300 text-sm">
+                                Sách đã sẵn sàng! Vui lòng đến quầy thủ thư để nhận sách
+                                @if (Model.ExpiryDate != null)
+                                {
+                                    <span>trước ngày @Model.ExpiryDate?.ToString("dd/MM/yyyy")</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Rejected")
+            {
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-red-600 dark:text-red-400">cancel</span>
+                        <div>
+                            <h3 class="font-semibold text-red-900 dark:text-red-200 mb-1">Đã từ chối</h3>
+                            <p class="text-red-800 dark:text-red-300 text-sm">
+                                Yêu cầu đặt sách của bạn đã bị từ chối.
+                                @if (!string.IsNullOrEmpty(Model.Notes))
+                                {
+                                    <br />
+                                    <span class="font-medium">Lý do:</span> @Model.Notes
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Cancelled")
+            {
+                <div class="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">close</span>
+                        <div>
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-200 mb-1">Đã hủy</h3>
+                            <p class="text-gray-700 dark:text-gray-300 text-sm">
+                                Bạn đã hủy yêu cầu đặt sách này.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.Status == "Completed")
+            {
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">library_books</span>
+                        <div>
+                            <h3 class="font-semibold text-blue-900 dark:text-blue-200 mb-1">Đã hoàn thành</h3>
+                            <p class="text-blue-800 dark:text-blue-300 text-sm">
+                                Bạn đã nhận và mượn sách thành công.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Book Info Section -->
+            <div class="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Thông tin sách</h2>
+                
+                <div class="flex gap-4">
+                    <!-- Book Cover -->
+                    <div class="w-32 h-44 bg-gray-200 dark:bg-gray-700 rounded flex-shrink-0">
+                        @if (!string.IsNullOrEmpty(Model.Book?.CoverImage))
+                        {
+                            <img src="@Model.Book.CoverImage" 
+                                 alt="@Model.Book.Title" 
+                                 class="w-full h-full object-cover rounded" />
+                        }
+                        else
+                        {
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-gray-400 text-5xl">book</span>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Book Details -->
+                    <div class="flex-1">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                            @Model.Book?.Title
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <span class="text-gray-600 dark:text-gray-400">Tác giả:</span>
+                                <span class="text-gray-900 dark:text-white ml-2">
+                                    @if (Model.Book?.BookAuthors != null && Model.Book.BookAuthors.Any())
+                                    {
+                                        @string.Join(", ", Model.Book.BookAuthors.Select(ba => ba.Author?.AuthorName))
+                                    }
+                                    else
+                                    {
+                                        <span>N/A</span>
+                                    }
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600 dark:text-gray-400">Thể loại:</span>
+                                <span class="text-gray-900 dark:text-white ml-2">
+                                    @(Model.Book?.Category?.CategoryName ?? "N/A")
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600 dark:text-gray-400">Nhà xuất bản:</span>
+                                <span class="text-gray-900 dark:text-white ml-2">
+                                    @(Model.Book?.Publisher?.PublisherName ?? "N/A")
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600 dark:text-gray-400">ISBN:</span>
+                                <span class="text-gray-900 dark:text-white ml-2">
+                                    @(Model.Book?.ISBN ?? "N/A")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="@Url.Action("Details", "Books", new { id = Model.BookId })"
+                               class="inline-flex items-center gap-1 text-primary hover:underline text-sm">
+                                Xem chi tiết sách
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservation Info Section -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Thông tin đặt sách</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-gray-400">event</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Ngày đặt</p>
+                            <p class="font-medium text-gray-900 dark:text-white">@Model.ReservationDate.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </div>
+
+                    @if (Model.ExpiryDate != null)
+                    {
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-gray-400">event_busy</span>
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Hạn nhận sách</p>
+                                <p class="font-medium text-gray-900 dark:text-white">@Model.ExpiryDate?.ToString("dd/MM/yyyy")</p>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-gray-400">label</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Trạng thái</p>
+                            <p>
+                                @if (Model.Status == "Pending")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                                        <span class="material-symbols-outlined text-sm">schedule</span>
+                                        Chờ duyệt
+                                    </span>
+                                }
+                                else if (Model.Status == "Approved")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                                        Đã duyệt
+                                    </span>
+                                }
+                                else if (Model.Status == "Rejected")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                                        <span class="material-symbols-outlined text-sm">cancel</span>
+                                        Từ chối
+                                    </span>
+                                }
+                                else if (Model.Status == "Cancelled")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                                        <span class="material-symbols-outlined text-sm">close</span>
+                                        Đã hủy
+                                    </span>
+                                }
+                                else if (Model.Status == "Completed")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                        <span class="material-symbols-outlined text-sm">library_books</span>
+                                        Hoàn thành
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            @if (Model.Status == "Pending")
+            {
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <form method="post" asp-action="Cancel" asp-route-id="@Model.ReservationId">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" 
+                                onclick="return confirm('Bạn có chắc muốn hủy đặt sách này?')"
+                                class="px-6 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-2">
+                            <span class="material-symbols-outlined">close</span>
+                            Hủy đặt sách
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Success"]');
+        });
+    </script>
+}
+
+@if (TempData["Error"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Error"]');
+        });
+    </script>
+}
+

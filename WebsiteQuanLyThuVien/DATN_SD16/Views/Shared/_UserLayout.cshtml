@@ -1,0 +1,184 @@
+﻿@using DATN_SD16.Helpers
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - City Library</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: { display: ["Inter", "sans-serif"] }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark">
+
+    <div class="min-h-screen w-full flex flex-col">
+        <div class="flex flex-col flex-1">
+
+            <!-- Header -->
+            <header class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 py-4 px-4 md:px-10 bg-white dark:bg-gray-900">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 text-primary">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M2 20h20v2H2v-2zm2-8h2v7H4v-7zm5 0h2v7H9v-7zm4 0h2v7h-2v-7zm5 0h2v7h-2v-7zM2 6l10-4 10 4v2H2V6z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">City Library</h2>
+                </div>
+
+                <nav class="hidden md:flex items-center gap-9 text-gray-700 dark:text-gray-300">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="hover:text-primary" href="@Url.Action("Dashboard", "Reader")">Trang chủ</a>
+                    }
+                    else
+                    {
+                        <a class="hover:text-primary" href="@Url.Action("Index", "Home")">Trang chủ</a>
+                    }
+                    
+                    <a class="hover:text-primary" href="@Url.Action("Index", "Books")">Tìm sách</a>
+                    
+                    <a class="hover:text-primary" 
+                       href="@(User.Identity.IsAuthenticated ? Url.Action("Index", "Borrows") : "javascript:void(0)")"
+                       onclick="@(User.Identity.IsAuthenticated ? "" : "openLoginModal(); return false;")">
+                       Mượn sách
+                    </a>
+                    
+                    <a class="hover:text-primary" 
+                       href="@(User.Identity.IsAuthenticated ? Url.Action("Index", "BookReservations") : "javascript:void(0)")"
+                       onclick="@(User.Identity.IsAuthenticated ? "" : "openLoginModal(); return false;")">
+                       Đặt sách
+                    </a>
+                    
+                    <a class="hover:text-primary" 
+                       href="@(User.Identity.IsAuthenticated ? Url.Action("Index", "ReadingRoom") : "javascript:void(0)")"
+                       onclick="@(User.Identity.IsAuthenticated ? "" : "openLoginModal(); return false;")">
+                       Phòng đọc
+                    </a>
+                </nav>
+
+                <div class="flex items-center gap-4">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- User Menu Dropdown -->
+                        <div class="relative" id="userMenu">
+                            <button class="flex items-center gap-2 hover:text-primary" onclick="toggleUserMenu()">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-semibold">
+                                    @User.Identity.Name.Substring(0, 1).ToUpper()
+                                </div>
+                                <span class="material-symbols-outlined">expand_more</span>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                                <a href="@Url.Action("Profile", "Reader")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">account_circle</span>
+                                    Thông tin cá nhân
+                                </a>
+                                <a href="@Url.Action("Index", "Borrows")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">library_books</span>
+                                    Sách đang mượn
+                                </a>
+                                <a href="@Url.Action("Index", "BookReservations")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">bookmark</span>
+                                    Đặt sách của tôi
+                                </a>
+                                <a href="@Url.Action("MyReservations", "ReadingRoom")" class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                    <span class="material-symbols-outlined text-sm">event_seat</span>
+                                    Đặt chỗ phòng đọc
+                                </a>
+                                <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                                <form method="post" action="/AdminAuth/Logout">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400">
+                                        <span class="material-symbols-outlined text-sm">logout</span>
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button onclick="openLoginModal()" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                            Đăng nhập
+                        </button>
+                    }
+                </div>
+            </header>
+
+            <!-- Main content -->
+            <main class="flex flex-col gap-10 px-4 md:px-10 mt-8">
+                @RenderBody()
+            </main>
+
+            <!-- Footer -->
+            <footer class="mt-16 py-8 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-10">
+                    <p>© 2024 City Library. All Rights Reserved.</p>
+                    <div class="flex items-center gap-6">
+                        <a class="hover:text-primary" href="#">About Us</a>
+                        <a class="hover:text-primary" href="#">Contact</a>
+                        <a class="hover:text-primary" href="#">Operating Hours</a>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    @await Html.PartialAsync("_LoginModal")
+    
+    <!-- Register Modal -->
+    @await Html.PartialAsync("_RegisterModal")
+
+    <script>
+        // Toggle user menu dropdown
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const dropdown = document.getElementById('userDropdown');
+            
+            if (userMenu && dropdown && !userMenu.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

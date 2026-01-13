@@ -1,0 +1,108 @@
+@model DATN_SD16.Models.Entities.BookDamage
+@{
+    ViewData["Title"] = "Chi tiết báo cáo sách hỏng/mất";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-info-circle"></i> Chi tiết báo cáo #@Model.DamageId
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Thông tin báo cáo</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Mã báo cáo:</th>
+                        <td>#@Model.DamageId</td>
+                    </tr>
+                    <tr>
+                        <th>Bản sách:</th>
+                        <td>@Model.Copy?.CopyNumber</td>
+                    </tr>
+                    <tr>
+                        <th>Sách:</th>
+                        <td>@Model.Copy?.Book?.Title</td>
+                    </tr>
+                    <tr>
+                        <th>Loại:</th>
+                        <td>
+                            @if (Model.DamageType == "Lost")
+                            {
+                                <span class="badge bg-danger">Mất</span>
+                            }
+                            else if (Model.DamageType == "Damaged")
+                            {
+                                <span class="badge bg-warning">Hỏng</span>
+                            }
+                            else if (Model.DamageType == "Missing")
+                            {
+                                <span class="badge bg-info">Thiếu</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.DamageType</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Ngày báo cáo:</th>
+                        <td>@Model.DamageDate.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                    <tr>
+                        <th>Người báo cáo:</th>
+                        <td>@Model.ReportedByUser?.FullName</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h5>Thông tin xử lý</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Trạng thái:</th>
+                        <td>
+                            @if (Model.Status == "Reported")
+                            {
+                                <span class="badge bg-warning">Đã báo cáo</span>
+                            }
+                            else if (Model.Status == "Processed")
+                            {
+                                <span class="badge bg-info">Đã xử lý</span>
+                            }
+                            else if (Model.Status == "Resolved")
+                            {
+                                <span class="badge bg-success">Đã giải quyết</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@Model.Status</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Người xử lý:</th>
+                        <td>@(Model.ProcessedByUser?.FullName ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Ngày xử lý:</th>
+                        <td>@(Model.ProcessedAt?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Mô tả:</th>
+                        <td>@(Model.Description ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Ghi chú:</th>
+                        <td>@(Model.Notes ?? "-")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a asp-action="BookDamages" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </div>
+</div>
+

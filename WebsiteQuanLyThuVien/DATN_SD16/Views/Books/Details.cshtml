@@ -1,0 +1,238 @@
+@model DATN_SD16.Models.Entities.Book
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="@Url.Action("Index", "Books")" 
+           class="inline-flex items-center gap-2 text-primary hover:underline">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Quay lại tìm kiếm
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Book Cover -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                <div class="aspect-[3/4] bg-gray-200 dark:bg-gray-700">
+                    @if (!string.IsNullOrEmpty(Model.CoverImage))
+                    {
+                        <img src="@Model.CoverImage" 
+                             alt="@Model.Title" 
+                             class="w-full h-full object-cover" />
+                    }
+                    else
+                    {
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-8xl text-gray-400">book</span>
+                        </div>
+                    }
+                </div>
+
+                <div class="p-6 space-y-4">
+                    <!-- Availability Status -->
+                    <div class="text-center">
+                        @if (Model.AvailableCopies > 0)
+                        {
+                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full mb-2">
+                                <span class="material-symbols-outlined text-sm">check_circle</span>
+                                <span class="font-semibold">Có sẵn</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                @Model.AvailableCopies bản còn lại / @Model.TotalCopies bản
+                            </p>
+                        }
+                        else
+                        {
+                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-full mb-2">
+                                <span class="material-symbols-outlined text-sm">cancel</span>
+                                <span class="font-semibold">Hết sách</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                0 bản còn lại / @Model.TotalCopies bản
+                            </p>
+                        }
+                    </div>
+
+                    <!-- Reserve Button -->
+                    @if (Model.AvailableCopies == 0)
+                    {
+                        <form method="post" asp-controller="BookReservations" asp-action="Create" class="w-full">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="bookId" value="@Model.BookId" />
+                            <button type="submit" 
+                                    class="w-full px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">bookmark_add</span>
+                                Đặt trước sách
+                            </button>
+                        </form>
+                        <p class="text-xs text-center text-gray-500">
+                            Bạn sẽ được ưu tiên khi sách có sẵn
+                        </p>
+                    }
+                    else
+                    {
+                        <form method="post" asp-controller="BookReservations" asp-action="Create" class="w-full">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="bookId" value="@Model.BookId" />
+                            <button type="submit" 
+                                    class="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">bookmark_add</span>
+                                Đặt mượn sách
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Book Details -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Info -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    @Model.Title
+                </h1>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">person</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Tác giả</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @if (Model.BookAuthors != null && Model.BookAuthors.Any())
+                                {
+                                    @string.Join(", ", Model.BookAuthors.Select(ba => ba.Author?.AuthorName))
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">Chưa cập nhật</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">category</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Thể loại</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.Category?.CategoryName ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">business</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nhà xuất bản</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.Publisher?.PublisherName ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">event</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Năm xuất bản</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.PublicationYear?.ToString() ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">tag</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">ISBN</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.ISBN ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">description</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Số trang</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.PageCount?.ToString() ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">translate</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Ngôn ngữ</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.Language ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-gray-400">place</span>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Vị trí</p>
+                            <p class="font-medium text-gray-900 dark:text-white">
+                                @(Model.Location?.LocationCode ?? "Chưa cập nhật")
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Mô tả</h3>
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                            @Model.Description
+                        </p>
+                    </div>
+                }
+            </div>
+
+            <!-- Status Info -->
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">info</span>
+                    <div>
+                        <h4 class="font-medium text-blue-900 dark:text-blue-200 mb-1">Lưu ý khi mượn sách</h4>
+                        <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                            <li>Vui lòng đến quầy thủ thư để hoàn tất thủ tục mượn sách</li>
+                            <li>Thời gian mượn sách theo quy định của thư viện</li>
+                            <li>Trả sách đúng hạn để tránh bị phạt</li>
+                            <li>Giữ gìn sách cẩn thận, không làm hỏng hoặc mất sách</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Success"]');
+        });
+    </script>
+}
+
+@if (TempData["Error"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Error"]');
+        });
+    </script>
+}
+

@@ -1,0 +1,93 @@
+@{
+    ViewData["Title"] = "Dashboard Thủ Thư";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-card-icon">
+            <i class="fas fa-book-reader"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.TotalBorrows</div>
+        <div class="stat-card-label">Tổng số lượt mượn</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-card-icon">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.ActiveBorrows</div>
+        <div class="stat-card-label">Sách đang mượn</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-card-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.OverdueBorrows</div>
+        <div class="stat-card-label">Sách quá hạn</div>
+    </div>
+    
+    <div class="stat-card danger">
+        <div class="stat-card-icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-card-value">@ViewBag.PendingReservations</div>
+        <div class="stat-card-label">Đặt sách chờ duyệt</div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tasks"></i> Công việc nhanh
+            </div>
+            <div class="card-body">
+                <a asp-action="CreateBorrow" class="btn btn-primary mb-2 w-100">
+                    <i class="fas fa-plus"></i> Tạo phiếu mượn mới
+                </a>
+                <a asp-action="Reservations" class="btn btn-info mb-2 w-100">
+                    <i class="fas fa-check-circle"></i> Xử lý đặt sách (@ViewBag.PendingReservations)
+                </a>
+                <a asp-action="OverdueBorrows" class="btn btn-warning mb-2 w-100">
+                    <i class="fas fa-exclamation-triangle"></i> Sách quá hạn (@ViewBag.OverdueBorrows)
+                </a>
+                <a asp-action="CreateBookDamage" class="btn btn-danger mb-2 w-100">
+                    <i class="fas fa-exclamation-circle"></i> Báo cáo sách hỏng/mất
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-list"></i> Menu chức năng
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a asp-action="Borrows" class="list-group-item list-group-item-action">
+                        <i class="fas fa-book"></i> Quản lý mượn-trả
+                    </a>
+                    <a asp-action="Reservations" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-check"></i> Xử lý đặt sách online
+                    </a>
+                    <a asp-action="Readers" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users"></i> Quản lý độc giả
+                    </a>
+                    <a asp-action="LibraryCards" class="list-group-item list-group-item-action">
+                        <i class="fas fa-id-card"></i> Quản lý thẻ thư viện
+                    </a>
+                    <a asp-action="BookDamages" class="list-group-item list-group-item-action">
+                        <i class="fas fa-exclamation-circle"></i> Sách hỏng/mất
+                    </a>
+                    <a asp-action="InventoryChecks" class="list-group-item list-group-item-action">
+                        <i class="fas fa-clipboard-check"></i> Kiểm kê sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

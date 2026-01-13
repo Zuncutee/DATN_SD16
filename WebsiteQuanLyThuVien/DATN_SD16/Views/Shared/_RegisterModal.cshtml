@@ -1,0 +1,307 @@
+<!-- Register Modal -->
+<div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Đăng ký tài khoản</h3>
+            <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6">
+            <form id="registerForm">
+                @Html.AntiForgeryToken()
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Username -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Tên đăng nhập <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="username" 
+                               id="regUsername"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Nhập tên đăng nhập"
+                               required />
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Họ và tên <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="fullName" 
+                               id="regFullName"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Nhập họ và tên"
+                               required />
+                    </div>
+
+                    <!-- Email -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" 
+                               name="email" 
+                               id="regEmail"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Nhập email"
+                               required />
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Số điện thoại
+                        </label>
+                        <input type="tel" 
+                               name="phone" 
+                               id="regPhone"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Nhập số điện thoại" />
+                    </div>
+
+                    <!-- Date of Birth -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Ngày sinh
+                        </label>
+                        <input type="date" 
+                               name="dateOfBirth" 
+                               id="regDateOfBirth"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Giới tính
+                        </label>
+                        <select name="gender" 
+                                id="regGender"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <option value="">-- Chọn --</option>
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                            <option value="Other">Khác</option>
+                        </select>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Địa chỉ
+                        </label>
+                        <textarea name="address" 
+                                  id="regAddress"
+                                  rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                  placeholder="Nhập địa chỉ"></textarea>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Mật khẩu <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" 
+                               name="password" 
+                               id="regPassword"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                               required 
+                               minlength="6" />
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Xác nhận mật khẩu <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" 
+                               name="confirmPassword" 
+                               id="regConfirmPassword"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="Nhập lại mật khẩu"
+                               required 
+                               minlength="6" />
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="registerError" class="hidden mt-4 p-3 bg-red-100 border border-red-300 text-red-800 rounded-lg text-sm">
+                </div>
+
+                <!-- Success Message -->
+                <div id="registerSuccess" class="hidden mt-4 p-3 bg-green-100 border border-green-300 text-green-800 rounded-lg text-sm">
+                </div>
+
+                <!-- Terms & Conditions -->
+                <div class="mt-6">
+                    <label class="flex items-start gap-2">
+                        <input type="checkbox" name="acceptTerms" id="regAcceptTerms" class="mt-1 rounded border-gray-300 text-primary focus:ring-primary" required>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            Tôi đồng ý với <a href="#" class="text-primary hover:underline">điều khoản sử dụng</a> và <a href="#" class="text-primary hover:underline">chính sách bảo mật</a>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        class="w-full mt-6 px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2">
+                    <span id="registerButtonText">Đăng ký</span>
+                    <span id="registerSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <div class="text-center mt-6">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Đã có tài khoản? 
+                    <a href="#" onclick="closeRegisterModal(); openLoginModal(); return false;" class="text-primary hover:underline font-medium">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openRegisterModal() {
+        document.getElementById('registerModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRegisterModal() {
+        document.getElementById('registerModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        // Reset form
+        document.getElementById('registerForm').reset();
+        document.getElementById('registerError').classList.add('hidden');
+        document.getElementById('registerSuccess').classList.add('hidden');
+    }
+
+    // Close on outside click
+    document.getElementById('registerModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeRegisterModal();
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = {
+            username: formData.get('username'),
+            fullName: formData.get('fullName'),
+            email: formData.get('email'),
+            phoneNumber: formData.get('phone'),
+            dateOfBirth: formData.get('dateOfBirth'),
+            gender: formData.get('gender'),
+            address: formData.get('address'),
+            password: formData.get('password'),
+            confirmPassword: formData.get('confirmPassword')
+        };
+
+        const errorDiv = document.getElementById('registerError');
+        const successDiv = document.getElementById('registerSuccess');
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const buttonText = document.getElementById('registerButtonText');
+        const spinner = document.getElementById('registerSpinner');
+
+        // Validate passwords match
+        if (data.password !== data.confirmPassword) {
+            errorDiv.textContent = 'Mật khẩu xác nhận không khớp!';
+            errorDiv.classList.remove('hidden');
+            successDiv.classList.add('hidden');
+            return;
+        }
+
+        // Show loading
+        submitButton.disabled = true;
+        buttonText.classList.add('hidden');
+        spinner.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+        successDiv.classList.add('hidden');
+
+        try {
+            const response = await fetch('/AdminAuth/Register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(data),
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errorMessage = 'Lỗi server: ' + response.status;
+                try {
+                    const errorData = JSON.parse(errorText);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // If not JSON, use the text
+                    if (errorText) errorMessage = errorText;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            console.log('Register response:', result);
+
+            if (result.success) {
+                // Show success message
+                successDiv.textContent = result.message || 'Đăng ký thành công! Vui lòng đăng nhập.';
+                successDiv.classList.remove('hidden');
+                
+                // Reset form
+                e.target.reset();
+                
+                // Auto close and open login after 2 seconds
+                setTimeout(() => {
+                    closeRegisterModal();
+                    openLoginModal();
+                }, 2000);
+            } else {
+                // Show error
+                errorDiv.textContent = result.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Register error:', error);
+            let errorMessage = 'Có lỗi xảy ra. Vui lòng thử lại sau.';
+            if (error.message) {
+                errorMessage += ' ' + error.message;
+            } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+            }
+            errorDiv.textContent = errorMessage;
+            errorDiv.classList.remove('hidden');
+        } finally {
+            // Hide loading
+            submitButton.disabled = false;
+            buttonText.classList.remove('hidden');
+            spinner.classList.add('hidden');
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeRegisterModal();
+        }
+    });
+</script>
+

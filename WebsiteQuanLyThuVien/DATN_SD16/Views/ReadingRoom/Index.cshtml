@@ -1,0 +1,133 @@
+@model IEnumerable<DATN_SD16.Models.Entities.ReadingRoom>
+@{
+    ViewData["Title"] = "Đặt phòng đọc";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <span class="material-symbols-outlined align-middle">meeting_room</span>
+            Đặt phòng đọc
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Chọn phòng đọc và đặt chỗ ngồi phù hợp với bạn
+        </p>
+    </div>
+
+    <!-- Quick Link to My Reservations -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">bookmark</span>
+                <span class="text-blue-900 dark:text-blue-200">Xem các chỗ đã đặt của bạn</span>
+            </div>
+            <a href="@Url.Action("MyReservations", "ReadingRoom")" 
+               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Đặt chỗ của tôi
+            </a>
+        </div>
+    </div>
+
+    <!-- Rooms Grid -->
+    @if (Model.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var room in Model)
+            {
+                var availableSeats = room.ReadingRoomSeats?.Count(s => s.Status == "Available") ?? 0;
+                var totalSeats = room.ReadingRoomSeats?.Count() ?? 0;
+                var occupancyRate = totalSeats > 0 ? (int)((totalSeats - availableSeats) * 100.0 / totalSeats) : 0;
+
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
+                    <!-- Room Header -->
+                    <div class="bg-gradient-to-r from-primary to-blue-600 px-6 py-4">
+                        <h3 class="text-xl font-bold text-white mb-1">@room.RoomName</h3>
+                        <p class="text-blue-100 text-sm">Mã phòng: @room.RoomCode</p>
+                    </div>
+
+                    <!-- Room Info -->
+                    <div class="p-6">
+                        @if (!string.IsNullOrEmpty(room.Description))
+                        {
+                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                                @room.Description
+                            </p>
+                        }
+
+                        <!-- Capacity Info -->
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-gray-600 dark:text-gray-400">Chỗ trống</span>
+                                <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                                    @availableSeats / @room.Capacity
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div class="@(occupancyRate >= 90 ? "bg-red-600" : occupancyRate >= 70 ? "bg-yellow-600" : "bg-green-600") h-2 rounded-full" 
+                                     style="width: @occupancyRate%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                @occupancyRate% đã sử dụng
+                            </p>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="mb-4">
+                            @if (availableSeats > 0)
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                                    Còn chỗ trống
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">
+                                    <span class="material-symbols-outlined text-sm">cancel</span>
+                                    Hết chỗ
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Action Button -->
+                        <a href="@Url.Action("Details", "ReadingRoom", new { id = room.RoomId })" 
+                           class="block w-full px-4 py-3 @(availableSeats > 0 ? "bg-primary hover:bg-blue-600" : "bg-gray-400 cursor-not-allowed") text-white text-center rounded-lg transition">
+                            @if (availableSeats > 0)
+                            {
+                                <span class="material-symbols-outlined align-middle text-sm">event_seat</span>
+                                <span>Xem chi tiết & Đặt chỗ</span>
+                            }
+                            else
+                            {
+                                <span>Hết chỗ</span>
+                            }
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center">
+            <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">meeting_room</span>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Chưa có phòng đọc nào
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                Vui lòng liên hệ quản trị viên
+            </p>
+        </div>
+    }
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Success"]');
+        });
+    </script>
+}

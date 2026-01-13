@@ -1,0 +1,272 @@
+@model IEnumerable<DATN_SD16.Models.Entities.ReadingRoomReservation>
+@{
+    ViewData["Title"] = "Quản lý Đặt chỗ Phòng đọc";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var rooms = ViewBag.Rooms as IEnumerable<DATN_SD16.Models.Entities.ReadingRoom> ?? new List<DATN_SD16.Models.Entities.ReadingRoom>();
+    var statusList = ViewBag.StatusList as IEnumerable<string> ?? new List<string>();
+}
+
+<div class="card mb-3">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-calendar-check"></i> Quản lý Đặt chỗ Phòng đọc
+    </div>
+    <div class="card-body">
+        <!-- Filter Form -->
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Phòng đọc</label>
+                <select name="roomId" class="form-select">
+                    <option value="">-- Tất cả phòng --</option>
+                    @foreach (var room in rooms)
+                    {
+                        <option value="@room.RoomId" selected="@(ViewBag.SelectedRoomId == room.RoomId)">@room.RoomName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Trạng thái</label>
+                <select name="status" class="form-select">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    @foreach (var status in statusList)
+                    {
+                        var statusText = status switch
+                        {
+                            "Reserved" => "Đã đặt",
+                            "CheckedIn" => "Đã check-in",
+                            "Completed" => "Hoàn thành",
+                            "Cancelled" => "Đã hủy",
+                            "NoShow" => "Không đến",
+                            _ => status
+                        };
+                        <option value="@status" selected="@(ViewBag.SelectedStatus == status)">@statusText</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ngày đặt</label>
+                <input type="date" name="date" class="form-control" value="@(ViewBag.SelectedDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-list"></i> Danh sách Đặt chỗ (@Model.Count() kết quả)
+    </div>
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Độc giả</th>
+                            <th>Phòng</th>
+                            <th>Chỗ ngồi</th>
+                            <th>Ngày đặt</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái</th>
+                            <th>QR Code</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reservation in Model)
+                        {
+                            <tr>
+                                <td>@reservation.ReservationId</td>
+                                <td>
+                                    <div>
+                                        <strong>@(reservation.User?.FullName ?? reservation.User?.Username ?? "N/A")</strong>
+                                        <br>
+                                        <small class="text-muted">@(reservation.User?.Username ?? "")</small>
+                                    </div>
+                                </td>
+                                <td>@(reservation.Seat?.Room?.RoomName ?? "N/A")</td>
+                                <td>
+                                    <span class="badge bg-info">@(reservation.Seat?.SeatNumber ?? "N/A")</span>
+                                </td>
+                                <td>@reservation.ReservationDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @reservation.StartTime.ToString(@"hh\:mm") - @reservation.EndTime.ToString(@"hh\:mm")
+                                    <br>
+                                    <small class="text-muted">@((reservation.EndTime - reservation.StartTime).TotalHours) giờ</small>
+                                </td>
+                                <td>
+                                    @if (reservation.Status == "Reserved")
+                                    {
+                                        <span class="badge bg-warning">Đã đặt</span>
+                                    }
+                                    else if (reservation.Status == "CheckedIn")
+                                    {
+                                        <span class="badge bg-success">Đã check-in</span>
+                                    }
+                                    else if (reservation.Status == "Completed")
+                                    {
+                                        <span class="badge bg-secondary">Hoàn thành</span>
+                                    }
+                                    else if (reservation.Status == "Cancelled")
+                                    {
+                                        <span class="badge bg-danger">Đã hủy</span>
+                                    }
+                                    else if (reservation.Status == "NoShow")
+                                    {
+                                        <span class="badge bg-dark">Không đến</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@reservation.Status</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(reservation.Seat?.QRCode))
+                                    {
+                                        <small class="font-monospace">@reservation.Seat.QRCode</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="RoomReservationDetails" asp-route-id="@reservation.ReservationId" 
+                                           class="btn btn-sm btn-info" title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (reservation.Status == "Reserved")
+                                        {
+                                            <button type="button" class="btn btn-sm btn-success" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#checkInModal"
+                                                    onclick="showCheckInModal(@reservation.ReservationId, '@reservation.Seat?.QRCode')"
+                                                    title="Check-in">
+                                                <i class="fas fa-sign-in-alt"></i>
+                                            </button>
+                                        }
+                                        @if (reservation.Status == "CheckedIn")
+                                        {
+                                            <form asp-action="CheckOutReservation" asp-route-id="@reservation.ReservationId" 
+                                                  method="post" class="d-inline" data-ajax="true" data-confirm="Xác nhận check-out?">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-warning" title="Check-out">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (reservation.Status == "Reserved" || reservation.Status == "CheckedIn")
+                                        {
+                                            <form asp-action="CancelRoomReservation" asp-route-id="@reservation.ReservationId" 
+                                                  method="post" class="d-inline" data-ajax="true" data-confirm="Xác nhận hủy đặt chỗ này?">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Hủy">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Không có đặt chỗ nào phù hợp với bộ lọc.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Check-in Modal -->
+<div class="modal fade" id="checkInModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Check-in Đặt chỗ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CheckInReservation" method="post" id="checkInForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="checkInReservationId" />
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Mã QR Code <span class="text-danger">*</span></label>
+                        <input type="text" name="qrCode" id="checkInQRCode" class="form-control" required 
+                               placeholder="Nhập hoặc quét mã QR" />
+                        <small class="text-muted">Mã QR từ chỗ ngồi</small>
+                    </div>
+                    <div id="checkInError" class="alert alert-danger d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Check-in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showCheckInModal(reservationId, qrCode) {
+            document.getElementById('checkInReservationId').value = reservationId;
+            document.getElementById('checkInQRCode').value = '';
+            document.getElementById('checkInQRCode').placeholder = qrCode ? 'Mã QR: ' + qrCode : 'Nhập mã QR';
+            document.getElementById('checkInError').classList.add('d-none');
+        }
+
+        document.getElementById('checkInForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const reservationId = document.getElementById('checkInReservationId').value;
+            const qrCode = document.getElementById('checkInQRCode').value;
+            const errorDiv = document.getElementById('checkInError');
+            
+            errorDiv.classList.add('d-none');
+
+            try {
+                const formData = new FormData();
+                formData.append('id', reservationId);
+                formData.append('qrCode', qrCode);
+                formData.append('__RequestVerificationToken', document.querySelector('#checkInForm input[name="__RequestVerificationToken"]').value);
+
+                const response = await fetch('@Url.Action("CheckInReservation", "Admin")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    errorDiv.textContent = data.message || 'Check-in thất bại. Vui lòng thử lại.';
+                    errorDiv.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Check-in error:', error);
+                errorDiv.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                errorDiv.classList.remove('d-none');
+            }
+        });
+    </script>
+}
+

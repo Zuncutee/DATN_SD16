@@ -1,0 +1,77 @@
+@model IEnumerable<DATN_SD16.Models.Entities.InventoryCheck>
+@{
+    ViewData["Title"] = "Kiểm kê sách";
+    Layout = "~/Views/Shared/_LibrarianLayout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-clipboard-check"></i> Kiểm kê sách
+        <div class="float-end">
+            <a asp-action="CreateInventoryCheck" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Tạo phiếu kiểm kê
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <form method="get" class="d-flex gap-2">
+                <select name="status" class="form-select" style="width: auto;">
+                    <option value="All" selected="@(ViewBag.Status == "All")">Tất cả</option>
+                    <option value="InProgress" selected="@(ViewBag.Status == "InProgress")">Đang thực hiện</option>
+                    <option value="Completed" selected="@(ViewBag.Status == "Completed")">Hoàn thành</option>
+                    <option value="Cancelled" selected="@(ViewBag.Status == "Cancelled")">Đã hủy</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Lọc</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Số phiếu</th>
+                        <th>Ngày kiểm kê</th>
+                        <th>Người kiểm kê</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var check in Model)
+                    {
+                        <tr>
+                            <td>@check.CheckNumber</td>
+                            <td>@check.CheckDate.ToString("dd/MM/yyyy")</td>
+                            <td>@check.CheckedByUser?.FullName</td>
+                            <td>
+                                @if (check.Status == "InProgress")
+                                {
+                                    <span class="badge bg-warning">Đang thực hiện</span>
+                                }
+                                else if (check.Status == "Completed")
+                                {
+                                    <span class="badge bg-success">Hoàn thành</span>
+                                }
+                                else if (check.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@check.Status</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="InventoryCheckDetails" asp-route-id="@check.CheckId" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,354 @@
+@model IEnumerable<DATN_SD16.Models.Entities.ReadingRoomReservation>
+@using System.Linq
+@{
+    ViewData["Title"] = "Đặt chỗ của tôi";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var reservations = Model.ToList();
+    var activeReservations = reservations.Where(r => r.Status == "Reserved" || r.Status == "CheckedIn").ToList();
+    var pastReservations = reservations.Where(r => r.Status == "Completed" || r.Status == "Cancelled").ToList();
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <span class="material-symbols-outlined align-middle">bookmark</span>
+            Đặt chỗ của tôi
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Quản lý các đặt chỗ phòng đọc của bạn
+        </p>
+    </div>
+
+    <!-- Quick Action -->
+    <div class="mb-6">
+        <a href="@Url.Action("Index", "ReadingRoom")" 
+           class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+            <span class="material-symbols-outlined">add</span>
+            Đặt chỗ mới
+        </a>
+    </div>
+
+    <!-- Active Reservations -->
+    @if (activeReservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">schedule</span>
+                Đặt chỗ hiện tại
+            </h2>
+
+            <div class="space-y-4">
+                @foreach (var reservation in activeReservations.OrderBy(r => r.ReservationDate))
+                {
+                                var isToday = reservation.ReservationDate.Date == DateTime.Now.Date;
+                    var isPast = reservation.ReservationDate < DateTime.Now;
+                    var duration = reservation.EndTime - reservation.StartTime;
+
+                    <div class="border @(reservation.Status == "CheckedIn" ? "border-green-300 bg-green-50 dark:bg-green-900/20" : "border-blue-300 bg-blue-50 dark:bg-blue-900/20") rounded-lg p-4">
+                        <div class="flex flex-col md:flex-row justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        @reservation.Seat?.Room?.RoomName
+                                    </h3>
+                                    @if (reservation.Status == "CheckedIn")
+                                    {
+                                        <span class="px-2 py-1 bg-green-500 text-white text-xs rounded-full">
+                                            <span class="material-symbols-outlined text-xs align-middle">check_circle</span>
+                                            Đã check-in
+                                        </span>
+                                    }
+                                    else if (isToday)
+                                    {
+                                        <span class="px-2 py-1 bg-blue-500 text-white text-xs rounded-full">
+                                            Hôm nay
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="material-symbols-outlined align-middle text-sm">event_seat</span>
+                                        Chỗ: <span class="font-medium text-gray-900 dark:text-white">@reservation.Seat?.SeatNumber</span>
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="material-symbols-outlined align-middle text-sm">event</span>
+                                        @reservation.ReservationDate.ToString("dd/MM/yyyy")
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="material-symbols-outlined align-middle text-sm">schedule</span>
+                                        @reservation.StartTime.ToString(@"hh\:mm") - @reservation.EndTime.ToString(@"hh\:mm")
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="material-symbols-outlined align-middle text-sm">timer</span>
+                                        @duration.TotalHours giờ
+                                    </p>
+                                </div>
+
+                                @if (reservation.CheckInTime != null)
+                                {
+                                    <p class="text-sm text-green-600 dark:text-green-400">
+                                        <span class="material-symbols-outlined align-middle text-sm">login</span>
+                                        Check-in: @reservation.CheckInTime?.ToString("HH:mm")
+                                    </p>
+                                }
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex flex-col gap-2 min-w-[200px]">
+                                @if (reservation.Status == "Reserved" && isToday && !isPast)
+                                {
+                                    <button type="button" 
+                                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                                            onclick="showQRScanModal(@reservation.ReservationId, '@reservation.Seat?.QRCode')">
+                                        <span class="material-symbols-outlined align-middle text-sm">qr_code_scanner</span>
+                                        Check-in
+                                    </button>
+                                }
+                                
+                                @if (reservation.Status == "CheckedIn")
+                                {
+                                    <form asp-action="CheckOut" asp-route-id="@reservation.ReservationId" method="post" data-ajax="true">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" 
+                                                class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                            <span class="material-symbols-outlined align-middle text-sm">logout</span>
+                                            Check-out
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (reservation.Status == "Reserved")
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@reservation.ReservationId" method="post" data-ajax="true" data-confirm="Bạn có chắc muốn hủy đặt chỗ này?">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" 
+                                                class="w-full px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+                                            <span class="material-symbols-outlined align-middle text-sm">close</span>
+                                            Hủy đặt
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Past Reservations -->
+    @if (pastReservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">history</span>
+                Lịch sử đặt chỗ
+            </h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Phòng</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Chỗ</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Ngày</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Giờ</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach (var reservation in pastReservations.OrderByDescending(r => r.ReservationDate))
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                    @reservation.Seat?.Room?.RoomName
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    @reservation.Seat?.SeatNumber
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    @reservation.ReservationDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    @reservation.ReservationDate.ToString("HH:mm")
+                                </td>
+                                <td class="px-4 py-3">
+                                    @if (reservation.Status == "Completed")
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                                            <span class="material-symbols-outlined text-xs">check_circle</span>
+                                            Hoàn thành
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                                            <span class="material-symbols-outlined text-xs">close</span>
+                                            Đã hủy
+                                        </span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- Empty State -->
+    @if (!reservations.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center">
+            <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">event_seat</span>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Chưa có đặt chỗ nào
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Hãy đặt chỗ phòng đọc để có không gian học tập thoải mái
+            </p>
+            <a href="@Url.Action("Index", "ReadingRoom")"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                <span class="material-symbols-outlined">add</span>
+                Đặt chỗ ngay
+            </a>
+        </div>
+    }
+</div>
+
+<!-- QR Scan Modal -->
+<div id="qrScanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Check-in</h3>
+            <button onclick="closeQRScanModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <div class="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-6xl text-gray-400">qr_code_scanner</span>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400 mb-2">
+                    Vui lòng scan mã QR trên ghế để check-in
+                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Hoặc nhập mã QR thủ công bên dưới
+                </p>
+            </div>
+
+            <form id="checkInForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="checkInReservationId" />
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Mã QR
+                    </label>
+                    <input type="text" 
+                           id="qrCodeInput"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
+                           placeholder="VD: SEAT-123-ABC12345"
+                           required />
+                </div>
+
+                <div id="checkInError" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-800 rounded-lg text-sm">
+                </div>
+
+                <button type="submit" 
+                        class="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                    Xác nhận Check-in
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showQRScanModal(reservationId, expectedQRCode) {
+            document.getElementById('checkInReservationId').value = reservationId;
+            document.getElementById('qrScanModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Pre-fill QR code if available (for testing)
+            if (expectedQRCode) {
+                document.getElementById('qrCodeInput').placeholder = 'Nhập: ' + expectedQRCode;
+            }
+        }
+
+        function closeQRScanModal() {
+            document.getElementById('qrScanModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('checkInForm').reset();
+            document.getElementById('checkInError').classList.add('hidden');
+        }
+
+        document.getElementById('checkInForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const reservationId = document.getElementById('checkInReservationId').value;
+            const qrCode = document.getElementById('qrCodeInput').value;
+            const errorDiv = document.getElementById('checkInError');
+            
+            errorDiv.classList.add('hidden');
+
+            try {
+                const formData = new FormData();
+                formData.append('id', reservationId);
+                formData.append('qrCode', qrCode);
+                formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+                const response = await fetch('@Url.Action("CheckIn", "ReadingRoom")', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Check-in error:', error);
+                errorDiv.textContent = 'Có lỗi xảy ra. Vui lòng thử lại.';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+
+        // Close modal on outside click
+        document.getElementById('qrScanModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeQRScanModal();
+            }
+        });
+    </script>
+}
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Success"]');
+        });
+    </script>
+}
+
+@if (TempData["Error"] != null)
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            alert('@TempData["Error"]');
+        });
+    </script>
+}

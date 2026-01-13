@@ -1,0 +1,232 @@
+@model IEnumerable<DATN_SD16.Models.Entities.Borrow>
+@using System.Linq
+@{
+    ViewData["Title"] = "Lịch sử mượn sách";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    var borrows = Model.ToList();
+    var activeBorrows = borrows.Where(b => b.Status == "Borrowed").ToList();
+    var overdueBorrows = borrows.Where(b => b.Status == "Borrowed" && b.DueDate < DateTime.Now).ToList();
+    var returnedBorrows = borrows.Where(b => b.Status == "Returned").ToList();
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <span class="material-symbols-outlined align-middle">library_books</span>
+            Lịch sử mượn sách
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400">
+            Quản lý và theo dõi các sách bạn đã mượn
+        </p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Đang mượn</p>
+                    <h3 class="text-3xl font-bold text-primary mt-2">@activeBorrows.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-2xl">book</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Quá hạn</p>
+                    <h3 class="text-3xl font-bold text-red-600 mt-2">@overdueBorrows.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 text-2xl">warning</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">Đã trả</p>
+                    <h3 class="text-3xl font-bold text-green-600 mt-2">@returnedBorrows.Count</h3>
+                </div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 text-2xl">check_circle</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Borrows -->
+    @if (activeBorrows.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">hourglass_top</span>
+                Sách đang mượn
+            </h2>
+
+            <div class="space-y-4">
+                @foreach (var borrow in activeBorrows)
+                {
+                    var isOverdue = borrow.DueDate < DateTime.Now;
+                    var daysLeft = (borrow.DueDate - DateTime.Now).Days;
+                    
+                    <div class="border @(isOverdue ? "border-red-300 bg-red-50 dark:bg-red-900/20" : "border-gray-200 dark:border-gray-700") rounded-lg p-4">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- Book Cover -->
+                            <div class="w-24 h-32 bg-gray-200 dark:bg-gray-700 rounded flex-shrink-0">
+                                @if (!string.IsNullOrEmpty(borrow.Copy?.Book?.CoverImage))
+                                {
+                                    <img src="@borrow.Copy.Book.CoverImage" 
+                                         alt="@borrow.Copy.Book.Title" 
+                                         class="w-full h-full object-cover rounded" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-gray-400">book</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Borrow Info -->
+                            <div class="flex-1">
+                                <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-2">
+                                    @borrow.Copy?.Book?.Title
+                                </h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm mb-3">
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Ngày mượn:</span> @borrow.BorrowDate.ToString("dd/MM/yyyy")
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Hạn trả:</span> @borrow.DueDate.ToString("dd/MM/yyyy")
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Bản sách:</span> @borrow.Copy?.CopyNumber
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Tình trạng khi mượn:</span> @borrow.ConditionOnBorrow
+                                    </p>
+                                </div>
+
+                                @if (isOverdue)
+                                {
+                                    <div class="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded px-3 py-2 mb-2">
+                                        <p class="text-red-800 dark:text-red-200 text-sm font-medium">
+                                            <span class="material-symbols-outlined align-middle text-sm">warning</span>
+                                            Quá hạn @Math.Abs(daysLeft) ngày. Vui lòng trả sách sớm!
+                                        </p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="bg-blue-100 dark:bg-blue-900/50 border border-blue-300 dark:border-blue-700 rounded px-3 py-2 mb-2">
+                                        <p class="text-blue-800 dark:text-blue-200 text-sm">
+                                            <span class="material-symbols-outlined align-middle text-sm">schedule</span>
+                                            Còn @daysLeft ngày để trả sách
+                                        </p>
+                                    </div>
+                                }
+
+                                <a href="@Url.Action("Details", "Borrows", new { id = borrow.BorrowId })"
+                                   class="inline-flex items-center gap-1 text-primary hover:underline text-sm">
+                                    Xem chi tiết
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Borrow History -->
+    @if (returnedBorrows.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <span class="material-symbols-outlined align-middle">history</span>
+                Lịch sử trả sách
+            </h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Sách</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Ngày mượn</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Ngày trả</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Tiền phạt</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach (var borrow in returnedBorrows.OrderByDescending(b => b.ReturnDate))
+                        {
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-gray-900 dark:text-white">
+                                        @borrow.Copy?.Book?.Title
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        Bản: @borrow.Copy?.CopyNumber
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    @borrow.BorrowDate.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    @borrow.ReturnDate?.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="px-4 py-3">
+                                    @if (borrow.FineAmount > 0)
+                                    {
+                                        <span class="text-red-600 dark:text-red-400 font-medium">
+                                            @borrow.FineAmount.ToString("N0") đ
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-500 dark:text-gray-400">-</span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3">
+                                    <a href="@Url.Action("Details", "Borrows", new { id = borrow.BorrowId })"
+                                       class="text-primary hover:underline text-sm">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- Empty State -->
+    @if (!borrows.Any())
+    {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-12 text-center">
+            <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">book_online</span>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Chưa có lịch sử mượn sách
+            </h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                Hãy bắt đầu tìm kiếm và mượn sách yêu thích của bạn
+            </p>
+            <a href="@Url.Action("Index", "Books")"
+               class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                <span class="material-symbols-outlined">search</span>
+                Tìm kiếm sách
+            </a>
+        </div>
+    }
+</div>
+
