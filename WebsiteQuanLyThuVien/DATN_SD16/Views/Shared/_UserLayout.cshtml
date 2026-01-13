@@ -154,6 +154,8 @@
         </div>
     </div>
 
+
+
     <!-- Login Modal -->
     @await Html.PartialAsync("_LoginModal")
     
@@ -161,7 +163,7 @@
     @await Html.PartialAsync("_RegisterModal")
     
     <!-- Forgot Password Modal -->
-    @await Html.PartialAsync("_ForgotPasswordModal")
+    @await Html.PartialAsync("_ForgotPasswordModal", new DATN_SD16.Models.ViewModels.ForgotPasswordViewModel())
 
     <script>
         // Toggle user menu dropdown
