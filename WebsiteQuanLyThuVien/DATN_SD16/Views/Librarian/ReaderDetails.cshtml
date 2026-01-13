@@ -7,6 +7,8 @@
     var activeBorrows = ViewBag.ActiveBorrows as IEnumerable<Borrow> ?? Enumerable.Empty<Borrow>();
     var overdueBorrows = ViewBag.OverdueBorrows as IEnumerable<Borrow> ?? Enumerable.Empty<Borrow>();
     var borrows = ViewBag.Borrows as IEnumerable<Borrow> ?? Enumerable.Empty<Borrow>();
+    var unpaidFines = ViewBag.UnpaidFines as IEnumerable<Borrow> ?? Enumerable.Empty<Borrow>();
+    var totalUnpaidFines = (decimal)(ViewBag.TotalUnpaidFines ?? 0);
 }
 
 <div class="row">
@@ -81,6 +83,54 @@
     </div>
 
     <div class="col-md-8">
+        @if (totalUnpaidFines > 0)
+        {
+            <div class="card mb-3 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-money-bill-wave"></i> Khoản phạt chưa thanh toán
+                </div>
+                <div class="card-body">
+                    <h5 class="text-danger fw-bold">Tổng tiền phạt: @totalUnpaidFines.ToString("N0") VNĐ</h5>
+                    <div class="table-container mt-3">
+                         <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Số phiếu</th>
+                                    <th>Sách</th>
+                                    <th>Tiền phạt</th>
+                                    <th>Đã trả</th>
+                                    <th>Còn lại</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var borrow in unpaidFines)
+                                {
+                                    var remaining = borrow.FineAmount - borrow.FinePaid;
+                                    <tr>
+                                        <td>@borrow.BorrowNumber</td>
+                                        <td>@borrow.Copy?.Book?.Title</td>
+                                        <td>@borrow.FineAmount.ToString("N0")</td>
+                                        <td>@borrow.FinePaid.ToString("N0")</td>
+                                        <td class="text-danger fw-bold">@remaining.ToString("N0")</td>
+                                        <td>
+                                            <form asp-action="PayFine" method="post" class="d-inline" onsubmit="return confirm('Xác nhận độc giả đã thanh toán đủ tiền phạt cho phiếu này?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="borrowId" value="@borrow.BorrowId" />
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-check"></i> Đã thanh toán
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                         </table>
+                    </div>
+                </div>
+            </div>
+        }
+
         <div class="card mb-3">
             <div class="card-header">
                 <i class="fas fa-book"></i> Sách đang mượn (@activeBorrows.Count())

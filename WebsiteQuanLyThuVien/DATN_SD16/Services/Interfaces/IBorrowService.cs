@@ -13,6 +13,7 @@ namespace DATN_SD16.Services.Interfaces
         Task<Borrow> CreateBorrowAsync(int userId, int copyId, int borrowedBy, int? reservationId = null);
         Task<bool> ReturnBookAsync(int borrowId, int returnedBy, string? conditionOnReturn = null);
         Task<decimal> CalculateFineAsync(int borrowId);
+        Task<decimal> CalculateFineAsync(Borrow borrow);
         Task<bool> RenewBorrowAsync(int borrowId);
     }
 }

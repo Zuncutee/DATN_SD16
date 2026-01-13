@@ -235,6 +235,45 @@ namespace DATN_SD16.Controllers
             }
         }
 
+        // POST: Librarian/Borrows/PayFine/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PayFine(int borrowId)
+        {
+            try
+            {
+                var borrow = await _borrowRepository.GetByIdAsync(borrowId);
+                if (borrow == null)
+                {
+                    if (IsAjaxRequest()) return Json(new { success = false, message = "Không tìm thấy phiếu mượn" });
+                    return NotFound();
+                }
+
+                if (borrow.FinePaid >= borrow.FineAmount)
+                {
+                     if (IsAjaxRequest()) return Json(new { success = false, message = "Phiếu mượn này đã thanh toán đủ tiền phạt" });
+                }
+
+                borrow.FinePaid = borrow.FineAmount;
+                borrow.UpdatedAt = DateTime.Now;
+                await _borrowRepository.UpdateAsync(borrow);
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new { success = true, message = "Thanh toán tiền phạt thành công!" });
+                }
+
+                TempData["Success"] = "Thanh toán tiền phạt thành công!";
+                return RedirectToAction(nameof(ReaderDetails), new { id = borrow.UserId });
+            }
+            catch (Exception ex)
+            {
+                 if (IsAjaxRequest()) return Json(new { success = false, message = ex.Message });
+                 TempData["Error"] = ex.Message;
+                 return RedirectToAction(nameof(Borrows));
+            }
+        }
+
         // GET: Librarian/Borrows/Details/5
         public async Task<IActionResult> BorrowDetails(int? id)
         {
@@ -402,10 +441,15 @@ namespace DATN_SD16.Controllers
             var borrows = await _borrowService.GetBorrowsByUserIdAsync(id.Value);
             var activeBorrows = await _borrowService.GetActiveBorrowsByUserIdAsync(id.Value);
             var overdueBorrows = borrows.Where(b => b.Status == "Overdue" || (b.DueDate < DateTime.Now && b.Status == "Borrowed"));
+            
+            var unpaidFines = borrows.Where(b => b.FineAmount > b.FinePaid).ToList();
+            var totalUnpaidFines = unpaidFines.Sum(b => b.FineAmount - b.FinePaid);
 
             ViewBag.Borrows = borrows;
             ViewBag.ActiveBorrows = activeBorrows;
             ViewBag.OverdueBorrows = overdueBorrows;
+            ViewBag.UnpaidFines = unpaidFines;
+            ViewBag.TotalUnpaidFines = totalUnpaidFines;
             ViewBag.LibraryCard = await _libraryCardRepository.FirstOrDefaultAsync(c => c.UserId == id.Value);
 
             return View(user);

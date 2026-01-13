@@ -220,7 +220,7 @@ namespace DATN_SD16.Services
             // Tính phí phạt nếu quá hạn
             if (borrow.ReturnDate > borrow.DueDate)
             {
-                borrow.FineAmount = await CalculateFineAsync(borrowId);
+                borrow.FineAmount = await CalculateFineAsync(borrow);
             }
 
             await _borrowRepository.UpdateAsync(borrow);
@@ -253,13 +253,23 @@ namespace DATN_SD16.Services
         public async Task<decimal> CalculateFineAsync(int borrowId)
         {
             var borrow = await _borrowRepository.GetBorrowWithDetailsAsync(borrowId);
-            if (borrow == null || borrow.ReturnDate == null)
+            if (borrow == null)
                 return 0;
 
-            if (borrow.ReturnDate <= borrow.DueDate)
+            return await CalculateFineAsync(borrow);
+        }
+
+        public async Task<decimal> CalculateFineAsync(Borrow borrow)
+        {
+            var returnDate = borrow.ReturnDate ?? DateTime.Now;
+
+            if (returnDate <= borrow.DueDate)
                 return 0;
 
-            var daysOverdue = (borrow.ReturnDate.Value - borrow.DueDate).Days;
+            var daysOverdue = (returnDate - borrow.DueDate).Days;
+            
+            if (daysOverdue <= 0) return 0;
+
             var finePerDaySetting = await _systemSettingRepository.FirstOrDefaultAsync(
                 s => s.SettingKey == "FinePerDay");
             
