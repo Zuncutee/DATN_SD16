@@ -88,3 +88,16 @@
     </div>
 </div>
 
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-user-times"></i> Danh sách người bị từ chối mượn sách
+            </div>
+            <div class="card-body">
+                @await Html.PartialAsync("_BorrowRejections", ViewBag.BorrowRejections as IEnumerable<dynamic> ?? new List<dynamic>())
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -3,9 +3,7 @@ using System.Security.Claims;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Service interface cho JWT
-    /// </summary>
+    // Service interface cho JWT
     public interface IJwtService
     {
         string GenerateToken(User user, List<string> roles);

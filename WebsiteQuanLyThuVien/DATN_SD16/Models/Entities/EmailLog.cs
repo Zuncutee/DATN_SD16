@@ -3,9 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DATN_SD16.Models.Entities
 {
-    /// <summary>
-    /// Bảng lịch sử gửi email (EmailLogs)
-    /// </summary>
+    // Bảng lịch sử gửi email (EmailLogs)
     [Table("EmailLogs")]
     public class EmailLog
     {

@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Repositories
 {
-    /// <summary>
-    /// Repository implementation cho Borrow
-    /// </summary>
+    // Repository implementation cho Borrow
     public class BorrowRepository : Repository<Borrow>, IBorrowRepository
     {
         public BorrowRepository(LibraryDbContext context) : base(context)

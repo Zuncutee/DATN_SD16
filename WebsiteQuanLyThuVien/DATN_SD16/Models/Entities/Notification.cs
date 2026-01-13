@@ -3,9 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DATN_SD16.Models.Entities
 {
-    /// <summary>
-    /// Bảng thông báo (Notifications)
-    /// </summary>
+    // Bảng thông báo (Notifications)
     [Table("Notifications")]
     public class Notification
     {

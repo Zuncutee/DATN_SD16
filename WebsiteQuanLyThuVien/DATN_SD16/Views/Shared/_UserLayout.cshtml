@@ -54,11 +54,34 @@
                 </div>
 
                 <nav class="hidden md:flex items-center gap-9 text-gray-700 dark:text-gray-300">
-                    <a class="hover:text-primary" href="@Url.Action("Dashboard", "Reader")">Trang chủ</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="hover:text-primary" href="@Url.Action("Dashboard", "Reader")">Trang chủ</a>
+                    }
+                    else
+                    {
+                        <a class="hover:text-primary" href="@Url.Action("Index", "Home")">Trang chủ</a>
+                    }
+                    
                     <a class="hover:text-primary" href="@Url.Action("Index", "Books")">Tìm sách</a>
-                    <a class="hover:text-primary" href="@Url.Action("Index", "Borrows")">Mượn sách</a>
-                    <a class="hover:text-primary" href="@Url.Action("Index", "BookReservations")">Đặt sách</a>
-                    <a class="hover:text-primary" href="@Url.Action("Index", "ReadingRoom")">Phòng đọc</a>
+                    
+                    <a class="hover:text-primary" 
+                       href="@(User.Identity.IsAuthenticated ? Url.Action("Index", "Borrows") : "javascript:void(0)")"
+                       onclick="@(User.Identity.IsAuthenticated ? "" : "openLoginModal(); return false;")">
+                       Mượn sách
+                    </a>
+                    
+                    <a class="hover:text-primary" 
+                       href="@(User.Identity.IsAuthenticated ? Url.Action("Index", "BookReservations") : "javascript:void(0)")"
+                       onclick="@(User.Identity.IsAuthenticated ? "" : "openLoginModal(); return false;")">
+                       Đặt sách
+                    </a>
+                    
+                    <a class="hover:text-primary" 
+                       href="@(User.Identity.IsAuthenticated ? Url.Action("Index", "ReadingRoom") : "javascript:void(0)")"
+                       onclick="@(User.Identity.IsAuthenticated ? "" : "openLoginModal(); return false;")">
+                       Phòng đọc
+                    </a>
                 </nav>
 
                 <div class="flex items-center gap-4">

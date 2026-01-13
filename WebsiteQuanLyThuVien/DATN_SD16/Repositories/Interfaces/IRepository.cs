@@ -2,9 +2,7 @@ using System.Linq.Expressions;
 
 namespace DATN_SD16.Repositories.Interfaces
 {
-    /// <summary>
-    /// Generic repository interface cho các thao tác CRUD cơ bản
-    /// </summary>
+    // Generic repository interface cho các thao tác CRUD cơ bản
     public interface IRepository<T> where T : class
     {
         Task<T?> GetByIdAsync(int id);

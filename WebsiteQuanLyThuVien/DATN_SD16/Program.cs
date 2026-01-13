@@ -79,6 +79,22 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
         ClockSkew = TimeSpan.Zero
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            // Nếu là request từ browser (mong đợi html) và chưa login -> Redirect về trang login
+            if (!context.Response.HasStarted && context.Request.Headers.UserAgent.ToString().Contains("Mozilla") && 
+                (context.Request.Headers.Accept.ToString().Contains("text/html") || context.Request.Headers.Accept.ToString() == "*/*"))
+            {
+                context.HandleResponse();
+                var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                context.Response.Redirect($"/AdminAuth/Login?returnUrl={returnUrl}");
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();

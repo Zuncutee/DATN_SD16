@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Service interface cho User
-    /// </summary>
+    // Service interface cho User
     public interface IUserService
     {
         Task<User?> GetUserByIdAsync(int userId);

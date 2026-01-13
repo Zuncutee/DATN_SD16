@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Repositories.Interfaces
 {
-    /// <summary>
-    /// Repository interface cho BookReservation
-    /// </summary>
+    // Repository interface cho BookReservation
     public interface IBookReservationRepository : IRepository<BookReservation>
     {
         Task<BookReservation?> GetReservationWithDetailsAsync(int reservationId);

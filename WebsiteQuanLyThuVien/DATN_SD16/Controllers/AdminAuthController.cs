@@ -6,9 +6,7 @@ using DATN_SD16.Helpers;
 
 namespace DATN_SD16.Controllers
 {
-    /// <summary>
-    /// Controller đăng nhập Admin
-    /// </summary>
+    // Controller đăng nhập Admin
     [AllowAnonymous]
     public class AdminAuthController : Controller
     {

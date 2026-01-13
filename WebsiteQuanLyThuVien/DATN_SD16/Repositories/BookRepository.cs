@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Repositories
 {
-    /// <summary>
-    /// Repository implementation cho Book
-    /// </summary>
+    // Repository implementation cho Book
     public class BookRepository : Repository<Book>, IBookRepository
     {
         public BookRepository(LibraryDbContext context) : base(context)

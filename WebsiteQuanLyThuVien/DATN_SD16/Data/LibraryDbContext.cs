@@ -4,9 +4,7 @@ using System;
 
 namespace DATN_SD16.Data
 {
-    /// <summary>
-    /// DbContext cho hệ thống quản lý thư viện
-    /// </summary>
+    // DbContext cho hệ thống quản lý thư viện
     public class LibraryDbContext : DbContext
     {
         public LibraryDbContext(DbContextOptions<LibraryDbContext> options) : base(options)

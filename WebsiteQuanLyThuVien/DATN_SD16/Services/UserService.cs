@@ -4,9 +4,7 @@ using DATN_SD16.Services.Interfaces;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Service implementation cho User
-    /// </summary>
+    // Service implementation cho User
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;

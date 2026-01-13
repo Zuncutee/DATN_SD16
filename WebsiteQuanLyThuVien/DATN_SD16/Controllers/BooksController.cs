@@ -7,9 +7,7 @@ using DATN_SD16.Helpers;
 
 namespace DATN_SD16.Controllers
 {
-    /// <summary>
-    /// Controller quản lý sách
-    /// </summary>
+    // Controller quản lý sách
     public class BooksController : Controller
     {
         private readonly IBookService _bookService;

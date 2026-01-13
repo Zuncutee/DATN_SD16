@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Repositories.Interfaces
 {
-    /// <summary>
-    /// Repository interface cho Book
-    /// </summary>
+    // Repository interface cho Book
     public interface IBookRepository : IRepository<Book>
     {
         Task<Book?> GetBookWithDetailsAsync(int bookId);

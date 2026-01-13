@@ -14,9 +14,7 @@ using System.Linq;
 
 namespace DATN_SD16.Controllers
 {
-    /// <summary>
-    /// Controller quản trị dành cho Admin
-    /// </summary>
+    // Controller quản trị dành cho Admin
     [Authorize]
     [AuthorizeRoles("Admin")]
     public class AdminController : Controller
@@ -39,6 +37,7 @@ namespace DATN_SD16.Controllers
         private readonly IRepository<ReadingRoomReservation> _roomReservationRepository;
         private readonly LibraryDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly INotificationService _notificationService;
 
         public AdminController(
             IUserService userService,
@@ -58,7 +57,8 @@ namespace DATN_SD16.Controllers
             IRepository<ReadingRoomSeat> seatRepository,
             IRepository<ReadingRoomReservation> roomReservationRepository,
             LibraryDbContext context,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            INotificationService notificationService)
         {
             _userService = userService;
             _bookService = bookService;
@@ -78,6 +78,7 @@ namespace DATN_SD16.Controllers
             _roomReservationRepository = roomReservationRepository;
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _notificationService = notificationService;
         }
 
         // GET: Admin/Dashboard
@@ -1123,6 +1124,35 @@ namespace DATN_SD16.Controllers
         {
             ViewBag.MostBorrowedBooks = (await _bookService.GetMostBorrowedBooksAsync(10)).ToList();
             ViewBag.OverdueBorrows = (await _borrowRepository.GetOverdueBorrowsAsync()).ToList();
+            
+            // Lấy danh sách người bị từ chối mượn sách
+            var notifications = await _notificationService.GetNotificationsByTypeAsync("System", includeRead: true);
+            var rejections = notifications
+                .Where(n => n.Title.Contains("Mượn sách không thành công") || 
+                           n.Message.Contains("không thể mượn sách"))
+                .OrderByDescending(n => n.CreatedAt)
+                .ToList();
+
+            var rejectionList = new List<object>();
+            foreach (var notif in rejections)
+            {
+                var user = await _userService.GetUserByIdAsync(notif.UserId);
+                rejectionList.Add(new
+                {
+                    NotificationId = notif.NotificationId,
+                    UserId = notif.UserId,
+                    UserName = user?.FullName ?? "N/A",
+                    UserEmail = user?.Email ?? "N/A",
+                    UserPhone = user?.PhoneNumber ?? "N/A",
+                    Title = notif.Title,
+                    Message = notif.Message,
+                    IsRead = notif.IsRead,
+                    CreatedAt = notif.CreatedAt,
+                    RelatedReservationId = notif.RelatedReservationId
+                });
+            }
+            ViewBag.BorrowRejections = rejectionList;
+            
             return View();
         }
 
@@ -1138,6 +1168,47 @@ namespace DATN_SD16.Controllers
         {
             var borrows = await _borrowRepository.GetOverdueBorrowsAsync();
             return PartialView("_OverdueBooks", borrows);
+        }
+
+        // GET: Admin/Reports/BorrowRejections
+        public async Task<IActionResult> BorrowRejections()
+        {
+            // Lấy tất cả notifications về mượn sách thất bại
+            var notifications = await _notificationService.GetNotificationsByTypeAsync("System", includeRead: true);
+            
+            // Lọc các notifications về mượn sách không thành công
+            var rejections = notifications
+                .Where(n => n.Title.Contains("Mượn sách không thành công") || 
+                           n.Message.Contains("không thể mượn sách"))
+                .OrderByDescending(n => n.CreatedAt)
+                .ToList();
+
+            // Load thông tin User cho mỗi notification
+                var rejectionList = new List<object>();
+            foreach (var notif in rejections)
+            {
+                var user = await _userService.GetUserByIdAsync(notif.UserId);
+                rejectionList.Add(new
+                {
+                    NotificationId = notif.NotificationId,
+                    UserId = notif.UserId,
+                    UserName = user?.FullName ?? "N/A",
+                    UserEmail = user?.Email ?? "N/A",
+                    UserPhone = user?.PhoneNumber ?? "N/A",
+                    Title = notif.Title,
+                    Message = notif.Message,
+                    IsRead = notif.IsRead,
+                    CreatedAt = notif.CreatedAt,
+                    RelatedReservationId = notif.RelatedReservationId
+                });
+            }
+
+            if (IsAjaxRequest())
+            {
+                return Json(new { success = true, data = rejectionList });
+            }
+
+            return PartialView("_BorrowRejections", rejectionList);
         }
         #endregion
 

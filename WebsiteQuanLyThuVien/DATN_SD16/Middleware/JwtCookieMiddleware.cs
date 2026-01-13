@@ -4,9 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DATN_SD16.Middleware
 {
-    /// <summary>
-    /// Middleware để đọc JWT token từ cookie và set vào HttpContext
-    /// </summary>
+    // Middleware để đọc JWT token từ cookie và set vào HttpContext
     public class JwtCookieMiddleware
     {
         private readonly RequestDelegate _next;

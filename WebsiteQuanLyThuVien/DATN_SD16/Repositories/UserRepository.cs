@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Repositories
 {
-    /// <summary>
-    /// Repository implementation cho User
-    /// </summary>
+    // Repository implementation cho User
     public class UserRepository : Repository<User>, IUserRepository
     {
         public UserRepository(LibraryDbContext context) : base(context)

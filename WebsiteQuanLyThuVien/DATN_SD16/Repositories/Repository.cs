@@ -9,9 +9,7 @@ using System.Data;
 
 namespace DATN_SD16.Repositories
 {
-    /// <summary>
-    /// Generic repository implementation
-    /// </summary>
+    // Generic repository implementation
     public class Repository<T> : IRepository<T> where T : class
     {
         protected readonly LibraryDbContext _context;

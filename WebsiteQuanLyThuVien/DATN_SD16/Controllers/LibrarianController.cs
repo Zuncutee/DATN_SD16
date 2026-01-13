@@ -10,9 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Controllers
 {
-    /// <summary>
-    /// Controller quản lý các chức năng dành cho Thủ Thư (Librarian)
-    /// </summary>
+    // Controller quản lý các chức năng dành cho Thủ Thư (Librarian)
     [Authorize]
     [AuthorizeRoles("Librarian", "Admin")]
     public class LibrarianController : Controller

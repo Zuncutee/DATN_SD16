@@ -7,9 +7,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Controllers
 {
-    /// <summary>
-    /// Controller cho Độc giả - Đặt phòng đọc
-    /// </summary>
+    // Controller cho Độc giả - Đặt phòng đọc
     [Authorize]
     [AuthorizeRoles("Reader")]
     public class ReadingRoomController : Controller

@@ -10,9 +10,7 @@ using DATN_SD16.Data;
 
 namespace DATN_SD16.Controllers
 {
-    /// <summary>
-    /// Controller dành cho Độc giả (Reader/User)
-    /// </summary>
+    // Controller dành cho Độc giả (Reader/User)
     [Authorize]
     [AuthorizeRoles("Reader")]
     public class ReaderController : Controller

@@ -8,9 +8,7 @@ using System.Net.Mail;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Service implementation cho Email
-    /// </summary>
+    // Service implementation cho Email
     public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;

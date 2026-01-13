@@ -4,9 +4,7 @@ using DATN_SD16.Services.Interfaces;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Service implementation cho BookReservation
-    /// </summary>
+    // Service implementation cho BookReservation
     public class BookReservationService : IBookReservationService
     {
         private readonly IBookReservationRepository _reservationRepository;

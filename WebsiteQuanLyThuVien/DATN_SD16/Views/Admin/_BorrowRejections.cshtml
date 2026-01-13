@@ -1,0 +1,56 @@
+@model IEnumerable<dynamic>
+
+<div class="table-container">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Độc giả</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Thông báo</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int index = 1;
+            }
+            @foreach (var rejection in Model)
+            {
+                <tr>
+                    <td>@index</td>
+                    <td><strong>@rejection.UserName</strong></td>
+                    <td>@rejection.UserEmail</td>
+                    <td>@rejection.UserPhone</td>
+                    <td>
+                        <div>
+                            <strong>@rejection.Title</strong><br />
+                            <small class="text-muted">@rejection.Message</small>
+                        </div>
+                    </td>
+                    <td>@(((DateTime)rejection.CreatedAt).ToString("dd/MM/yyyy HH:mm"))</td>
+                    <td>
+                        @if ((bool)rejection.IsRead)
+                        {
+                            <span class="badge bg-success">Đã đọc</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">Chưa đọc</span>
+                        }
+                    </td>
+                </tr>
+                index++;
+            }
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Không có người dùng nào bị từ chối mượn sách</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

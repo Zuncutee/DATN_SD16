@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Repositories.Interfaces
 {
-    /// <summary>
-    /// Repository interface cho Borrow
-    /// </summary>
+    // Repository interface cho Borrow
     public interface IBorrowRepository : IRepository<Borrow>
     {
         Task<Borrow?> GetBorrowWithDetailsAsync(int borrowId);

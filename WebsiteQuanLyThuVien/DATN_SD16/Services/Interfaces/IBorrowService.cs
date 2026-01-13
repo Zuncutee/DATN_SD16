@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Service interface cho Borrow
-    /// </summary>
+    // Service interface cho Borrow
     public interface IBorrowService
     {
         Task<Borrow?> GetBorrowByIdAsync(int borrowId);

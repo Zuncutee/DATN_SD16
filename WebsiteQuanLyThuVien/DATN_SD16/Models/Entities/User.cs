@@ -3,9 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DATN_SD16.Models.Entities
 {
-    /// <summary>
-    /// Bảng người dùng (Users) - Tất cả người dùng trong hệ thống
-    /// </summary>
+    // Bảng người dùng (Users) - Tất cả người dùng trong hệ thống
     [Table("Users")]
     public class User
     {

@@ -3,9 +3,7 @@ using System.Text.Json;
 
 namespace DATN_SD16.Helpers
 {
-    /// <summary>
-    /// Helper class để xử lý lỗi
-    /// </summary>
+    // Helper class để xử lý lỗi
     public static class ErrorHandler
     {
         public static IResult HandleError(Exception ex, IWebHostEnvironment env)

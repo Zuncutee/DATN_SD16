@@ -6,9 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Service implementation cho Authentication
-    /// </summary>
+    // Service implementation cho Authentication
     public class AuthService : IAuthService
     {
         private readonly IUserService _userService;

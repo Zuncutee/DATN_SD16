@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Background service để gửi thông báo email tự động
-    /// </summary>
+    // Background service để gửi thông báo email tự động
     public class NotificationBackgroundService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;

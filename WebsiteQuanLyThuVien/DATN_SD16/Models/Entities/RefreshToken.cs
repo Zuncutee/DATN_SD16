@@ -3,9 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DATN_SD16.Models.Entities
 {
-    /// <summary>
-    /// Bảng refresh token để quản lý JWT refresh tokens
-    /// </summary>
+    // Bảng refresh token để quản lý JWT refresh tokens
     [Table("RefreshTokens")]
     public class RefreshToken
     {

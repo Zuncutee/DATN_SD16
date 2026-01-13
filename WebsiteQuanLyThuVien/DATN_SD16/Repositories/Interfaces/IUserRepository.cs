@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Repositories.Interfaces
 {
-    /// <summary>
-    /// Repository interface cho User
-    /// </summary>
+    // Repository interface cho User
     public interface IUserRepository : IRepository<User>
     {
         Task<User?> GetByUsernameAsync(string username);

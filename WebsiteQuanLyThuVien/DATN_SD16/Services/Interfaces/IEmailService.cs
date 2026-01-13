@@ -2,29 +2,19 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Interface cho Email Service
-    /// </summary>
+    // Interface cho Email Service
     public interface IEmailService
     {
-        /// <summary>
-        /// Gửi email
-        /// </summary>
+        // Gửi email
         Task<bool> SendEmailAsync(string to, string subject, string body, string emailType);
 
-        /// <summary>
-        /// Gửi email và lưu vào EmailLog
-        /// </summary>
+        // Gửi email và lưu vào EmailLog
         Task<bool> SendEmailWithLogAsync(int userId, string to, string subject, string body, string emailType);
 
-        /// <summary>
-        /// Gửi email nhắc trả sách
-        /// </summary>
+        // Gửi email nhắc trả sách
         Task<bool> SendReturnReminderEmailAsync(User user, IEnumerable<Borrow> borrows);
 
-        /// <summary>
-        /// Gửi email cảnh báo quá hạn
-        /// </summary>
+        // Gửi email cảnh báo quá hạn
         Task<bool> SendOverdueAlertEmailAsync(User user, IEnumerable<Borrow> borrows);
     }
 }

@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace DATN_SD16.Models.Entities
 {
-    /// <summary>
-    /// Bảng sách (Books) - Thông tin chung về sách
-    /// </summary>
+    // Bảng sách (Books) - Thông tin chung về sách
     [Table("Books")]
     public class Book
     {

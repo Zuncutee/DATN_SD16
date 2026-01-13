@@ -3,9 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DATN_SD16.Models.Entities
 {
-    /// <summary>
-    /// Bảng phòng đọc (ReadingRooms)
-    /// </summary>
+    // Bảng phòng đọc (ReadingRooms)
     [Table("ReadingRooms")]
     public class ReadingRoom
     {

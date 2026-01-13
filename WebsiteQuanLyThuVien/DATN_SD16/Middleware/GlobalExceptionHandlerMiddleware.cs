@@ -4,9 +4,7 @@ using System.Text.Json;
 
 namespace DATN_SD16.Middleware
 {
-    /// <summary>
-    /// Middleware để xử lý exception toàn cục
-    /// </summary>
+    // Middleware để xử lý exception toàn cục
     public class GlobalExceptionHandlerMiddleware
     {
         private readonly RequestDelegate _next;

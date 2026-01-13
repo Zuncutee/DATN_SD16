@@ -4,9 +4,7 @@ using DATN_SD16.Services.Interfaces;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Service implementation cho Notification
-    /// </summary>
+    // Service implementation cho Notification
     public class NotificationService : INotificationService
     {
         private readonly IRepository<Notification> _notificationRepository;
@@ -68,6 +66,15 @@ namespace DATN_SD16.Services
         public async Task<int> GetUnreadCountAsync(int userId)
         {
             return await _notificationRepository.CountAsync(n => n.UserId == userId && !n.IsRead);
+        }
+
+        public async Task<IEnumerable<Notification>> GetNotificationsByTypeAsync(string notificationType, bool includeRead = true)
+        {
+            if (includeRead)
+            {
+                return await _notificationRepository.FindAsync(n => n.NotificationType == notificationType);
+            }
+            return await _notificationRepository.FindAsync(n => n.NotificationType == notificationType && !n.IsRead);
         }
     }
 }

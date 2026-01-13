@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Service interface cho BookReservation
-    /// </summary>
+    // Service interface cho BookReservation
     public interface IBookReservationService
     {
         Task<BookReservation?> GetReservationByIdAsync(int reservationId);

@@ -5,9 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DATN_SD16.Repositories
 {
-    /// <summary>
-    /// Repository implementation cho Category
-    /// </summary>
+    // Repository implementation cho Category
     public class CategoryRepository : Repository<Category>, ICategoryRepository
     {
         public CategoryRepository(LibraryDbContext context) : base(context)

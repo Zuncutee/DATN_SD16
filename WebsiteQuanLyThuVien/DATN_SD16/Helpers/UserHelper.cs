@@ -2,9 +2,7 @@ using System.Security.Claims;
 
 namespace DATN_SD16.Helpers
 {
-    /// <summary>
-    /// Helper class để lấy thông tin user từ Claims
-    /// </summary>
+    // Helper class để lấy thông tin user từ Claims
     public static class UserHelper
     {
         public static int? GetUserId(ClaimsPrincipal user)

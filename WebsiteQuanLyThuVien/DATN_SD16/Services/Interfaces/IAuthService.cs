@@ -2,9 +2,7 @@ using DATN_SD16.Models.DTOs;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Service interface cho Authentication
-    /// </summary>
+    // Service interface cho Authentication
     public interface IAuthService
     {
         Task<AuthResponse?> LoginAsync(LoginRequest request);

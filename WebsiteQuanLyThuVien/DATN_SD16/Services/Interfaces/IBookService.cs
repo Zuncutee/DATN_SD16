@@ -2,9 +2,7 @@ using DATN_SD16.Models.Entities;
 
 namespace DATN_SD16.Services.Interfaces
 {
-    /// <summary>
-    /// Service interface cho Book
-    /// </summary>
+    // Service interface cho Book
     public interface IBookService
     {
         Task<Book?> GetBookByIdAsync(int bookId);

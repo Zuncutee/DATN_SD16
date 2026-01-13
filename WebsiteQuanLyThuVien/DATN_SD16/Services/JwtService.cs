@@ -8,9 +8,7 @@ using System.Text;
 
 namespace DATN_SD16.Services
 {
-    /// <summary>
-    /// Service implementation cho JWT
-    /// </summary>
+    // Service implementation cho JWT
     public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
