@@ -10,14 +10,21 @@
     <div class="card-body">
         <form id="createBorrowForm" method="post" asp-action="CreateBorrow">
             @Html.AntiForgeryToken()
-            
+
             <div class="form-group mb-3">
                 <label class="form-label">Độc giả <span class="text-danger">*</span></label>
                 <select name="userId" id="userId" class="form-select" required>
                     <option value="">-- Chọn độc giả --</option>
                     @foreach (var user in ViewBag.Users as IEnumerable<DATN_SD16.Models.Entities.User>)
                     {
-                        <option value="@user.UserId" @(ViewBag.SelectedUserId != null && (int)ViewBag.SelectedUserId == user.UserId ? "selected" : "")>@user.FullName (@user.Username)</option>
+                        if (ViewBag.SelectedUserId != null && (int)ViewBag.SelectedUserId == user.UserId)
+                        {
+                            <option value="@user.UserId" selected>@user.FullName (@user.Username)</option>
+                        }
+                        else
+                        {
+                            <option value="@user.UserId">@user.FullName (@user.Username)</option>
+                        }
                     }
                 </select>
             </div>
@@ -28,7 +35,14 @@
                     <option value="">-- Chọn sách --</option>
                     @foreach (var book in ViewBag.Books as IEnumerable<DATN_SD16.Models.Entities.Book>)
                     {
-                        <option value="@book.BookId" data-available="@book.AvailableCopies" @(ViewBag.SelectedBookId != null && (int)ViewBag.SelectedBookId == book.BookId ? "selected" : "")>@book.Title (@book.AvailableCopies bản có sẵn)</option>
+                        if (ViewBag.SelectedBookId != null && (int)ViewBag.SelectedBookId == book.BookId)
+                        {
+                            <option value="@book.BookId" data-available="@book.AvailableCopies" selected>@book.Title (@book.AvailableCopies bản có sẵn)</option>
+                        }
+                        else
+                        {
+                            <option value="@book.BookId" data-available="@book.AvailableCopies">@book.Title (@book.AvailableCopies bản có sẵn)</option>
+                        }
                     }
                 </select>
             </div>
@@ -69,7 +83,7 @@
         async function loadReservations() {
             const userId = userIdSelect.value;
             const bookId = bookIdSelect.value;
-            
+
             if (!userId) {
                 reservationSelect.innerHTML = '<option value="">-- Không có --</option>';
                 return;
@@ -90,7 +104,7 @@
                 const reservations = Array.isArray(data) ? data : [];
 
                 reservationSelect.innerHTML = '<option value="">-- Không có --</option>';
-                
+
                 if (reservations.length > 0) {
                     reservations.forEach(res => {
                         const option = document.createElement('option');
@@ -119,15 +133,15 @@
 
         // Load reservations khi chọn độc giả
         userIdSelect.addEventListener('change', loadReservations);
-        
+
         // Load reservations khi chọn sách
         bookIdSelect.addEventListener('change', async function() {
             const bookId = this.value;
             const copySelect = document.getElementById('copyId');
-            
+
             // Load reservations
             await loadReservations();
-            
+
             // Load copies
             if (!bookId) {
                 copySelect.innerHTML = '<option value="">-- Chọn sách trước --</option>';
@@ -140,25 +154,25 @@
 
             try {
                 const response = await fetch(`/Books/GetAvailableCopies?bookId=${bookId}`);
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                
+
                 // Kiểm tra nếu có lỗi trong response
                 if (data.error) {
                     throw new Error(data.error);
                 }
-                
+
                 // Kiểm tra nếu data là mảng
                 const copies = Array.isArray(data) ? data : [];
-                
+
                 console.log('Loaded copies:', copies);
-                
+
                 copySelect.innerHTML = '<option value="">-- Chọn bản sách --</option>';
-                
+
                 if (copies.length === 0) {
                     copySelect.innerHTML = '<option value="">Không có bản sách có sẵn</option>';
                     copySelect.disabled = true;
@@ -194,7 +208,7 @@
                     }
                 });
             }
-            
+
             if (bookIdSelect.value) {
                 bookIdSelect.dispatchEvent(new Event('change'));
             }
