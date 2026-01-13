@@ -59,6 +59,9 @@
                                 <button class="btn btn-sm btn-primary" onclick="editUser(@user.UserId)" data-bs-toggle="tooltip" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </button>
+                                <button class="btn btn-sm btn-info" onclick="resetPassword(@user.UserId, '@user.Username')" data-bs-toggle="tooltip" title="Đổi mật khẩu">
+                                    <i class="fas fa-key"></i>
+                                </button>
                                 <button class="btn btn-sm btn-warning" onclick="toggleLock(@user.UserId, @user.IsLocked.ToString().ToLower())" data-bs-toggle="tooltip" title="@(user.IsLocked ? "Mở khóa" : "Khóa")">
                                     <i class="fas fa-@(user.IsLocked ? "unlock" : "lock")"></i>
                                 </button>
@@ -145,6 +148,33 @@
     </div>
 </div>
 
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-key"></i> Đổi mật khẩu tài khoản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="resetPasswordForm" asp-action="ResetUserPassword" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" id="resetUserId" />
+                <div class="modal-body">
+                    <p>Đổi mật khẩu cho tài khoản: <strong id="resetUsername"></strong></p>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu mới *</label>
+                        <input type="password" name="newPassword" class="form-control" required minlength="6" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu mật khẩu mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         function editUser(userId) {
@@ -204,8 +234,16 @@
             });
         }
 
+        function resetPassword(userId, username) {
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUsername').textContent = username;
+            document.getElementById('resetPasswordForm').reset();
+            openModal('resetPasswordModal');
+        }
+
         submitForm('createUserForm');
         submitForm('editUserForm');
+        submitForm('resetPasswordForm');
     </script>
 }
 

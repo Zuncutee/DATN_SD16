@@ -408,6 +408,34 @@ namespace DATN_SD16.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        // POST: Admin/Users/ResetUserPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetUserPassword(int userId, string newPassword)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+                {
+                    return Json(new { success = false, message = "Mật khẩu phải có ít nhất 6 ký tự" });
+                }
+
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null) return Json(new { success = false, message = "Không tìm thấy người dùng" });
+
+                var newHash = await _userService.HashPasswordAsync(newPassword);
+                user.PasswordHash = newHash;
+                user.UpdatedAt = DateTime.Now;
+
+                await _userService.UpdateUserAsync(user);
+                return Json(new { success = true, message = "Đổi mật khẩu thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
         #endregion
 
         #region Quản lý Danh mục
@@ -1606,6 +1634,61 @@ namespace DATN_SD16.Controllers
             }
         }
         #endregion
+        #region Cá nhân (Profile)
+        // GET: Admin/ChangePassword
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        // POST: Admin/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(DATN_SD16.Models.ViewModels.ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var userId = UserHelper.GetUserId(User);
+                if (userId == null)
+                {
+                    return RedirectToAction("Login", "AdminAuth");
+                }
+
+                var user = await _userService.GetUserByIdAsync(userId.Value);
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "AdminAuth");
+                }
+
+                var isPasswordCorrect = await _userService.ValidatePasswordAsync(model.CurrentPassword, user.PasswordHash);
+                if (!isPasswordCorrect)
+                {
+                    ModelState.AddModelError("CurrentPassword", "Mật khẩu hiện tại không đúng.");
+                    return View(model);
+                }
+
+                var newPasswordHash = await _userService.HashPasswordAsync(model.NewPassword);
+                user.PasswordHash = newPasswordHash;
+                user.UpdatedAt = DateTime.Now;
+
+                await _userService.UpdateUserAsync(user);
+
+                TempData["Success"] = "Đổi mật khẩu thành công!";
+                return RedirectToAction("Dashboard");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi: " + ex.Message);
+                return View(model);
+            }
+        }
+        #endregion
+
     }
 }
 
