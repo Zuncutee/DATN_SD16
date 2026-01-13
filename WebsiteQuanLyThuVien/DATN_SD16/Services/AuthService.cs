@@ -32,6 +32,9 @@ namespace DATN_SD16.Services
             if (user == null || !user.IsActive)
                 return null;
 
+            if (user.IsLocked)
+                throw new Exception("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.");
+
             var isValidPassword = await _userService.ValidatePasswordAsync(request.Password, user.PasswordHash);
             if (!isValidPassword)
                 return null;
