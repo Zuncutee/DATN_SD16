@@ -56,6 +56,12 @@
                 <a asp-action="CreateBookDamage" class="btn btn-danger mb-2 w-100">
                     <i class="fas fa-exclamation-circle"></i> Báo cáo sách hỏng/mất
                 </a>
+                <form asp-action="TriggerNotifications" method="post" class="mt-2" onsubmit="return confirm('Bạn muốn quét và gửi thông báo nhắc nhở ngay bây giờ?');">
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="fas fa-bell"></i> Gửi thông báo nhắc nhở
+                    </button>
+                    <small class="text-muted d-block mt-1 text-center">(Quét thủ công)</small>
+                </form>
             </div>
         </div>
     </div>

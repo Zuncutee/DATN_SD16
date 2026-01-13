@@ -74,6 +74,22 @@ namespace DATN_SD16.Controllers
             ViewBag.PendingReservations = pendingReservations.Count();
             return View();
         }
+
+        // POST: Librarian/TriggerNotifications
+        [HttpPost]
+        public async Task<IActionResult> TriggerNotifications([FromServices] INotificationService notificationService)
+        {
+            try
+            {
+               await notificationService.ProcessDailyNotificationsAsync();
+               TempData["Success"] = "Đã kích hoạt gửi thông báo tự động!";
+            }
+            catch (Exception ex)
+            {
+               TempData["Error"] = "Lỗi: " + ex.Message;
+            }
+            return RedirectToAction(nameof(Dashboard));
+        }
         #endregion
 
         #region Quản lý Mượn - Trả

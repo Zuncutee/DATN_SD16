@@ -22,6 +22,9 @@ namespace DATN_SD16.Services.Interfaces
 
         // Lấy tất cả thông báo theo type (cho admin)
         Task<IEnumerable<Notification>> GetNotificationsByTypeAsync(string notificationType, bool includeRead = true);
+
+        // Xử lý thông báo định kỳ (Daily)
+        Task ProcessDailyNotificationsAsync();
     }
 }
 
