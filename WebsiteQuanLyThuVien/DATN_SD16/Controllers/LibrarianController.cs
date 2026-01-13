@@ -111,10 +111,24 @@ namespace DATN_SD16.Controllers
         }
 
         // GET: Librarian/Borrows/Create
-        public async Task<IActionResult> CreateBorrow()
+        public async Task<IActionResult> CreateBorrow(int? userId, int? reservationId)
         {
             ViewBag.Users = await _userRepository.GetAllAsync();
             ViewBag.Books = await _bookRepository.GetAllAsync();
+
+            ViewBag.SelectedUserId = userId;
+            ViewBag.SelectedReservationId = reservationId;
+
+            if (reservationId.HasValue)
+            {
+                var res = await _bookReservationRepository.GetByIdAsync(reservationId.Value);
+                if (res != null)
+                {
+                    ViewBag.SelectedBookId = res.BookId;
+                    ViewBag.SelectedUserId = res.UserId; // Ensure userId matches
+                }
+            }
+
             return View();
         }
 

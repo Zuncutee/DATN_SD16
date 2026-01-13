@@ -17,7 +17,7 @@
                     <option value="">-- Chọn độc giả --</option>
                     @foreach (var user in ViewBag.Users as IEnumerable<DATN_SD16.Models.Entities.User>)
                     {
-                        <option value="@user.UserId">@user.FullName (@user.Username)</option>
+                        <option value="@user.UserId" @(ViewBag.SelectedUserId != null && (int)ViewBag.SelectedUserId == user.UserId ? "selected" : "")>@user.FullName (@user.Username)</option>
                     }
                 </select>
             </div>
@@ -28,7 +28,7 @@
                     <option value="">-- Chọn sách --</option>
                     @foreach (var book in ViewBag.Books as IEnumerable<DATN_SD16.Models.Entities.Book>)
                     {
-                        <option value="@book.BookId" data-available="@book.AvailableCopies">@book.Title (@book.AvailableCopies bản có sẵn)</option>
+                        <option value="@book.BookId" data-available="@book.AvailableCopies" @(ViewBag.SelectedBookId != null && (int)ViewBag.SelectedBookId == book.BookId ? "selected" : "")>@book.Title (@book.AvailableCopies bản có sẵn)</option>
                     }
                 </select>
             </div>
@@ -182,6 +182,22 @@
 
         submitForm('createBorrowForm', function(data) {
             window.location.href = '@Url.Action("Borrows")';
+        });
+
+        // Auto-load logic if params are present
+        document.addEventListener('DOMContentLoaded', function() {
+            if (userIdSelect.value) {
+                loadReservations().then(() => {
+                    const selectedResId = '@ViewBag.SelectedReservationId';
+                    if (selectedResId) {
+                        reservationSelect.value = selectedResId;
+                    }
+                });
+            }
+            
+            if (bookIdSelect.value) {
+                bookIdSelect.dispatchEvent(new Event('change'));
+            }
         });
     </script>
 }

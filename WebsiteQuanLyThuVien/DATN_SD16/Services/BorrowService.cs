@@ -107,6 +107,11 @@ namespace DATN_SD16.Services
                     ? int.Parse(maxBorrowDaysSetting.SettingValue) 
                     : 14;
 
+                // DEMO MODE: Set DueDate to 1 minute for testing overdue notifications
+                // Override maxBorrowDays logic
+                maxBorrowDays = 0; // Using logic below to add minutes instead of days if needed, but simplest is to modify instantiation
+
+
                 var borrowNumber = $"BR{DateTime.Now:yyyyMMddHHmmss}{userId}";
                 var borrow = new Borrow
                 {
@@ -115,7 +120,7 @@ namespace DATN_SD16.Services
                     CopyId = copyId,
                     ReservationId = reservationId,
                     BorrowDate = DateTime.Now,
-                    DueDate = DateTime.Now.AddDays(maxBorrowDays),
+                    DueDate = DateTime.Now.AddMinutes(1), // DEMO: 1 phút
                     Status = "Borrowed",
                     BorrowedBy = borrowedBy,
                     ConditionOnBorrow = copy.Condition,

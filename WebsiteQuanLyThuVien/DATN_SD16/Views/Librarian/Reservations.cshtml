@@ -92,6 +92,15 @@
                                         <i class="fas fa-times"></i> Từ chối
                                     </button>
                                 }
+                                @if (reservation.Status == "Approved")
+                                {
+                                    <a asp-action="CreateBorrow" 
+                                       asp-route-userId="@reservation.UserId" 
+                                       asp-route-reservationId="@reservation.ReservationId"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-book-reader"></i> Tạo phiếu mượn
+                                    </a>
+                                }
                             </td>
                         </tr>
                     }
