@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 using DATN_SD16.Services.Interfaces;
 using DATN_SD16.Models.DTOs;
 using DATN_SD16.Helpers;
@@ -14,11 +15,19 @@ namespace DATN_SD16.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
+        private readonly IRepository<PasswordResetToken> _passwordResetTokenRepository;
 
-        public AdminAuthController(IAuthService authService, IUserService userService)
+        public AdminAuthController(
+            IAuthService authService, 
+            IUserService userService,
+            IEmailService emailService,
+            IRepository<PasswordResetToken> passwordResetTokenRepository)
         {
             _authService = authService;
             _userService = userService;
+            _emailService = emailService;
+            _passwordResetTokenRepository = passwordResetTokenRepository;
         }
 
         // GET: AdminAuth/Login
@@ -275,20 +284,116 @@ namespace DATN_SD16.Controllers
                 }
 
                 // Kiểm tra email tồn tại
-                // var user = await _userService.GetUserByEmailAsync(email);
-                // if (user == null) { return Json(new { success = false, message = "Email không tồn tại trong hệ thống." }); }
-                
-                // TODO: Generate Token & Send Email
-                // await _authService.InitiatePasswordResetAsync(email);
+                var user = await _userService.GetUserByEmailAsync(email);
+                if (user == null) 
+                { 
+                    // Để bảo mật, không báo lỗi nếu email không tồn tại
+                    return Json(new { success = true, message = "Nếu email tồn tại, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu." }); 
+                }
 
-                // Giả lập thành công cho demo
-                await Task.Delay(1000); 
+                // Generate Token
+                var token = Guid.NewGuid().ToString("N");
+                var resetToken = new PasswordResetToken
+                {
+                    UserId = user.UserId,
+                    Token = token,
+                    ExpiresAt = DateTime.Now.AddMinutes(15),
+                    IsUsed = false,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _passwordResetTokenRepository.AddAsync(resetToken);
+
+                // Send Email
+                var resetLink = Url.Action("ResetPassword", "AdminAuth", new { token = token }, Request.Scheme);
+                var subject = "Đặt lại mật khẩu - Thư viện";
+                var body = $@"
+                    <h3>Yêu cầu đặt lại mật khẩu</h3>
+                    <p>Xin chào {user.FullName},</p>
+                    <p>Bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu cho tài khoản {user.Username}.</p>
+                    <p>Vui lòng click vào link dưới đây để đặt lại mật khẩu:</p>
+                    <p><a href='{resetLink}'>Đặt lại mật khẩu</a></p>
+                    <p>Link này sẽ hết hạn sau 15 phút.</p>
+                    <p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>";
+
+                await _emailService.SendEmailAsync(email, subject, body, "PasswordReset");
 
                 return Json(new { success = true, message = "Nếu email tồn tại, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu." });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        // GET: AdminAuth/ResetPassword
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var resetToken = await _passwordResetTokenRepository.FirstOrDefaultAsync(t => t.Token == token);
+            if (resetToken == null || resetToken.IsUsed || resetToken.ExpiresAt < DateTime.Now)
+            {
+                ViewBag.Error = "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.";
+                return View("Login"); // Fallback to login with error
+            }
+
+            var model = new ResetPasswordRequest { Token = token };
+            return View(model);
+        }
+
+        // POST: AdminAuth/ResetPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordRequest model)
+        {
+            // Ignore IsValid false if only ConfirmPassword mismatch inside loop? No, default binding.
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var resetToken = await _passwordResetTokenRepository.FirstOrDefaultAsync(t => t.Token == model.Token);
+                if (resetToken == null || resetToken.IsUsed || resetToken.ExpiresAt < DateTime.Now)
+                {
+                    ModelState.AddModelError("", "Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
+                    return View(model);
+                }
+
+                var user = await _userService.GetUserByIdAsync(resetToken.UserId);
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "Người dùng không tồn tại.");
+                    return View(model);
+                }
+
+                // Update Password
+                var newPasswordHash = await _userService.HashPasswordAsync(model.NewPassword);
+                user.PasswordHash = newPasswordHash;
+                await _userService.UpdateUserAsync(user);
+
+                // Mark token as used
+                resetToken.IsUsed = true;
+                await _passwordResetTokenRepository.UpdateAsync(resetToken);
+
+                // Redirect to Login with success
+                // Cannot pass complex object easily, use TempData or ViewBag in Redirect?
+                // TempData is better.
+                // Assuming TempData is available.
+                // Or return View("Login") with ViewBag.Success
+                ViewBag.Success = "Đổi mật khẩu thành công. Vui lòng đăng nhập.";
+                return View("Login"); 
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi: " + ex.Message);
+                return View(model);
             }
         }
     }
@@ -306,5 +411,20 @@ public class RegisterRequest
     public DateTime? DateOfBirth { get; set; }
     public string? Gender { get; set; }
     public string? Address { get; set; }
+}
+
+// DTO for Reset Password
+public class ResetPasswordRequest
+{
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng nhập mật khẩu mới")]
+    [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu")]
+    [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+    public string ConfirmPassword { get; set; } = string.Empty;
 }
 
