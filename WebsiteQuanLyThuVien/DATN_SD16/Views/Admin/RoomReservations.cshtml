@@ -1,10 +1,14 @@
 @model IEnumerable<DATN_SD16.Models.Entities.ReadingRoomReservation>
 @{
     ViewData["Title"] = "Quản lý Đặt chỗ Phòng đọc";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    Layout = User.IsInRole("Admin") ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_LibrarianLayout.cshtml";
     var rooms = ViewBag.Rooms as IEnumerable<DATN_SD16.Models.Entities.ReadingRoom> ?? new List<DATN_SD16.Models.Entities.ReadingRoom>();
     var statusList = ViewBag.StatusList as IEnumerable<string> ?? new List<string>();
 }
+@* ... skip ... *@
+                const response = await fetch('@Url.Action("CheckInReservation", "RoomReservationManagement")', {
+                    method: 'POST',
+                    body: formData,
 
 <div class="card mb-3">
     <div class="card-header bg-primary text-white">
