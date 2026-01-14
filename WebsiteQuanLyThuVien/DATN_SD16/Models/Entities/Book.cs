@@ -83,6 +83,9 @@ namespace DATN_SD16.Models.Entities
         public virtual ICollection<BookReservation> BookReservations { get; set; } = new List<BookReservation>();
         [ValidateNever]
         public virtual ICollection<BookReview> BookReviews { get; set; } = new List<BookReview>();
+
+        [NotMapped]
+        public List<int> AuthorIds { get; set; } = new List<int>();
     }
 }
 

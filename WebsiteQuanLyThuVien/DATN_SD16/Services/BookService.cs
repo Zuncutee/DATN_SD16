@@ -472,6 +472,43 @@ namespace DATN_SD16.Services
             var status = copy.Status?.Trim();
             return string.IsNullOrEmpty(status) || status.Equals("Available", StringComparison.OrdinalIgnoreCase);
         }
+
+        public async Task<bool> UpdateBookAuthorsAsync(int bookId, List<int> authorIds)
+        {
+            try
+            {
+                var existingAuthors = await _bookAuthorRepository.FindAsync(ba => ba.BookId == bookId);
+                
+                // Remove authors not in the new list
+                var toRemove = existingAuthors.Where(ba => !authorIds.Contains(ba.AuthorId)).ToList();
+                foreach (var item in toRemove)
+                {
+                    await _bookAuthorRepository.DeleteAsync(item);
+                }
+
+                // Add new authors
+                var existingAuthorIds = existingAuthors.Select(ba => ba.AuthorId).ToList();
+                var toAddId = authorIds.Where(id => !existingAuthorIds.Contains(id)).ToList();
+
+                foreach (var authorId in toAddId)
+                {
+                    await _bookAuthorRepository.AddAsync(new BookAuthor
+                    {
+                        BookId = bookId,
+                        AuthorId = authorId,
+                        IsPrimary = false // Default to false or logic to determine primary
+                    });
+                }
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log error
+                Console.WriteLine($"Error updating book authors: {ex.Message}");
+                return false;
+            }
+        }
     }
 }
 

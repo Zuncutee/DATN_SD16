@@ -7,6 +7,7 @@
     var categories = ViewBag.Categories as IEnumerable<Category> ?? Enumerable.Empty<Category>();
     var publishers = ViewBag.Publishers as IEnumerable<Publisher> ?? Enumerable.Empty<Publisher>();
     var locations = ViewBag.Locations as IEnumerable<BookLocation> ?? Enumerable.Empty<BookLocation>();
+    var authors = ViewBag.Authors as IEnumerable<Author> ?? Enumerable.Empty<Author>();
     bool isEdit = ViewBag.IsEdit ?? false;
     string formAction = ViewBag.FormAction ?? "CreateBook";
 }
@@ -95,6 +96,15 @@
                 <label asp-for="Description" class="form-label"></label>
                 <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="AuthorIds" class="form-label">Tác giả</label>
+                <select asp-for="AuthorIds" class="form-select" multiple size="5" required
+                        asp-items="@(new MultiSelectList(authors, "AuthorId", "AuthorName", Model?.AuthorIds))">
+                </select>
+                <small class="text-muted">Giữ phím Ctrl (hoặc Cmd) để chọn nhiều tác giả.</small>
+                <span asp-validation-for="AuthorIds" class="text-danger"></span>
             </div>
 
             <div class="col-md-4">

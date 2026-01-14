@@ -181,6 +181,29 @@ namespace DATN_SD16.Controllers
 
                 await _bookCopyRepository.AddAsync(copy);
 
+                // Update Book counts
+                var book = await _bookRepository.GetByIdAsync(copy.BookId);
+                if (book != null)
+                {
+                    book.TotalCopies += 1;
+                    
+                    var status = copy.Status?.Trim();
+                    if (string.Equals(status, "Available", StringComparison.OrdinalIgnoreCase))
+                    {
+                        book.AvailableCopies += 1;
+                    }
+                    else if (string.Equals(status, "Lost", StringComparison.OrdinalIgnoreCase))
+                    {
+                        book.LostCopies += 1;
+                    }
+                    else if (string.Equals(status, "Damaged", StringComparison.OrdinalIgnoreCase))
+                    {
+                        book.DamagedCopies += 1;
+                    }
+
+                    await _bookRepository.UpdateAsync(book);
+                }
+
                 if (IsAjaxRequest())
                 {
                     return Json(new { success = true, message = "Thêm bản sách thành công!" });
@@ -878,7 +901,13 @@ namespace DATN_SD16.Controllers
 
                 book.CoverImage = await SaveCoverImageAsync(coverImageFile);
                 var createdBy = UserHelper.GetUserId(User) ?? throw new UnauthorizedAccessException("User not authenticated");
-                await _bookService.CreateBookAsync(book, createdBy);
+                var createdBook = await _bookService.CreateBookAsync(book, createdBy);
+
+                if (book.AuthorIds != null && book.AuthorIds.Any())
+                {
+                    await _bookService.UpdateBookAuthorsAsync(createdBook.BookId, book.AuthorIds);
+                }
+
                 var message = "Thêm sách mới thành công!";
                 TempData["Success"] = message;
 
@@ -909,11 +938,13 @@ namespace DATN_SD16.Controllers
         [AuthorizeRoles("Admin", "Librarian")]
         public async Task<IActionResult> EditBook(int id)
         {
-            var book = await _bookService.GetBookByIdAsync(id);
+            var book = await _bookService.GetBookWithDetailsAsync(id);
             if (book == null)
             {
                 return NotFound();
             }
+
+            book.AuthorIds = book.BookAuthors.Select(ba => ba.AuthorId).ToList();
 
             await PopulateBookDropdownsAsync();
             ViewBag.FormAction = nameof(EditBook);
@@ -968,6 +999,11 @@ namespace DATN_SD16.Controllers
                         return Json(new { success = false, message = errorMsg });
                     }
                     return NotFound();
+                }
+
+                if (book.AuthorIds != null)
+                {
+                    await _bookService.UpdateBookAuthorsAsync(book.BookId, book.AuthorIds);
                 }
 
                 var message = "Cập nhật sách thành công!";
@@ -1036,6 +1072,7 @@ namespace DATN_SD16.Controllers
             ViewBag.Categories = await _categoryRepository.GetAllAsync();
             ViewBag.Publishers = await _publisherRepository.GetAllAsync();
             ViewBag.Locations = await _bookLocationRepository.GetAllAsync();
+            ViewBag.Authors = await _authorRepository.GetAllAsync();
         }
 
         private async Task PrepareBorrowBookDropdownsAsync()
