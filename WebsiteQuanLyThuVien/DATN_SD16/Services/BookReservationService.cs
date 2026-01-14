@@ -10,15 +10,18 @@ namespace DATN_SD16.Services
         private readonly IBookReservationRepository _reservationRepository;
         private readonly IBookRepository _bookRepository;
         private readonly IRepository<SystemSetting> _systemSettingRepository;
+        private readonly IRepository<LibraryCard> _libraryCardRepository;
 
         public BookReservationService(
             IBookReservationRepository reservationRepository,
             IBookRepository bookRepository,
-            IRepository<SystemSetting> systemSettingRepository)
+            IRepository<SystemSetting> systemSettingRepository,
+            IRepository<LibraryCard> libraryCardRepository)
         {
             _reservationRepository = reservationRepository;
             _bookRepository = bookRepository;
             _systemSettingRepository = systemSettingRepository;
+            _libraryCardRepository = libraryCardRepository;
         }
 
         public async Task<BookReservation?> GetReservationByIdAsync(int reservationId)
@@ -43,6 +46,32 @@ namespace DATN_SD16.Services
 
         public async Task<BookReservation> CreateReservationAsync(int userId, int bookId)
         {
+            // Kiểm tra trạng thái thẻ thư viện
+            var libraryCard = await _libraryCardRepository.FirstOrDefaultAsync(c => c.UserId == userId);
+            
+            if (libraryCard == null)
+            {
+                throw new Exception("Bạn chưa có thẻ thư viện. Vui lòng liên hệ thủ thư để được cấp thẻ.");
+            }
+
+            if (libraryCard.Status != "Active")
+            {
+                // Thông báo cụ thể tùy trạng thái
+                string message = libraryCard.Status switch
+                {
+                    "Suspended" => "Thẻ thư viện của bạn đang bị tạm ngưng.",
+                    "Expired" => "Thẻ thư viện của bạn đã hết hạn.",
+                    "Cancelled" => "Thẻ thư viện của bạn đã bị hủy.",
+                    _ => $"Thẻ thư viện không khả dụng (Trạng thái: {libraryCard.Status})."
+                };
+                throw new Exception(message + " Không thể đặt sách.");
+            }
+
+            if (libraryCard.ExpiryDate != null && libraryCard.ExpiryDate < DateTime.Now)
+            {
+                throw new Exception("Thẻ thư viện của bạn đã hết hạn. Vui lòng gia hạn thẻ.");
+            }
+
             var book = await _bookRepository.GetByIdAsync(bookId);
             if (book == null)
                 throw new Exception("Không tìm thấy sách");
